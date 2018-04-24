@@ -36,13 +36,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void apiActivity(View view) {
-        Intent intent = new Intent(this, MainAPIActivity.class);
+    public void airStationsAPIActivity(View view) {
+        Intent intent = new Intent(this, AirStationsAPIActivity.class);
         startActivity(intent);
     }
 
     public void parkingAPIActivity(View view) {
-        Intent intent = new Intent(this, CykelParkeringAPIActivity.class);
+        Intent intent = new Intent(this, ParkingAPIActivity.class);
         startActivity(intent);
     }
 
