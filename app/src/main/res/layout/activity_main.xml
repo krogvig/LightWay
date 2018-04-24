@@ -6,6 +6,16 @@
     android:layout_height="match_parent"
     tools:context="com.example.lightway.MainActivity">
 
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:layout_marginStart="32dp"
+        android:onClick="apiActivity"
+        android:text="Fetch API"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
     <!--
 
     <Button

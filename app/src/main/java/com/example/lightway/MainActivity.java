@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+
 public class MainActivity extends AppCompatActivity {
 
     private Button map;
@@ -31,6 +32,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void viewMap() {
         Intent intent = new Intent(this, com.example.lightway.MapActivity.class);
+        startActivity(intent);
+    }
+
+
+    public void apiActivity(View view) {
+        Intent intent = new Intent(this, MainAPIActivity.class);
         startActivity(intent);
     }
 }
