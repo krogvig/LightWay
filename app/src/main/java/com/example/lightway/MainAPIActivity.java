@@ -48,7 +48,7 @@ public class MainAPIActivity extends AppCompatActivity  {
                 }
                 in.close();
                 con.disconnect();       //Close connection
-                result = content.toString();      //This should probably be parsed with GSON ( parse() ) instead
+                result = parse(content.toString());      //This should probably be parsed with GSON ( parse() ) instead
             }
 
             catch (IOException e) {
@@ -65,12 +65,11 @@ public class MainAPIActivity extends AppCompatActivity  {
         private String parse(String jsonLine) {     //To parse the JSON respond as String/Java object(?) so that we can actually use the data
             JsonElement jelement = new JsonParser().parse(jsonLine);
             JsonObject jobject = jelement.getAsJsonObject();
-            jobject = jobject.getAsJsonObject("data");
-            jobject.get("Adress");
-            JsonArray jarray = jobject.getAsJsonArray("translations");
-            jobject = jarray.get(0).getAsJsonObject();
-            String result = jobject.get("translatedText").getAsString();
+            jobject = jobject.getAsJsonObject("features");
+            JsonArray jsonArray = jobject.getAsJsonArray("properties");
+            String result = jsonArray.get(8).getAsString();
             return result;
+
         }
     }
 }
