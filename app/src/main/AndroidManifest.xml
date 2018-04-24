@@ -18,8 +18,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".MainAPIActivity"></activity>
-        <activity android:name=".CykelParkeringAPIActivity"></activity>
+        <activity android:name=".AirStationsAPIActivity" />
+        <activity android:name=".ParkingAPIActivity" />
         <activity android:name=".MapActivity">
         </activity>
 
