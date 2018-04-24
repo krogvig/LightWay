@@ -17,7 +17,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity android:name=".MainAPIActivity"></activity>
+        <activity android:name=".MapActivity">
+        </activity>
+
     </application>
 
 </manifest>
