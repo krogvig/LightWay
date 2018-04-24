@@ -15,7 +15,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void fetchAPI(View view) {
+    public void apiActivity(View view) {
         Intent intent = new Intent(this, MainAPIActivity.class);
         startActivity(intent);
     }
