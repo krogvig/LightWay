@@ -7,15 +7,27 @@
     tools:context="com.example.lightway.MainActivity">
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/pumpButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
         android:layout_marginStart="32dp"
         android:onClick="apiActivity"
-        android:text="Fetch API"
+        android:text="Pump API"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/parkingButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:layout_marginStart="128dp"
+        android:onClick="parkingAPIActivity"
+        android:text="Parkering API"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <!--
 
     <Button
@@ -52,7 +64,7 @@
         android:id="@+id/map"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="118dp"
+        android:layout_marginBottom="116dp"
         android:onClick="viewMap"
         android:text="@string/map"
         app:layout_constraintBottom_toBottomOf="parent"

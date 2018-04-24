@@ -40,6 +40,12 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, MainAPIActivity.class);
         startActivity(intent);
     }
+
+    public void parkingAPIActivity(View view) {
+        Intent intent = new Intent(this, CykelParkeringAPIActivity.class);
+        startActivity(intent);
+    }
+
 }
 
 
