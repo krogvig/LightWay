@@ -4,6 +4,7 @@
     <string name="air_stations">Luftpumpar</string>
     <string name="parking">Parkeringar</string>
     <string name="map">Karta</string>
+    <string name="title_activity_gmaps">GoogleMaps</string>
 
 
 </resources>
