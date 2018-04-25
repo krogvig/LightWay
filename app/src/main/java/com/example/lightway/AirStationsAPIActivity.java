@@ -14,12 +14,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 
-public class MainAPIActivity extends AppCompatActivity  {
+public class AirStationsAPIActivity extends AppCompatActivity  {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_api);
+        setContentView(R.layout.activity_parking_api);
         callAPI();
     }
 
