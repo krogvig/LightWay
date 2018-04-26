@@ -37,7 +37,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void viewMap(View view) {
-        //Intent intent = new Intent(this, com.example.lightway.MapActivity.class);
         Intent intent = new Intent(this, GMapsActivity.class);
         startActivity(intent);
     }
