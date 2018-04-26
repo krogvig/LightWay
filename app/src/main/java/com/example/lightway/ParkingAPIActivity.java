@@ -62,14 +62,13 @@ public class ParkingAPIActivity extends AppCompatActivity  {
             textView.setText(result);
         }
 
-        private String parse(String jsonLine) {     //To parse the JSON respond as String/Java object(?) so that we can actually use the data
-            JsonElement jelement = new JsonParser().parse(jsonLine);
-            JsonObject jobject = jelement.getAsJsonObject();
-            jobject = jobject.getAsJsonObject("data");
-            jobject.get("Adress");
-            JsonArray jarray = jobject.getAsJsonArray("translations");
-            jobject = jarray.get(0).getAsJsonObject();
-            String result = jobject.get("translatedText").getAsString();
+        private String parse(String jsonLine) {
+            JsonElement jelement = new JsonParser().parse(jsonLine);    //Sort of starting it all
+            JsonObject  jobject = jelement.getAsJsonObject();       //Gets the first object
+            JsonArray jarray = jobject.getAsJsonArray("features");      //Get the array named "features" which contains everything as an array
+            jobject = jarray.get(0).getAsJsonObject();      //Get the first value of the "features array" (which only contains one object on index 0)
+            jobject = jobject.getAsJsonObject("properties");        //Get the object "properties", which contains most values we are interested in
+            String result = jobject.get("Adress").getAsString();        //Get the value of "Adress" as a string
             return result;
         }
     }
