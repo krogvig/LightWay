@@ -14,16 +14,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Button map = findViewById(R.id.map);
-        map.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                viewMap(v);
-            }
-        });
-
     }
 
     public void airStationsAPIActivity(View view) {
@@ -33,11 +23,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void parkingAPIActivity(View view) {
         Intent intent = new Intent(this, ParkingAPIActivity.class);
-        startActivity(intent);
-    }
-
-    public void viewMap(View view) {
-        Intent intent = new Intent(this, GMapsActivity.class);
         startActivity(intent);
     }
 }

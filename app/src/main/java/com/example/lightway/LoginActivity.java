@@ -23,7 +23,10 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent loginIntent = new Intent(LoginActivity.this, MainActivity.class);
-                LoginActivity.this.startActivity(loginIntent);
+                startActivity(loginIntent);
+
+                Intent intent = new Intent(LoginActivity.this, GMapsActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -31,7 +34,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent registerIntent = new Intent(LoginActivity.this, RegisterActivity.class);
-                LoginActivity.this.startActivity(registerIntent);
+                startActivity(registerIntent);
             }
         });
 

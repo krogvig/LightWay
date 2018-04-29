@@ -92,7 +92,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
 
         // Retrieve the content view that renders the map.
-        setContentView(R.layout.activity_gmaps);
+        setContentView(R.layout.activity_main);
 
         // Construct a GeoDataClient.
         mGeoDataClient = Places.getGeoDataClient(this, null);
@@ -105,7 +105,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
         // Build the map.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+                .findFragmentById(R.id.Gmap);
         mapFragment.getMapAsync(this);
 
     }
@@ -179,7 +179,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             public View getInfoContents(Marker marker) {
                 // Inflate the layouts for the info window, title and snippet.
                 View infoWindow = getLayoutInflater().inflate(R.layout.custom_info_contents,
-                        (FrameLayout) findViewById(R.id.map), false);
+                        (FrameLayout) findViewById(R.id.Gmap), false);
 
                 TextView title = infoWindow.findViewById(R.id.title);
                 title.setText(marker.getTitle());
