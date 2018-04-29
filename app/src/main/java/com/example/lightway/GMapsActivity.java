@@ -161,10 +161,11 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Stockholm and move the camera
-        //LatLng stockholm = new LatLng(59, 18);
-        //mMap.addMarker(new MarkerOptions().position(stockholm).title("LightWay HQ, Stockholm"));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(stockholm));
+        // Add a marker in Stockholm and move the camera (moving doesn't seem to work, enter something close to lat:59 and long:18 in your emulator to test this
+        LatLng stockholm = new LatLng(59, 18);
+        mMap.addMarker(new MarkerOptions().position(stockholm).title("LightWay HQ, Stockholm"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(stockholm));
+
 
         mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
 
@@ -229,6 +230,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     }
                 });
             }
+
         } catch (SecurityException e)  {
             Log.e("Exception: %s", e.getMessage());
         }
