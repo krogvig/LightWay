@@ -23,16 +23,15 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private GoogleApiClient googleApiClient;
     private SignInButton signInButton;
     final int SIGN_IN_CODE = 500;
+    final EditText uName = (EditText) findViewById(R.id.username);
+    final EditText uPassword = (EditText) findViewById(R.id.userPassword);
+    final Button loginButton = (Button) findViewById(R.id.loginButton);
+    final Button registerButton = (Button) findViewById(R.id.registerButton);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        final EditText uName = (EditText) findViewById(R.id.username);
-        final EditText uPassword = (EditText) findViewById(R.id.userPassword);
-        final Button loginButton = (Button) findViewById(R.id.loginButton);
-        final Button registerButton = (Button) findViewById(R.id.registerButton);
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
