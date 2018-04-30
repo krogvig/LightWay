@@ -1,11 +1,14 @@
 package com.example.lightway;
 
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.SupportMapFragment;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -15,28 +18,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button map = findViewById(R.id.map);
-        map.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                viewMap(v);
-            }
-        });
-
-    }
-
-    public void airStationsAPIActivity(View view) {
-        Intent intent = new Intent(this, AirStationsAPIActivity.class);
-        startActivity(intent);
-    }
-
-    public void parkingAPIActivity(View view) {
-        Intent intent = new Intent(this, ParkingAPIActivity.class);
-        startActivity(intent);
-    }
-
-    public void viewMap(View view) {
         Intent intent = new Intent(this, GMapsActivity.class);
         startActivity(intent);
     }
