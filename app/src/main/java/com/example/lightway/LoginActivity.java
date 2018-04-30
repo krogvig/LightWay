@@ -7,6 +7,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.android.gms.maps.SupportMapFragment;
+
 public class LoginActivity extends AppCompatActivity {
 
     @Override
@@ -24,9 +26,6 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent loginIntent = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(loginIntent);
-
-                Intent intent = new Intent(LoginActivity.this, GMapsActivity.class);
-                startActivity(intent);
             }
         });
 
