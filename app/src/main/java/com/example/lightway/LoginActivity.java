@@ -18,7 +18,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleApiClient googleApiClient;
     private SignInButton signInButton;
@@ -39,6 +39,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent loginIntent = new Intent(LoginActivity.this, MainActivity.class);
                 LoginActivity.this.startActivity(loginIntent);
+                finish();       //So that we can't use the back button to get to the login screen
             }
         });
 

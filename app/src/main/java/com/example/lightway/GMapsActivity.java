@@ -44,8 +44,23 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.maps.DirectionsApi;
+import com.google.maps.GeoApiContext;
+import com.google.maps.android.PolyUtil;
+import com.google.maps.errors.ApiException;
+import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.TravelMode;
+
+import org.joda.time.DateTime;
+
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class GMapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -414,8 +429,52 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     public void airStationsAPIActivity(View view) {
-        Intent intent = new Intent(this, AirStationsAPIActivity.class);
-        startActivity(intent);
+        //Intent intent = new Intent(this, AirStationsAPIActivity.class);
+        //startActivity(intent);
+        //Spånga stationsplan
+        //Google Directions API key: AIzaSyCHzYqbzfL73v_HWgWenSIRhRhhgEOlkVU
+        GeoApiContext geoApiContext = new GeoApiContext();
+        Date date = Calendar.getInstance().getTime();
+        DateTime now = new DateTime(date.getTime());
+
+
+        try {
+            geoApiContext = geoApiContext.setQueryRateLimit(3)
+                    .setApiKey("AIzaSyCHzYqbzfL73v_HWgWenSIRhRhhgEOlkVU")
+                    .setConnectTimeout(1, TimeUnit.SECONDS)
+                    .setReadTimeout(1, TimeUnit.SECONDS)
+                    .setWriteTimeout(1, TimeUnit.SECONDS);
+
+
+            DirectionsResult result = DirectionsApi.newRequest(geoApiContext)
+                    .mode(TravelMode.BICYCLING).origin("Bennebolsgatan 32")
+                    .destination("Spånga stationsplan").departureTime(now)
+                    .await();
+
+            addMarkersToMap(result, mMap);
+            addPolyline(result, mMap);
+
+        } catch (ApiException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void addMarkersToMap(DirectionsResult results, GoogleMap mMap) {
+        mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].legs[0].startLocation.lat,results.routes[0].legs[0].startLocation.lng)).title(results.routes[0].legs[0].startAddress));
+        mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].legs[0].endLocation.lat,results.routes[0].legs[0].endLocation.lng)).title(results.routes[0].legs[0].startAddress).snippet(getEndLocationTitle(results)));
+    }
+
+    private String getEndLocationTitle(DirectionsResult results){
+        return  "Time :"+ results.routes[0].legs[0].duration.humanReadable + " Distance :" + results.routes[0].legs[0].distance.humanReadable;
+    }
+
+    private void addPolyline(DirectionsResult results, GoogleMap mMap) {
+        List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
+        mMap.addPolyline(new PolylineOptions().addAll(decodedPath));
     }
 
     public void parkingAPIActivity(View view) {
