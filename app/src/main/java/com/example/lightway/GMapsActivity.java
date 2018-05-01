@@ -28,6 +28,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -180,13 +181,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        // Add a marker in Stockholm and move the camera (moving doesn't seem to work, enter something close to lat:59 and long:18 in your emulator to test this
-        LatLng stockholm = new LatLng(59, 18);
-        mMap.addMarker(new MarkerOptions().position(stockholm).title("LightWay HQ, Stockholm"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(stockholm));
-
-
         mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
 
             @Override
@@ -250,6 +244,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     }
                 });
             }
+            else {
+                Toast.makeText(this, "För att kunna utnyttja appen till fullo behöver du tillåta att den använder din GPS",
+                        Toast.LENGTH_LONG).show();
+            }
 
         } catch (SecurityException e)  {
             Log.e("Exception: %s", e.getMessage());
@@ -292,6 +290,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     mLocationPermissionGranted = true;
                 }
+                else
+                    mLocationPermissionGranted = false;
             }
         }
         updateLocationUI();
@@ -371,7 +371,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     .snippet(getString(R.string.default_info_snippet)));
 
             // Prompt the user for permission.
-            getLocationPermission();
+            //getLocationPermission();
         }
     }
 
@@ -425,7 +425,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 mMap.setMyLocationEnabled(false);
                 mMap.getUiSettings().setMyLocationButtonEnabled(false);
                 mLastKnownLocation = null;
-                getLocationPermission();
+                //getLocationPermission();
             }
         } catch (SecurityException e)  {
             Log.e("Exception: %s", e.getMessage());
