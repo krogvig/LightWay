@@ -44,6 +44,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -57,9 +58,12 @@ import com.google.maps.model.TravelMode;
 import org.joda.time.DateTime;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class GMapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -428,29 +432,37 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
-    public void airStationsAPIActivity(View view) {
-        //Intent intent = new Intent(this, AirStationsAPIActivity.class);
+    public void airStationsAPIActivity(View view, String destination) {
+        new Thread(new Runnable() {
+            public void run() {
+                getDeviceLocation();        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
+            }
+        }).start();
+
+        //Intent intent = new Intent(this, AirStationsAPIActivity.class);       //Ignoring the activation of a new activity, since I believe we will have to reaorganize the whole thing /Felix
         //startActivity(intent);
-        //Spånga stationsplan
         //Google Directions API key: AIzaSyCHzYqbzfL73v_HWgWenSIRhRhhgEOlkVU
         GeoApiContext geoApiContext = new GeoApiContext();
-        Date date = Calendar.getInstance().getTime();
+        Date date = Calendar.getInstance().getTime();       //Get the current time so we can display how long the ride will take
         DateTime now = new DateTime(date.getTime());
-
+        destination = "Spånga stationsplan";        //For now we always set the destination for better testing
 
         try {
-            geoApiContext = geoApiContext.setQueryRateLimit(3)
+            geoApiContext = geoApiContext.setQueryRateLimit(3)      //Set everything needed for the API connection, the key should be moved to the strings
                     .setApiKey("AIzaSyCHzYqbzfL73v_HWgWenSIRhRhhgEOlkVU")
                     .setConnectTimeout(1, TimeUnit.SECONDS)
                     .setReadTimeout(1, TimeUnit.SECONDS)
                     .setWriteTimeout(1, TimeUnit.SECONDS);
 
 
-            DirectionsResult result = DirectionsApi.newRequest(geoApiContext)
-                    .mode(TravelMode.BICYCLING).origin("Bennebolsgatan 32")
-                    .destination("Spånga stationsplan").departureTime(now)
+            String origin = "" + mLastKnownLocation.getLatitude() + "," + mLastKnownLocation.getLongitude();        //Get the start-location so we now from where the polygon should draw
+
+            DirectionsResult result = DirectionsApi.newRequest(geoApiContext)       //Get information from the API about the trip
+                    .mode(TravelMode.BICYCLING).origin(origin)
+                    .destination(destination).departureTime(now)
                     .await();
 
+            mMap.clear();       //Clear everything from the map beforehand. This should probably be reduced to only clear the origin-marker and polygon
             addMarkersToMap(result, mMap);
             addPolyline(result, mMap);
 
@@ -464,17 +476,17 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     private void addMarkersToMap(DirectionsResult results, GoogleMap mMap) {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].legs[0].startLocation.lat,results.routes[0].legs[0].startLocation.lng)).title(results.routes[0].legs[0].startAddress));
-        mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].legs[0].endLocation.lat,results.routes[0].legs[0].endLocation.lng)).title(results.routes[0].legs[0].startAddress).snippet(getEndLocationTitle(results)));
+        Marker origin = mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].legs[0].startLocation.lat,results.routes[0].legs[0].startLocation.lng)).title(results.routes[0].legs[0].startAddress));
+        Marker destination = mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].legs[0].endLocation.lat,results.routes[0].legs[0].endLocation.lng)).title(results.routes[0].legs[0].startAddress).snippet(getEndLocationTitle(results)));
     }
 
     private String getEndLocationTitle(DirectionsResult results){
-        return  "Time :"+ results.routes[0].legs[0].duration.humanReadable + " Distance :" + results.routes[0].legs[0].distance.humanReadable;
+        return  "Tid: "+ results.routes[0].legs[0].duration.humanReadable + " Sträcka: " + results.routes[0].legs[0].distance.humanReadable;
     }
 
     private void addPolyline(DirectionsResult results, GoogleMap mMap) {
         List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
-        mMap.addPolyline(new PolylineOptions().addAll(decodedPath));
+        Polyline polyline = mMap.addPolyline(new PolylineOptions().addAll(decodedPath));
     }
 
     public void parkingAPIActivity(View view) {
