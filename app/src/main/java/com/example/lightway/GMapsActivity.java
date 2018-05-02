@@ -449,7 +449,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
         try {
             geoApiContext = geoApiContext.setQueryRateLimit(3)      //Set everything needed for the API connection, the key should be moved to the strings
-                    .setApiKey("AIzaSyCHzYqbzfL73v_HWgWenSIRhRhhgEOlkVU")
+                    .setApiKey("AIzaSyB6aaw5fMcg8pxN1Q8NA2jDzghat9zO4Jc")
                     .setConnectTimeout(1, TimeUnit.SECONDS)
                     .setReadTimeout(1, TimeUnit.SECONDS)
                     .setWriteTimeout(1, TimeUnit.SECONDS);
