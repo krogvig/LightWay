@@ -23,7 +23,7 @@ public class ParkingAPIActivity extends AppCompatActivity  {
         callAPI();
     }
 
-    private void callAPI() {      //Create new thread that can work in the background fetching the API and use the API URL as parameter
+    private void callAPI() {
         try {
             new connectToAPI().execute(new URL("https://openstreetgs.stockholm.se/geoservice/api/dd0997ea-f66b-4c80-9b87-3783e3faa6f9/wfs?request=GetFeature&typeName=od_gis:Cykelparkering_Punkt&outputFormat=JSON"));
         } catch (MalformedURLException e) {
@@ -58,7 +58,7 @@ public class ParkingAPIActivity extends AppCompatActivity  {
         }
 
         protected void onPostExecute(String result) {
-            TextView textView = (TextView) findViewById(R.id.apiTextView);      //Update the TextView with the result
+            TextView textView = findViewById(R.id.apiTextView);      //Update the TextView with the result
             textView.setText(result);
         }
 

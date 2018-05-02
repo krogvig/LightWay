@@ -25,8 +25,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -43,8 +45,27 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.maps.DirectionsApi;
+import com.google.maps.GeoApiContext;
+import com.google.maps.android.PolyUtil;
+import com.google.maps.errors.ApiException;
+import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.TravelMode;
+
+import org.joda.time.DateTime;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class GMapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -160,12 +181,15 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+<<<<<<< HEAD
 
         // Add a marker in Stockholm and move the camera
         //LatLng stockholm = new LatLng(59, 18);
         //mMap.addMarker(new MarkerOptions().position(stockholm).title("LightWay HQ, Stockholm"));
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(stockholm));
 
+=======
+>>>>>>> origin/GustaF
         mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
 
             @Override
@@ -229,6 +253,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     }
                 });
             }
+<<<<<<< HEAD
+=======
+            else {
+                Toast.makeText(this, "För att kunna utnyttja appen till fullo behöver du tillåta att den använder din GPS",
+                        Toast.LENGTH_LONG).show();
+            }
+
+>>>>>>> origin/GustaF
         } catch (SecurityException e)  {
             Log.e("Exception: %s", e.getMessage());
         }
@@ -266,10 +298,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         switch (requestCode) {
             case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    mLocationPermissionGranted = true;
-                }
+                mLocationPermissionGranted = grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED;
             }
         }
         updateLocationUI();
@@ -349,7 +379,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     .snippet(getString(R.string.default_info_snippet)));
 
             // Prompt the user for permission.
-            getLocationPermission();
+            //getLocationPermission();
         }
     }
 
@@ -403,10 +433,75 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 mMap.setMyLocationEnabled(false);
                 mMap.getUiSettings().setMyLocationButtonEnabled(false);
                 mLastKnownLocation = null;
-                getLocationPermission();
+                //getLocationPermission();
             }
         } catch (SecurityException e)  {
             Log.e("Exception: %s", e.getMessage());
         }
     }
+<<<<<<< HEAD
+=======
+
+    public void airStationsAPIActivity(View view) {
+        new Thread(new Runnable() {
+            public void run() {
+                getDeviceLocation();        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
+            }
+        }).start();
+
+        //Intent intent = new Intent(this, AirStationsAPIActivity.class);       //Ignoring the activation of a new activity, since I believe we will have to reaorganize the whole thing /Felix
+        //startActivity(intent);
+        //Google Directions API key: AIzaSyCHzYqbzfL73v_HWgWenSIRhRhhgEOlkVU
+        GeoApiContext geoApiContext = new GeoApiContext();
+        Date date = Calendar.getInstance().getTime();       //Get the current time so we can display how long the ride will take
+        DateTime now = new DateTime(date.getTime());
+        String destination = "Spånga stationsplan";        //For now we always set the destination for better testing
+
+        try {
+            geoApiContext = geoApiContext.setQueryRateLimit(3)      //Set everything needed for the API connection, the key should be moved to the strings
+                    .setApiKey("AIzaSyB6aaw5fMcg8pxN1Q8NA2jDzghat9zO4Jc")
+                    .setConnectTimeout(1, TimeUnit.SECONDS)
+                    .setReadTimeout(1, TimeUnit.SECONDS)
+                    .setWriteTimeout(1, TimeUnit.SECONDS);
+
+
+            String origin = "" + mLastKnownLocation.getLatitude() + "," + mLastKnownLocation.getLongitude();        //Get the start-location so we now from where the polygon should draw
+
+            DirectionsResult result = DirectionsApi.newRequest(geoApiContext)       //Get information from the API about the trip
+                    .mode(TravelMode.BICYCLING).origin(origin)
+                    .destination(destination).departureTime(now)
+                    .await();
+
+            mMap.clear();       //Clear everything from the map beforehand. This should probably be reduced to only clear the origin-marker and polygon
+            addMarkersToMap(result, mMap);
+            addPolyline(result, mMap);
+
+        } catch (ApiException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void addMarkersToMap(DirectionsResult results, GoogleMap mMap) {
+        Marker origin = mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].legs[0].startLocation.lat,results.routes[0].legs[0].startLocation.lng)).title(results.routes[0].legs[0].startAddress));
+        Marker destination = mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].legs[0].endLocation.lat,results.routes[0].legs[0].endLocation.lng)).title(results.routes[0].legs[0].startAddress).snippet(getEndLocationTitle(results)));
+    }
+
+    private String getEndLocationTitle(DirectionsResult results){
+        return  "Tid: "+ results.routes[0].legs[0].duration.humanReadable + " Sträcka: " + results.routes[0].legs[0].distance.humanReadable;
+    }
+
+    private void addPolyline(DirectionsResult results, GoogleMap mMap) {
+        List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
+        Polyline polyline = mMap.addPolyline(new PolylineOptions().addAll(decodedPath));
+    }
+
+    public void parkingAPIActivity(View view) {
+        Intent intent = new Intent(this, ParkingAPIActivity.class);
+        startActivity(intent);
+    }
+>>>>>>> origin/GustaF
 }
