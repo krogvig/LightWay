@@ -1,5 +1,6 @@
 package com.example.lightway;
 
+import android.content.Intent;
 import android.location.Location;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -92,7 +93,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
 
         // Retrieve the content view that renders the map.
-        setContentView(R.layout.activity_gmaps);
+        setContentView(R.layout.activity_main);
 
         // Construct a GeoDataClient.
         mGeoDataClient = Places.getGeoDataClient(this, null);
@@ -105,7 +106,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
         // Build the map.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+                .findFragmentById(R.id.gMap);
         mapFragment.getMapAsync(this);
 
     }
@@ -161,10 +162,11 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Stockholm and move the camera
-        //LatLng stockholm = new LatLng(59, 18);
-        //mMap.addMarker(new MarkerOptions().position(stockholm).title("LightWay HQ, Stockholm"));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(stockholm));
+        // Add a marker in Stockholm and move the camera (moving doesn't seem to work, enter something close to lat:59 and long:18 in your emulator to test this
+        LatLng stockholm = new LatLng(59, 18);
+        mMap.addMarker(new MarkerOptions().position(stockholm).title("LightWay HQ, Stockholm"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(stockholm));
+
 
         mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
 
@@ -178,7 +180,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             public View getInfoContents(Marker marker) {
                 // Inflate the layouts for the info window, title and snippet.
                 View infoWindow = getLayoutInflater().inflate(R.layout.custom_info_contents,
-                        (FrameLayout) findViewById(R.id.map), false);
+                        (FrameLayout) findViewById(R.id.gMap), false);
 
                 TextView title = infoWindow.findViewById(R.id.title);
                 title.setText(marker.getTitle());
@@ -213,7 +215,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
                     @Override
                     public void onComplete(@NonNull Task<Location> task) {
-                        if (task.isSuccessful()) {
+                        if (task.isSuccessful() && task.getResult() != null) {
                             // Set the map's camera position to the current location of the device.
                             mLastKnownLocation = task.getResult();
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
@@ -229,6 +231,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     }
                 });
             }
+
         } catch (SecurityException e)  {
             Log.e("Exception: %s", e.getMessage());
         }
@@ -408,5 +411,15 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         } catch (SecurityException e)  {
             Log.e("Exception: %s", e.getMessage());
         }
+    }
+
+    public void airStationsAPIActivity(View view) {
+        Intent intent = new Intent(this, AirStationsAPIActivity.class);
+        startActivity(intent);
+    }
+
+    public void parkingAPIActivity(View view) {
+        Intent intent = new Intent(this, ParkingAPIActivity.class);
+        startActivity(intent);
     }
 }
