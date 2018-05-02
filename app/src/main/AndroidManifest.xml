@@ -23,9 +23,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
-
-        </activity>
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -42,9 +39,6 @@
         <activity
             android:name=".GMapsActivity"
             android:label="@string/title_activity_gmaps">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.lightway.MainActivity" />
         </activity>
         <activity android:name=".AirStationsAPIActivity" />
         <activity android:name=".ParkingAPIActivity" />

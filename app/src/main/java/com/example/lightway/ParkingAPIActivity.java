@@ -58,7 +58,7 @@ public class ParkingAPIActivity extends AppCompatActivity  {
         }
 
         protected void onPostExecute(String result) {
-            TextView textView = (TextView) findViewById(R.id.apiTextView);      //Update the TextView with the result
+            TextView textView = findViewById(R.id.apiTextView);      //Update the TextView with the result
             textView.setText(result);
         }
 

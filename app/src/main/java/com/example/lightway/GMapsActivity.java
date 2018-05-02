@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -286,12 +287,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         switch (requestCode) {
             case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    mLocationPermissionGranted = true;
-                }
-                else
-                    mLocationPermissionGranted = false;
+                mLocationPermissionGranted = grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED;
             }
         }
         updateLocationUI();
@@ -432,7 +429,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
-    public void airStationsAPIActivity(View view, String destination) {
+    public void airStationsAPIActivity(View view) {
         new Thread(new Runnable() {
             public void run() {
                 getDeviceLocation();        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
@@ -445,7 +442,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         GeoApiContext geoApiContext = new GeoApiContext();
         Date date = Calendar.getInstance().getTime();       //Get the current time so we can display how long the ride will take
         DateTime now = new DateTime(date.getTime());
-        destination = "Spånga stationsplan";        //For now we always set the destination for better testing
+        String destination = "Spånga stationsplan";        //For now we always set the destination for better testing
 
         try {
             geoApiContext = geoApiContext.setQueryRateLimit(3)      //Set everything needed for the API connection, the key should be moved to the strings

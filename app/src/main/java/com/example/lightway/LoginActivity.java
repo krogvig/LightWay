@@ -29,15 +29,15 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        final EditText uName = (EditText) findViewById(R.id.username);
-        final EditText uPassword = (EditText) findViewById(R.id.userPassword);
-        final Button loginButton = (Button) findViewById(R.id.loginButton);
-        final Button registerButton = (Button) findViewById(R.id.registerButton);
+        final EditText uName = findViewById(R.id.username);
+        final EditText uPassword = findViewById(R.id.userPassword);
+        final Button loginButton = findViewById(R.id.loginButton);
+        final Button registerButton = findViewById(R.id.registerButton);
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent loginIntent = new Intent(LoginActivity.this, MainActivity.class);
+                Intent loginIntent = new Intent(LoginActivity.this, GMapsActivity.class);
                 LoginActivity.this.startActivity(loginIntent);
                 finish();       //So that we can't use the back button to get to the login screen
             }
@@ -62,7 +62,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
         final GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        signInButton = (SignInButton) findViewById(R.id.gmailLoginButton);
+        signInButton = findViewById(R.id.gmailLoginButton);
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -86,12 +86,12 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         if(result.isSuccess()){
             goMainScreen();
         } else {
-            Toast.makeText(this, "failed to login", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Failed to login", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void goMainScreen() {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, GMapsActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }
