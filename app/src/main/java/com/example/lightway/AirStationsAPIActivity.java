@@ -1,5 +1,6 @@
 package com.example.lightway;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,12 +10,15 @@ import com.google.gson.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 
 public class AirStationsAPIActivity extends AppCompatActivity  {
+    public static final String PUBLIC_STATIC_STRING_IDENTIFIER = "Coordinates";
+    public static final int RESULT_OK = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,10 +35,10 @@ public class AirStationsAPIActivity extends AppCompatActivity  {
         }
     }
 
-    private class connectToAPI extends AsyncTask<URL, Integer, String> {        //Create a "ASyncTask" so that the API can be fetched in the background (think AJAX). https://stackoverflow.com/questions/18289623/how-to-use-asynctask/18289746#18289746
+    private class connectToAPI extends AsyncTask<URL, Integer, double[]> {        //Create a "ASyncTask" so that the API can be fetched in the background (think AJAX). https://stackoverflow.com/questions/18289623/how-to-use-asynctask/18289746#18289746
 
-        protected String doInBackground(URL... urlInput){       //Take in the API URL, try to return the response as String
-            String result = "Nothing has been updated";
+        protected double[] doInBackground(URL... urlInput){       //Take in the API URL, try to return the response as String
+            double[] result = {0};
             try {
                 URL url = urlInput[0];
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();       //Open the connection via HTTPS
@@ -48,7 +52,11 @@ public class AirStationsAPIActivity extends AppCompatActivity  {
                 }
                 in.close();
                 con.disconnect();       //Close connection
-                result = parse(content.toString());
+                //Call this method and send in UTM-String in this form: 34 V 327680.04 6543920.33
+                String[] utmCoordArray = parse(content.toString());     //Get the UTM coordinates
+                String coords = "34 V " + utmCoordArray[0] + " " + utmCoordArray[1];        //Format to the correct string
+                double[] coordsArray = new CoordCalc().calculateCoord(coords);      //Convert the coordinates
+                return coordsArray;      //Return the coordinates in the correct format Lat/Long
             }
 
             catch (IOException e) {
@@ -57,19 +65,23 @@ public class AirStationsAPIActivity extends AppCompatActivity  {
             return result;
         }
 
-        protected void onPostExecute(String result) {
-            TextView textView = findViewById(R.id.apiTextView);      //Update the TextView with the result
-            textView.setText(result);
+        protected void onPostExecute(double[] result) {
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra(PUBLIC_STATIC_STRING_IDENTIFIER, result);
+            setResult(RESULT_OK, resultIntent);
+            finish();
         }
 
-        private String parse(String jsonLine) {
+        private String[] parse(String jsonLine) {
             JsonElement jelement = new JsonParser().parse(jsonLine);    //Sort of starting it all
             JsonObject  jobject = jelement.getAsJsonObject();       //Gets the first object
             JsonArray jarray = jobject.getAsJsonArray("features");      //Get the array named "features" which contains everything as an array
             jobject = jarray.get(0).getAsJsonObject();      //Get the first value of the "features array" (which only contains one object on index 0)
-            jobject = jobject.getAsJsonObject("properties");        //Get the object "properties", which contains most values we are interested in
-            String result = jobject.get("Adress").getAsString();        //Get the value of "Adress" as a string
+            jobject = jobject.getAsJsonObject("geometry");        //Get the object "properties", which contains most values we are interested in
+            jarray = jobject.getAsJsonArray("coordinates");
+            String[] result = {jarray.get(0).getAsString(),jarray.get(1).getAsString()};
             return result;
+            //String result = jobject.get("Adress").getAsString();        //Get the value of "Adress" as a string
 
             /*
             * The JSON we get looks sort of like this:

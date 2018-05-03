@@ -9,10 +9,11 @@ public class CoordCalc {
     //Method then calculates and places longitude and latitude in double-array and returns the array
     // and as of right now simply prints it out
 
-    public void calculateCoord(String UTMCoord){
+    public double[] calculateCoord(String UTMCoord){
         double[] coords =  UTM2Deg(UTMCoord);
-        System.out.println("Longitude: " + coords[0]);
-        System.out.println("Latitude: " + coords[1]);
+        return coords;
+        //System.out.println("Longitude: " + coords[0]);
+        //System.out.println("Latitude: " + coords[1]);
     }
 
     private double[] UTM2Deg(String UTM) {
@@ -40,8 +41,8 @@ public class CoordCalc {
         longitude = Math.round(longitude * 10000000);
         longitude = longitude / 10000000;
 
-        coords[0] = longitude;
-        coords[1] = latitude;
+        coords[0] = latitude;
+        coords[1] = longitude;
         return coords;
     }
 }

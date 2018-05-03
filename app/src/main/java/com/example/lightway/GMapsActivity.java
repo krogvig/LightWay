@@ -436,13 +436,17 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             }
         }).start();
 
-        //Intent intent = new Intent(this, AirStationsAPIActivity.class);       //Ignoring the activation of a new activity, since I believe we will have to reaorganize the whole thing /Felix
-        //startActivity(intent);
+        Intent intent = new Intent(this, AirStationsAPIActivity.class);       //Ignoring the activation of a new activity, since I believe we will have to reaorganize the whole thing /Felix
+        startActivityForResult(intent, 0);      //Create a "startActivityForResult to be able to get the coordinates back to this activity from AirStationsAPIActivity. See: https://stackoverflow.com/questions/1124548/how-to-pass-the-values-from-one-activity-to-previous-activity
+        //fetchAndWriteOriginToDestination();
+    }
+
+    private void fetchAndWriteOriginToDestination(double[] destinationCoordinates) {
         //Google Directions API key: AIzaSyCHzYqbzfL73v_HWgWenSIRhRhhgEOlkVU
         GeoApiContext geoApiContext = new GeoApiContext();
         Date date = Calendar.getInstance().getTime();       //Get the current time so we can display how long the ride will take
         DateTime now = new DateTime(date.getTime());
-        String destination = "Spånga stationsplan";        //For now we always set the destination for better testing
+        //String destination = "Spånga stationsplan";        //For now we always set the destination for better testing
 
         try {
             geoApiContext = geoApiContext.setQueryRateLimit(3)      //Set everything needed for the API connection, the key should be moved to the strings
@@ -453,10 +457,11 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
 
             String origin = "" + mLastKnownLocation.getLatitude() + "," + mLastKnownLocation.getLongitude();        //Get the start-location so we now from where the polygon should draw
-
+            String destinationLatLng = ""+destinationCoordinates[0]+destinationCoordinates[1];
             DirectionsResult result = DirectionsApi.newRequest(geoApiContext)       //Get information from the API about the trip
                     .mode(TravelMode.BICYCLING).origin(origin)
-                    .destination(destination).departureTime(now)
+                    .destination(destinationLatLng)
+                    .departureTime(now)
                     .await();
 
             mMap.clear();       //Clear everything from the map beforehand. This should probably be reduced to only clear the origin-marker and polygon
@@ -484,6 +489,20 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private void addPolyline(DirectionsResult results, GoogleMap mMap) {
         List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
         Polyline polyline = mMap.addPolyline(new PolylineOptions().addAll(decodedPath));
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch(requestCode) {
+            case (0) : {
+                if (resultCode == AirStationsAPIActivity.RESULT_OK) {
+                    double[] coordsFromAPI = data.getDoubleArrayExtra(AirStationsAPIActivity.PUBLIC_STATIC_STRING_IDENTIFIER);
+                    fetchAndWriteOriginToDestination(coordsFromAPI);
+                }
+                break;
+            }
+        }
     }
 
     public void parkingAPIActivity(View view) {
