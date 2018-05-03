@@ -34,7 +34,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private GoogleApiClient mGoogleApiClient;
     private SignInButton signInButton;
     private FirebaseAuth mAuth;
-    FirebaseAuth.AuthStateListener mAuthListener;
+    private FirebaseAuth.AuthStateListener mAuthListener;
     private final static int RC_SIGN_IN = 2;
 
     final int SIGN_IN_CODE = 500;
@@ -126,14 +126,14 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            try {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            if(result.isSuccess()){
                 // Google Sign In was successful, authenticate with Firebase
-                GoogleSignInAccount account = task.getResult(ApiException.class);
+                GoogleSignInAccount account = result.getSignInAccount();
                 firebaseAuthWithGoogle(account);
-            } catch (ApiException e) {
+            } else {
                 // Google Sign In failed, update UI appropriately
-                Log.w("TAG", "Google sign in failed", e);
+                Log.w("TAG", "Google sign in failed");
                 // ...
             }
         }
@@ -149,11 +149,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                             // Sign in success, update UI with the signed-in user's information
                             Log.d("TAG", "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                        //    updateUI(user);
+                            // updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w("TAG", "signInWithCredential:failure", task.getException());
-                            Snackbar.make(findViewById(R.id.button3), "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
+                            Snackbar.make(findViewById(R.id.gmailLoginButton), "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
                          //    updateUI(null);
                         }
 
@@ -164,19 +164,19 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
 
 
-    private void handleSignInResult(GoogleSignInResult result) {
-        if(result.isSuccess()){
-            goMainScreen();
-        } else {
-            Toast.makeText(this, "failed to login", Toast.LENGTH_SHORT).show();
-        }
-    }
+//    private void handleSignInResult(GoogleSignInResult result) {
+//        if(result.isSuccess()){
+//            goMainScreen();
+//        } else {
+//            Toast.makeText(this, "failed to login", Toast.LENGTH_SHORT).show();
+//        }
+//    }
 
-    private void goMainScreen() {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-    }
+//    private void goMainScreen() {
+//        Intent intent = new Intent(this, MainActivity.class);
+//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+//        startActivity(intent);
+//    }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
