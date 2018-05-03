@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.lightway.MainActivity">
+    tools:context="com.example.lightway.GMapsActivity">
 
     <fragment
         android:id="@+id/gMap"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/city_bikes"
+        app:layout_constraintBottom_toTopOf="@+id/log_out"
         app:layout_constraintTop_toTopOf="parent"
         tools:context=".GMapsActivity" />
 
@@ -26,13 +26,13 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/parking"
         app:layout_constraintHorizontal_bias="0.795"
-        app:layout_constraintStart_toEndOf="@+id/city_bikes" />
+        app:layout_constraintStart_toEndOf="@+id/log_out" />
 
     <Button
-        android:id="@+id/city_bikes"
+        android:id="@+id/log_out"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/city_bikes"
+        android:text="Log Out"
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <Button
