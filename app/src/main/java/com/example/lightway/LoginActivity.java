@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -36,6 +37,9 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private final static int RC_SIGN_IN = 2;
+    private EditText mEmailField;
+    private EditText mPasswordField;
+    private Button mLoginbutton;
 
     final int SIGN_IN_CODE = 500;
 
@@ -51,12 +55,12 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        final EditText uName = (EditText) findViewById(R.id.username);
-        final EditText uPassword = (EditText) findViewById(R.id.userPassword);
-        final Button loginButton = (Button) findViewById(R.id.loginButton);
-        final Button registerButton = (Button) findViewById(R.id.registerButton);
+        mEmailField = findViewById(R.id.emailField);
+        mPasswordField = findViewById(R.id.passwordField);
+        mLoginbutton = findViewById(R.id.loginButton);
+        final Button registerButton = findViewById(R.id.registerButton);
 
-        signInButton = (SignInButton) findViewById(R.id.gmailLoginButton);
+        signInButton = findViewById(R.id.gmailLoginButton);
         mAuth = FirebaseAuth.getInstance();
 
 
@@ -70,11 +74,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         };
 
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
+        mLoginbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent loginIntent = new Intent(LoginActivity.this, MainActivity.class);
-                LoginActivity.this.startActivity(loginIntent);
+                emailSignIn();
                 finish();       //So that we can't use the back button to get to the login screen
             }
         });
@@ -110,6 +113,25 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
+    }
+
+    private void emailSignIn(){
+        String email = mEmailField.getText().toString();
+        String password = mPasswordField.getText().toString();
+
+        if(TextUtils.isEmpty(email) || TextUtils.isEmpty(password)){
+            Toast.makeText(LoginActivity.this, "Fields are empty", Toast.LENGTH_LONG).show();
+        }else{
+            mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(@NonNull Task<AuthResult> task) {
+                    if(!task.isSuccessful()){
+                        Toast.makeText(LoginActivity.this, "Sign In Problem", Toast.LENGTH_LONG).show();
+                    }
+
+                }
+            });
+        }
 
     }
 

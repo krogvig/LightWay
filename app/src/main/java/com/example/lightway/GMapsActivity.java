@@ -108,7 +108,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private Button logOutButton;
-    private GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,7 +136,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.gMap);
         mapFragment.getMapAsync(this);
 
-        logOutButton = (Button) findViewById(R.id.log_out);
+        logOutButton = findViewById(R.id.log_out);
 
         logOutButton.setOnClickListener(new View.OnClickListener() {
             @Override
