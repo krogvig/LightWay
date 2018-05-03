@@ -22,6 +22,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     private GoogleApiClient googleApiClient;
     private SignInButton signInButton;
+
+
     final int SIGN_IN_CODE = 500;
 
     @Override
