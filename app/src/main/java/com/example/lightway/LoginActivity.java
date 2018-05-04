@@ -78,7 +78,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             @Override
             public void onClick(View v) {
                 emailSignIn();
-                finish();       //So that we can't use the back button to get to the login screen
             }
         });
 
