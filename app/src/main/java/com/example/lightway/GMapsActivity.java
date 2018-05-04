@@ -455,9 +455,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     .setReadTimeout(1, TimeUnit.SECONDS)
                     .setWriteTimeout(1, TimeUnit.SECONDS);
 
-
             String origin = "" + mLastKnownLocation.getLatitude() + "," + mLastKnownLocation.getLongitude();        //Get the start-location so we now from where the polygon should draw
-            String destinationLatLng = ""+destinationCoordinates[0]+destinationCoordinates[1];
+            String destinationLatLng = ""+destinationCoordinates[0]+","+destinationCoordinates[1];      //Format the destination coordinates correctly
+
             DirectionsResult result = DirectionsApi.newRequest(geoApiContext)       //Get information from the API about the trip
                     .mode(TravelMode.BICYCLING).origin(origin)
                     .destination(destinationLatLng)
