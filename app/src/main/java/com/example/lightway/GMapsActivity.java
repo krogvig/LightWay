@@ -441,7 +441,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         //fetchAndWriteOriginToDestination();
     }
 
-    private void fetchAndWriteOriginToDestination(double[] destinationCoordinates) {
+    private void fetchAndWriteOriginToDestination(ArrayList<String> destinationCoordinates) {
         //Google Directions API key: AIzaSyCHzYqbzfL73v_HWgWenSIRhRhhgEOlkVU
         GeoApiContext geoApiContext = new GeoApiContext();
         Date date = Calendar.getInstance().getTime();       //Get the current time so we can display how long the ride will take
@@ -456,28 +456,37 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     .setWriteTimeout(1, TimeUnit.SECONDS);
 
             String origin = "" + mLastKnownLocation.getLatitude() + "," + mLastKnownLocation.getLongitude();        //Get the start-location so we now from where the polygon should draw
-            String destinationLatLng = ""+destinationCoordinates[0]+","+destinationCoordinates[1];      //Format the destination coordinates correctly
 
             DirectionsResult result = DirectionsApi.newRequest(geoApiContext)       //Get information from the API about the trip
                     .mode(TravelMode.BICYCLING).origin(origin)
-                    .destination(destinationLatLng)
+                    .destination(destinationCoordinates.get(0))
                     .departureTime(now)
                     .await();
 
             mMap.clear();       //Clear everything from the map beforehand. This should probably be reduced to only clear the origin-marker and polygon
-            addMarkersToMap(result, mMap);
-            addPolyline(result, mMap);
+            //addDirectionsMarkersToMap(result, mMap);
+            //addPolyline(result, mMap);
+            addAllMarkersToMap(destinationCoordinates);
 
         } catch (ApiException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
+
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void addMarkersToMap(DirectionsResult results, GoogleMap mMap) {
+    private void addAllMarkersToMap(ArrayList<String> inputCoords) {
+        for (int x = 0; x<inputCoords.size(); x++) {
+            double latitude = Double.parseDouble(inputCoords.get(x).split(",")[0]);
+            double longitude = Double.parseDouble(inputCoords.get(x).split(",")[1]);
+            mMap.addMarker(new MarkerOptions().position(new LatLng(latitude,longitude)));
+        }
+    }
+
+    private void addDirectionsMarkersToMap(DirectionsResult results, GoogleMap mMap) {
         Marker origin = mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].legs[0].startLocation.lat,results.routes[0].legs[0].startLocation.lng)).title(results.routes[0].legs[0].startAddress));
         Marker destination = mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].legs[0].endLocation.lat,results.routes[0].legs[0].endLocation.lng)).title(results.routes[0].legs[0].startAddress).snippet(getEndLocationTitle(results)));
     }
@@ -497,7 +506,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         switch(requestCode) {
             case (0) : {
                 if (resultCode == AirStationsAPIActivity.RESULT_OK) {
-                    double[] coordsFromAPI = data.getDoubleArrayExtra(AirStationsAPIActivity.PUBLIC_STATIC_STRING_IDENTIFIER);
+                    ArrayList<String> coordsFromAPI = data.getStringArrayListExtra(AirStationsAPIActivity.PUBLIC_STATIC_STRING_IDENTIFIER);
                     fetchAndWriteOriginToDestination(coordsFromAPI);
                 }
                 break;
