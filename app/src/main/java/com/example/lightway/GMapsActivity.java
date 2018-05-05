@@ -103,6 +103,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private String[] mLikelyPlaceAttributions;
     private LatLng[] mLikelyPlaceLatLngs;
 
+    private Polyline polyline;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -214,6 +216,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
+
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker m) {
+                calcTrip(m);
+                return true;
+            }
+        });
     }
     /**
      * Gets the current location of the device, and positions the map's camera.
@@ -441,12 +451,11 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         //fetchAndWriteOriginToDestination();
     }
 
-    private void fetchAndWriteOriginToDestination(ArrayList<String> destinationCoordinates) {
+    private void calcTrip(Marker destination) {
         //Google Directions API key: AIzaSyCHzYqbzfL73v_HWgWenSIRhRhhgEOlkVU
         GeoApiContext geoApiContext = new GeoApiContext();
         Date date = Calendar.getInstance().getTime();       //Get the current time so we can display how long the ride will take
         DateTime now = new DateTime(date.getTime());
-        //String destination = "Spånga stationsplan";        //For now we always set the destination for better testing
 
         try {
             geoApiContext = geoApiContext.setQueryRateLimit(3)      //Set everything needed for the API connection, the key should be moved to the strings
@@ -456,17 +465,17 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     .setWriteTimeout(1, TimeUnit.SECONDS);
 
             String origin = "" + mLastKnownLocation.getLatitude() + "," + mLastKnownLocation.getLongitude();        //Get the start-location so we now from where the polygon should draw
-
+            String destinationString = ""+destination.getPosition().latitude+","+destination.getPosition().longitude;
             DirectionsResult result = DirectionsApi.newRequest(geoApiContext)       //Get information from the API about the trip
                     .mode(TravelMode.BICYCLING).origin(origin)
-                    .destination(destinationCoordinates.get(0))
+                    .destination(destinationString)
                     .departureTime(now)
                     .await();
 
-            mMap.clear();       //Clear everything from the map beforehand. This should probably be reduced to only clear the origin-marker and polygon
+            //mMap.clear();       //Clear everything from the map beforehand. This should probably be reduced to only clear the origin-marker and polygon
             //addDirectionsMarkersToMap(result, mMap);
-            //addPolyline(result, mMap);
-            addAllMarkersToMap(destinationCoordinates);
+            addPolyline(result, mMap);
+
 
         } catch (ApiException e) {
             e.printStackTrace();
@@ -497,7 +506,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     private void addPolyline(DirectionsResult results, GoogleMap mMap) {
         List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
-        Polyline polyline = mMap.addPolyline(new PolylineOptions().addAll(decodedPath));
+        if (polyline != null) { polyline.remove(); }
+        polyline = mMap.addPolyline(new PolylineOptions().addAll(decodedPath));
     }
 
     @Override
@@ -507,7 +517,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             case (0) : {
                 if (resultCode == AirStationsAPIActivity.RESULT_OK) {
                     ArrayList<String> coordsFromAPI = data.getStringArrayListExtra(AirStationsAPIActivity.PUBLIC_STATIC_STRING_IDENTIFIER);
-                    fetchAndWriteOriginToDestination(coordsFromAPI);
+                    addAllMarkersToMap(coordsFromAPI);
                 }
                 break;
             }
