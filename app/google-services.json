@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "361371227015",
+    "firebase_url": "https://lightway-90a9c.firebaseio.com",
+    "project_id": "lightway-90a9c",
+    "storage_bucket": "lightway-90a9c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:361371227015:android:b8840a4474aa5f94",
+        "android_client_info": {
+          "package_name": "com.example.lightway"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "361371227015-uvr6mnv48fuk87q6a1nt3rpo8u0fiouc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.lightway",
+            "certificate_hash": "a9d7d4813a3fd823ac5da83f4de43deab2b35bd2"
+          }
+        },
+        {
+          "client_id": "361371227015-4m25s7uot8rcupi68ilv4od07fg4h85o.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "361371227015-brusjkv9aa2q43q155i86q1pmvd7dh1i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.lightway",
+            "certificate_hash": "7bbb2e4d48fdd6778f1f26faf51dd327dfe3c1f4"
+          }
+        },
+        {
+          "client_id": "361371227015-dcdqcm98cr2avmulhtni7kfs3v03p014.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAtfKfoS06jmblx-h3p2GxZs6vET77NpY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "361371227015-4m25s7uot8rcupi68ilv4od07fg4h85o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
