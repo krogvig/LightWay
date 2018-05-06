@@ -40,7 +40,7 @@ public class AirStationsAPIActivity extends AppCompatActivity  {
     private class connectToAPI extends AsyncTask<URL, Integer, ArrayList<String>> {        //Create a "ASyncTask" so that the API can be fetched in the background (think AJAX). https://stackoverflow.com/questions/18289623/how-to-use-asynctask/18289746#18289746
 
         protected ArrayList<String> doInBackground(URL... urlInput){       //Take in the API URL, try to return the response as String
-            ArrayList<String> coordsList = new ArrayList<String>();
+            ArrayList<String> allLatLongCoordsArraysAsList = new ArrayList<String>();
             try {
                 URL url = urlInput[0];
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();       //Open the connection via HTTPS
@@ -56,43 +56,41 @@ public class AirStationsAPIActivity extends AppCompatActivity  {
                 con.disconnect();       //Close connection
 
                 //Call this method and send in UTM-String in this form: 34 V 327680.04 6543920.33
-                List<String[]> utmCoordArray = parse(content.toString());     //Get the UTM coordinates
-                for (int x = 0; x<utmCoordArray.size(); x++) {
+                List<String[]> utmCoordArray = parse(content.toString());     //Send everything we got for parsing and get back only the corrdinates
+                for (int x = 0; x < utmCoordArray.size(); x++) {
                     String coords = "34 V " + utmCoordArray.get(x)[0] + " " + utmCoordArray.get(x)[1];        //Format to the correct string for input to the conversion
-                    double[] convertedCoords = new CoordCalc().calculateCoord(coords);      //Convert the coordinates
-                    coordsList.add(""+convertedCoords[0]+","+convertedCoords[1]);       //Format to the correct string for input to the Directions API
+                    double[] convertedCoords = new CoordCalc().calculateCoord(coords);      // For each string, convert the coordinates to "our" LatLong format
+                    allLatLongCoordsArraysAsList.add(""+convertedCoords[0]+","+convertedCoords[1]);       //Format to the correct string for input to the Directions API
                 }
-
-                return coordsList;      //Return the coordinates in the correct format Lat/Long
             }
 
             catch (IOException e) {
                 System.out.println(e);
             }
-            return coordsList;
+            return allLatLongCoordsArraysAsList;        //Return the list of LatLong coord arrays, which will be returned to onPostExecute()
         }
 
         protected void onPostExecute(ArrayList<String> result) {
-            Intent resultIntent = new Intent();
+            Intent resultIntent = new Intent();     //Create a new intent, add allLatLongCoordsArraysAsList to it and then send it back to GMapsActivity
             resultIntent.putStringArrayListExtra(PUBLIC_STATIC_STRING_IDENTIFIER, result);
             setResult(RESULT_OK, resultIntent);
             finish();
         }
 
         private List<String[]> parse(String jsonLine) {
-            List<String[]> result = new ArrayList<String[]>();
+            List<String[]> allUTMCoordsArraysAsList = new ArrayList<String[]>();
             JsonElement jelement = new JsonParser().parse(jsonLine);    //Sort of starting it all
             JsonObject  jobject = jelement.getAsJsonObject();       //Gets the first object
             JsonArray jarrayAll = jobject.getAsJsonArray("features");      //Get the array named "features" which contains everything as an array
             for (int x = 0; x<64; x++ )
             {
-                jobject = jarrayAll.get(x).getAsJsonObject();      //Get the first value of the "features array" (which only contains one object on index 0)
+                jobject = jarrayAll.get(x).getAsJsonObject();      //Iterate every array
                 jobject = jobject.getAsJsonObject("geometry");        //Get the object "geometry", which contains the coordinates we are interested in
-                JsonArray jarrayCurrentObject = jobject.getAsJsonArray("coordinates");
-                String[] coordinates = {jarrayCurrentObject.get(0).getAsString(),jarrayCurrentObject.get(1).getAsString()};
-                result.add(coordinates);
+                JsonArray jarrayCurrentObject = jobject.getAsJsonArray("coordinates");      //Get the coordinates
+                String[] coordinates = {jarrayCurrentObject.get(0).getAsString(),jarrayCurrentObject.get(1).getAsString()};     //Add the coordinates to it's own string in the following format: Latitude,Longitude
+                allUTMCoordsArraysAsList.add(coordinates);        //Add the string to our list
             }
-            return result;
+            return allUTMCoordsArraysAsList ;
 
             /*
             * The JSON we get looks sort of like this:
