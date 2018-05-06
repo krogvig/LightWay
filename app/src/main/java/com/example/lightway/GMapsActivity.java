@@ -1,6 +1,8 @@
 package com.example.lightway;
 
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -15,18 +17,14 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.location.Location;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,14 +36,7 @@ import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
 import com.google.android.gms.location.places.Places;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -64,8 +55,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class GMapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -81,9 +71,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient mFusedLocationProviderClient;
 
-    // A default location (Sydney, Australia) and default zoom to use when location permission is
+    // A default location (Stockholm, Sweden) and default zoom to use when location permission is
     // not granted.
-    private final LatLng mDefaultLocation = new LatLng(-33.8523341, 151.2106085);
+    private final LatLng mDefaultLocation = new LatLng(59.334591, 18.063240);
     private static final int DEFAULT_ZOOM = 15;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean mLocationPermissionGranted;
@@ -102,6 +92,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private String[] mLikelyPlaceAddresses;
     private String[] mLikelyPlaceAttributions;
     private LatLng[] mLikelyPlaceLatLngs;
+
+    //Used to draw out the navigational line
+    private Polyline polyline;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,32 +142,18 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
      * Sets up the options menu.
      * @param menu The options menu.
      * @return Boolean.
-     */
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.current_place_menu, menu);
         return true;
     }
-
-    /**
-     * Handles a click on the menu option to get a place.
-     * @param item The menu item to handle.
-     * @return Boolean.
      */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.option_get_place) {
-            showCurrentPlace();
-        }
-        return true;
-    }
-
 
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
+     * This is where we can add markers or lines, add listeners or move the camera.
      * If Google Play services is not installed on the device, the user will be prompted to install
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
@@ -214,9 +193,19 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
+
+        // Listen for clicks on any marker
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker m) {
+                calcTrip(m);        // When a marker is clicked, call the method to calculate the trip to it from the phones position
+                return true;
+            }
+        });
     }
     /**
      * Gets the current location of the device, and positions the map's camera.
+     * Call this whenever you need to update the device location
      */
     private void getDeviceLocation() {
         /*
@@ -295,119 +284,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     /**
-     * Prompts the user to select the current place from a list of likely places, and shows the
-     * current place on the map - provided the user has granted location permission.
-     */
-    private void showCurrentPlace() {
-        if (mMap == null) {
-            return;
-        }
-
-        if (mLocationPermissionGranted) {
-            // Get the likely places - that is, the businesses and other points of interest that
-            // are the best match for the device's current location.
-            @SuppressWarnings("MissingPermission") final
-            Task<PlaceLikelihoodBufferResponse> placeResult =
-                    mPlaceDetectionClient.getCurrentPlace(null);
-            placeResult.addOnCompleteListener
-                    (new OnCompleteListener<PlaceLikelihoodBufferResponse>() {
-                        @Override
-                        public void onComplete(@NonNull Task<PlaceLikelihoodBufferResponse> task) {
-                            if (task.isSuccessful() && task.getResult() != null) {
-                                PlaceLikelihoodBufferResponse likelyPlaces = task.getResult();
-
-                                // Set the count, handling cases where less than 5 entries are returned.
-                                int count;
-                                if (likelyPlaces.getCount() < M_MAX_ENTRIES) {
-                                    count = likelyPlaces.getCount();
-                                } else {
-                                    count = M_MAX_ENTRIES;
-                                }
-
-                                int i = 0;
-                                mLikelyPlaceNames = new String[count];
-                                mLikelyPlaceAddresses = new String[count];
-                                mLikelyPlaceAttributions = new String[count];
-                                mLikelyPlaceLatLngs = new LatLng[count];
-
-                                for (PlaceLikelihood placeLikelihood : likelyPlaces) {
-                                    // Build a list of likely places to show the user.
-                                    mLikelyPlaceNames[i] = (String) placeLikelihood.getPlace().getName();
-                                    mLikelyPlaceAddresses[i] = (String) placeLikelihood.getPlace()
-                                            .getAddress();
-                                    mLikelyPlaceAttributions[i] = (String) placeLikelihood.getPlace()
-                                            .getAttributions();
-                                    mLikelyPlaceLatLngs[i] = placeLikelihood.getPlace().getLatLng();
-
-                                    i++;
-                                    if (i > (count - 1)) {
-                                        break;
-                                    }
-                                }
-
-                                // Release the place likelihood buffer, to avoid memory leaks.
-                                likelyPlaces.release();
-
-                                // Show a dialog offering the user the list of likely places, and add a
-                                // marker at the selected place.
-                                openPlacesDialog();
-
-                            } else {
-                                Log.e(TAG, "Exception: %s", task.getException());
-                            }
-                        }
-                    });
-        } else {
-            // The user has not granted permission.
-            Log.i(TAG, "The user did not grant location permission.");
-
-            // Add a default marker, because the user hasn't selected a place.
-            mMap.addMarker(new MarkerOptions()
-                    .title(getString(R.string.default_info_title))
-                    .position(mDefaultLocation)
-                    .snippet(getString(R.string.default_info_snippet)));
-
-            // Prompt the user for permission.
-            //getLocationPermission();
-        }
-    }
-
-    /**
-     * Displays a form allowing the user to select a place from a list of likely places.
-     */
-    private void openPlacesDialog() {
-        // Ask the user to choose the place where they are now.
-        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // The "which" argument contains the position of the selected item.
-                LatLng markerLatLng = mLikelyPlaceLatLngs[which];
-                String markerSnippet = mLikelyPlaceAddresses[which];
-                if (mLikelyPlaceAttributions[which] != null) {
-                    markerSnippet = markerSnippet + "\n" + mLikelyPlaceAttributions[which];
-                }
-
-                // Add a marker for the selected place, with an info window
-                // showing information about that place.
-                mMap.addMarker(new MarkerOptions()
-                        .title(mLikelyPlaceNames[which])
-                        .position(markerLatLng)
-                        .snippet(markerSnippet));
-
-                // Position the map's camera at the location of the marker.
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(markerLatLng,
-                        DEFAULT_ZOOM));
-            }
-        };
-
-        // Display the dialog.
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.pick_place)
-                .setItems(mLikelyPlaceNames, listener)
-                .show();
-    }
-
-    /**
      * Updates the map's UI settings based on whether the user has granted location permission.
      */
     private void updateLocationUI() {
@@ -422,7 +298,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 mMap.setMyLocationEnabled(false);
                 mMap.getUiSettings().setMyLocationButtonEnabled(false);
                 mLastKnownLocation = null;
-                //getLocationPermission();
+                //getLocationPermission(); This is commented, since we don't want to fall into the "ask for permissions" loop. If the user says no we don't want to spam the question and crash the app
             }
         } catch (SecurityException e)  {
             Log.e("Exception: %s", e.getMessage());
@@ -436,54 +312,82 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             }
         }).start();
 
-        //Intent intent = new Intent(this, AirStationsAPIActivity.class);       //Ignoring the activation of a new activity, since I believe we will have to reaorganize the whole thing /Felix
-        //startActivity(intent);
-        //Google Directions API key: AIzaSyCHzYqbzfL73v_HWgWenSIRhRhhgEOlkVU
+        Intent intent = new Intent(this, AirStationsAPIActivity.class);
+        startActivityForResult(intent, 0);      //Create a "startActivityForResult to be able to get the coordinates back to this activity from AirStationsAPIActivity. See: https://stackoverflow.com/questions/1124548/how-to-pass-the-values-from-one-activity-to-previous-activity
+    }
+
+    private void calcTrip(Marker destination) {     // This takes the destination marker (the one previously clicked) as input
         GeoApiContext geoApiContext = new GeoApiContext();
         Date date = Calendar.getInstance().getTime();       //Get the current time so we can display how long the ride will take
         DateTime now = new DateTime(date.getTime());
-        String destination = "Spånga stationsplan";        //For now we always set the destination for better testing
 
         try {
             geoApiContext = geoApiContext.setQueryRateLimit(3)      //Set everything needed for the API connection, the key should be moved to the strings
-                    .setApiKey("AIzaSyB6aaw5fMcg8pxN1Q8NA2jDzghat9zO4Jc")
+                    .setApiKey(getString(R.string.directionsApiKey))
                     .setConnectTimeout(1, TimeUnit.SECONDS)
                     .setReadTimeout(1, TimeUnit.SECONDS)
                     .setWriteTimeout(1, TimeUnit.SECONDS);
 
-
             String origin = "" + mLastKnownLocation.getLatitude() + "," + mLastKnownLocation.getLongitude();        //Get the start-location so we now from where the polygon should draw
+            String destinationString = "" + destination.getPosition().latitude + "," + destination.getPosition().longitude;
 
             DirectionsResult result = DirectionsApi.newRequest(geoApiContext)       //Get information from the API about the trip
                     .mode(TravelMode.BICYCLING).origin(origin)
-                    .destination(destination).departureTime(now)
+                    .destination(destinationString)
+                    .departureTime(now)
                     .await();
 
-            mMap.clear();       //Clear everything from the map beforehand. This should probably be reduced to only clear the origin-marker and polygon
-            addMarkersToMap(result, mMap);
-            addPolyline(result, mMap);
+            destination.setSnippet(getEndLocationSnippet(result));        //Get time and distance and add it to the InfoWindow snippet
+            destination.setTitle(result.routes[0].legs[0].endAddress);      //Get the adress and add it to the InfoWindow snippet
+            addPolyline(result, mMap);      //Draw the navigational line
+            destination.showInfoWindow();       //Display the InfoWindow snippet
 
         } catch (ApiException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
+
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void addMarkersToMap(DirectionsResult results, GoogleMap mMap) {
-        Marker origin = mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].legs[0].startLocation.lat,results.routes[0].legs[0].startLocation.lng)).title(results.routes[0].legs[0].startAddress));
-        Marker destination = mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].legs[0].endLocation.lat,results.routes[0].legs[0].endLocation.lng)).title(results.routes[0].legs[0].startAddress).snippet(getEndLocationTitle(results)));
+    private void addAllMarkersToMap(ArrayList<String> inputCoords) {        //Take an arraylist of strings as input. The strings are the LatLong coordinates in the following format: "Latitude,Longitude"
+        try {
+            for (int x = 0; x<inputCoords.size(); x++) {        //For loop since we need to go through all coordinates
+                double latitude = Double.parseDouble(inputCoords.get(x).split(",")[0]);     //Split the strings into latitude and longitude
+                double longitude = Double.parseDouble(inputCoords.get(x).split(",")[1]);
+
+                mMap.addMarker(new MarkerOptions().position(new LatLng(latitude,longitude)));       //Add the marker and its title
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    private String getEndLocationTitle(DirectionsResult results){
+    private String getEndLocationSnippet(DirectionsResult results){       //This can be used later on
         return  "Tid: "+ results.routes[0].legs[0].duration.humanReadable + " Sträcka: " + results.routes[0].legs[0].distance.humanReadable;
     }
 
     private void addPolyline(DirectionsResult results, GoogleMap mMap) {
         List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
-        Polyline polyline = mMap.addPolyline(new PolylineOptions().addAll(decodedPath));
+        if (polyline != null) { polyline.remove(); }        //Remove the previous polyline, if it exists
+        polyline = mMap.addPolyline(new PolylineOptions().addAll(decodedPath));     //Add the polyline
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {        //Used to get the ArrayList back from AirStationsAPIActivity
+        super.onActivityResult(requestCode, resultCode, data);
+        switch(requestCode) {
+            case (0) : {
+                if (resultCode == AirStationsAPIActivity.RESULT_OK) {
+                    ArrayList<String> coordsFromAPI = data.getStringArrayListExtra(AirStationsAPIActivity.PUBLIC_STATIC_STRING_IDENTIFIER);     //Get the ArrayList and then send it to addAllMarkersToMap to draw them
+                    addAllMarkersToMap(coordsFromAPI);
+                }
+                break;
+            }
+        }
     }
 
     public void parkingAPIActivity(View view) {
