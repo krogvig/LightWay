@@ -171,19 +171,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
-
-    /**
-     * Sets up the options menu.
-     * @param menu The options menu.
-     * @return Boolean.
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.current_place_menu, menu);
-        return true;
-    }
-     */
-
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
