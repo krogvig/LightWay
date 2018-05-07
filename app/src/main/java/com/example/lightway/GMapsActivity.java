@@ -7,6 +7,7 @@ import android.location.Location;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
+import com.facebook.login.LoginManager;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -99,6 +100,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private Button logOutButton;
+    private GoogleApiClient mGoogleApiClient;
 
     //Used to draw out the navigational line
     private Polyline polyline;
@@ -135,7 +137,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         logOutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mAuth.signOut();
+                logout();
             }
         });
 
@@ -157,6 +159,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         super.onStart();
 
         mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    private void logout(){
+        //Firebase sign out
+        mAuth.signOut();
+        //Facebook sign out
+        LoginManager.getInstance().logOut();
+        // Google sign out
     }
 
     /**
