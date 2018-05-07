@@ -7,6 +7,9 @@ import android.location.Location;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
+import com.facebook.login.LoginManager;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -25,6 +28,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,6 +45,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.maps.DirectionsApi;
 import com.google.maps.GeoApiContext;
 import com.google.maps.android.PolyUtil;
@@ -92,6 +97,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private String[] mLikelyPlaceAddresses;
     private String[] mLikelyPlaceAttributions;
     private LatLng[] mLikelyPlaceLatLngs;
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+    private Button logOutButton;
+    private GoogleApiClient mGoogleApiClient;
 
     //Used to draw out the navigational line
     private Polyline polyline;
@@ -123,6 +132,41 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.gMap);
         mapFragment.getMapAsync(this);
 
+        logOutButton = findViewById(R.id.log_out);
+
+        logOutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logout();
+            }
+        });
+
+        mAuth = FirebaseAuth.getInstance();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                if(firebaseAuth.getCurrentUser() == null){
+
+                    startActivity(new Intent(GMapsActivity.this, LoginActivity.class));
+                }
+            }
+        };
+
+    }
+
+    @Override
+    protected void onStart(){
+        super.onStart();
+
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    private void logout(){
+        //Firebase sign out
+        mAuth.signOut();
+        //Facebook sign out
+        LoginManager.getInstance().logOut();
+        // Google sign out
     }
 
     /**
@@ -136,19 +180,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             super.onSaveInstanceState(outState);
         }
     }
-
-
-    /**
-     * Sets up the options menu.
-     * @param menu The options menu.
-     * @return Boolean.
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.current_place_menu, menu);
-        return true;
-    }
-     */
 
     /**
      * Manipulates the map once available.
@@ -394,4 +425,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         Intent intent = new Intent(this, ParkingAPIActivity.class);
         startActivity(intent);
     }
+
+
 }
