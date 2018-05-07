@@ -85,7 +85,6 @@ public class RegisterActivity extends AppCompatActivity {
                         mProgress.dismiss();
 
                         Intent loginIntent = new Intent(RegisterActivity.this, LoginActivity.class);
-                        loginIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(loginIntent);
                     }
                 }
