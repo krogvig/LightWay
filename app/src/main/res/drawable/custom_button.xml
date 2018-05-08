@@ -25,12 +25,12 @@
     <item>
         <shape>
             <gradient
-                android:endColor="#FFFFFF"
-                android:startColor="#FFFFFF"
+                android:endColor="@android:color/darker_gray"
+                android:startColor="@android:color/darker_gray"
                 android:angle="270" />
             <stroke
                 android:width="2dp"
-                android:color="#3F51B5" />
+                android:color="@android:color/darker_gray" />
             <corners
                 android:radius="1000dp" />
             <padding
