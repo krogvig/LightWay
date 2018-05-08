@@ -13,8 +13,10 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.squareup.picasso.Picasso;
 
@@ -24,7 +26,6 @@ public class ProfileTemp extends AppCompatActivity {
     private Button changeProfilePic;
     private ImageView profilePic;
     private Button setFirebasePic;
-    private String bildPåMicke = "https://i.imgur.com/KrQ3CLS.jpg";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +49,8 @@ public class ProfileTemp extends AppCompatActivity {
         setFirebasePic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setFirebasePic();
+                String facebookPic = gatherFBData();
+                setFirebasePic(facebookPic);
             }
         });
 
@@ -56,11 +58,10 @@ public class ProfileTemp extends AppCompatActivity {
 
     }
 
-    private void setFirebasePic(){
+    private void setFirebasePic(String facebookPic){
         FirebaseUser user = mAuth.getCurrentUser();
         UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                .setDisplayName("JagHeterMicke")
-                .setPhotoUri(Uri.parse(bildPåMicke))
+                .setPhotoUri(Uri.parse(facebookPic))
                 .build();
         user.updateProfile(profileUpdates)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -98,5 +99,21 @@ public class ProfileTemp extends AppCompatActivity {
 
         request.executeAsync();
     }*/
+
+    private String gatherFBData(){
+        String facebookUserId = "";
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        // find the Facebook profile and get the user's id
+        for(UserInfo profile : user.getProviderData()) {
+            // check if the provider id matches "facebook.com"
+            if(FacebookAuthProvider.PROVIDER_ID.equals(profile.getProviderId())) {
+                facebookUserId = profile.getUid();
+            }
+        }
+
+        return "https://graph.facebook.com/" + facebookUserId + "/picture?height=500";
+
+    }
 
 }
