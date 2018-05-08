@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -22,6 +24,7 @@ public class ProfileTemp extends AppCompatActivity {
     private Button changeProfilePic;
     private ImageView profilePic;
     private Button setFirebasePic;
+    private String bildPåMicke = "https://i.imgur.com/KrQ3CLS.jpg";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +38,7 @@ public class ProfileTemp extends AppCompatActivity {
         changeProfilePic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                changeFacebookPic();
+                changeImageViewPic();
 
             }
         });
@@ -57,8 +60,7 @@ public class ProfileTemp extends AppCompatActivity {
         FirebaseUser user = mAuth.getCurrentUser();
         UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                 .setDisplayName("JagHeterMicke")
-                .setPhotoUri(Uri.parse("https://i.imgur.com/KrQ3CLS.jpg"))
-                //.setPhotoUri(Uri.parse("http://square.github.io/picasso/static/sample.png"))
+                .setPhotoUri(Uri.parse(bildPåMicke))
                 .build();
         user.updateProfile(profileUpdates)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -71,7 +73,7 @@ public class ProfileTemp extends AppCompatActivity {
                 });
     }
 
-    private void changeFacebookPic() {
+    private void changeImageViewPic() {
 
         Uri newPicture = mAuth.getCurrentUser().getPhotoUrl();
 
@@ -81,8 +83,20 @@ public class ProfileTemp extends AppCompatActivity {
             Log.d("Tag", "newPicture is null");
         }
 
-
-
-
     }
+    /*private void gatherFacebookPic(){
+
+        GraphRequest request = GraphRequest.newGraphPathRequest(
+                accessToken,
+                "/100026029201882/picture",
+                new GraphRequest.Callback() {
+                    @Override
+                    public void onCompleted(GraphResponse response) {
+                        // Insert your code here
+                    }
+                });
+
+        request.executeAsync();
+    }*/
+
 }
