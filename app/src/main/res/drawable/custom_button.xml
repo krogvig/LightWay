@@ -1,42 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
 
     <item android:state_pressed="true" >
         <shape>
             <gradient
-                android:startColor="#FFFFFF"
-                android:endColor="@color/yellow2"
+                android:startColor="#3F51B5"
+                android:endColor="#3F51B5"
                 android:angle="270" />
             <stroke
-                android:width="3dp"
-                android:color="@color/grey05" />
+                android:width="2dp"
+                android:color="#3F51B5" />
             <corners
-                android:radius="3dp" />
+                android:radius="1000dp" />
             <padding
-                android:left="10dp"
-                android:top="10dp"
-                android:right="10dp"
-                android:bottom="10dp" />
+                android:top="4dp"
+                android:right="4dp"
+                android:left="4dp"
+                android:bottom="4dp" />
         </shape>
     </item>
 
     <item>
         <shape>
             <gradient
-                android:endColor="@color/blue2"
-                android:startColor="@color/blue25"
+                android:endColor="#FFFFFF"
+                android:startColor="#FFFFFF"
                 android:angle="270" />
             <stroke
-                android:width="3dp"
-                android:color="@color/grey05" />
+                android:width="2dp"
+                android:color="#3F51B5" />
             <corners
-                android:radius="3dp" />
+                android:radius="1000dp" />
             <padding
-                android:left="10dp"
-                android:top="10dp"
-                android:right="10dp"
-                android:bottom="10dp" />
+                android:top="4dp"
+                android:right="4dp"
+                android:left="4dp"
+                android:bottom="4dp" />
         </shape>
     </item>
 </selector>
