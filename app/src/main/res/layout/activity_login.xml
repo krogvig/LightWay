@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="84dp"
         android:layout_marginStart="85dp"
-        android:layout_marginTop="82dp"
+        android:layout_marginTop="120dp"
         android:backgroundTint="@android:color/white"
         android:ems="10"
         android:hint="Email..."
@@ -36,7 +36,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="84dp"
         android:layout_marginStart="85dp"
-        android:layout_marginTop="11dp"
+        android:layout_marginTop="8dp"
         android:backgroundTint="@android:color/white"
         android:ems="10"
         android:hint="Password..."
@@ -58,27 +58,27 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="84dp"
         android:layout_marginStart="85dp"
-        android:layout_marginTop="14dp"
+        android:layout_marginTop="8dp"
         android:background="@drawable/button_rounded"
+        android:shadowColor="#000000"
+        android:shadowDx="5"
+        android:shadowDy="5"
+        android:shadowRadius="10"
         android:text="Login"
         android:textColor="@color/common_google_signin_btn_text_dark_default"
         android:textColorLink="@color/common_google_signin_btn_text_dark_focused"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/passwordField"
-        android:shadowColor="#000000"
-        android:shadowDx="5"
-        android:shadowDy="5"
-        android:shadowRadius="10"/>
+        app:layout_constraintTop_toBottomOf="@+id/passwordField" />
 
     <Button
         android:id="@+id/registerButton"
         style="@android:style/Widget.DeviceDefault.Button.Borderless"
         android:layout_width="110dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="68dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginEnd="76dp"
+        android:layout_marginTop="8dp"
         android:shadowColor="#000000"
         android:shadowDx="5"
         android:shadowDy="5"
@@ -93,8 +93,8 @@
         style="@android:style/Widget.DeviceDefault.Button.Borderless"
         android:layout_width="117dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="74dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginStart="84dp"
+        android:layout_marginTop="8dp"
         android:shadowColor="#000000"
         android:shadowDx="5"
         android:shadowDy="5"
@@ -108,32 +108,32 @@
         android:id="@+id/gmailLoginButton"
         android:layout_width="215dp"
         android:layout_height="48dp"
-        android:layout_marginBottom="7dp"
         android:layout_marginEnd="84dp"
         android:layout_marginStart="85dp"
+        android:layout_marginTop="12dp"
         android:text="Log in using Gmail"
-        app:layout_constraintBottom_toTopOf="@+id/fbLoginButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
     <com.facebook.login.widget.LoginButton
         android:id="@+id/fbLoginButton"
         android:layout_width="215dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
         android:layout_marginEnd="84dp"
         android:layout_marginStart="85dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/gmailLoginButton" />
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
         android:layout_marginEnd="168dp"
         android:layout_marginStart="168dp"
+        android:layout_marginTop="80dp"
         android:background="@drawable/border_circle"
         android:paddingBottom="8dp"
         android:paddingLeft="8dp"
@@ -146,17 +146,17 @@
         android:text="OR"
         android:textColor="@android:color/white"
         android:textSize="25sp"
-        app:layout_constraintBottom_toTopOf="@+id/textView2"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loginButton" />
 
     <TextView
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
         android:layout_marginEnd="144dp"
         android:layout_marginStart="145dp"
+        android:layout_marginTop="16dp"
         android:shadowColor="#000000"
         android:shadowDx="5"
         android:shadowDy="5"
@@ -164,9 +164,9 @@
         android:text="Continue With"
         android:textColor="@android:color/white"
         android:textSize="15sp"
-        app:layout_constraintBottom_toTopOf="@+id/gmailLoginButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
 
 
