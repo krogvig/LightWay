@@ -46,6 +46,11 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.maps.DirectionsApi;
 import com.google.maps.GeoApiContext;
 import com.google.maps.android.PolyUtil;
@@ -54,8 +59,15 @@ import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.TravelMode;
 
 import org.joda.time.DateTime;
+import org.xml.sax.SAXParseException;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -146,7 +158,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 if(firebaseAuth.getCurrentUser() == null){
-
                     startActivity(new Intent(GMapsActivity.this, LoginActivity.class));
                 }
             }
@@ -233,7 +244,49 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 return true;
             }
         });
+
+        // Listen for clicks on any InfoWindow
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker m) {
+                String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                String[] snippet = m.getSnippet().split("Sträcka:");
+                snippet = snippet[1].split(" ");
+                final double distanceToAdd = Double.parseDouble(snippet[1]);
+
+                DatabaseReference mDatabase;
+                mDatabase = FirebaseDatabase.getInstance().getReference();
+                try {
+                    mDatabase.child("Users").child(uid).child("distance_traveled").addListenerForSingleValueEvent(
+                            new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    double oldDistance = Double.parseDouble(dataSnapshot.getValue().toString());
+                                    double newDistance = oldDistance + distanceToAdd;
+                                    setDistanceValue(newDistance);
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+                } catch (NullPointerException e){
+                    setDistanceValue(distanceToAdd);
+                }
+
+                Toast toast = Toast.makeText(getApplicationContext(), "Let the light guide your way!", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        });
     }
+    private void setDistanceValue(double newDistance) {
+        DatabaseReference mDatabase;
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        mDatabase.child("Users").child(uid).child("distance_traveled").setValue(newDistance);
+    }
+
     /**
      * Gets the current location of the device, and positions the map's camera.
      * Call this whenever you need to update the device location
