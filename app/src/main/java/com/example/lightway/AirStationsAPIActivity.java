@@ -31,7 +31,7 @@ public class AirStationsAPIActivity extends AppCompatActivity  {
 
     private void callAPI() {      //Create new thread that can work in the background fetching the API and use the API URL as parameter
         try {
-            new connectToAPI().execute(new URL("https://openstreetgs.stockholm.se/geoservice/api/dd0997ea-f66b-4c80-9b87-3783e3faa6f9/wfs?request=GetFeature&typeName=od_gis:Cykelpump_Punkt&outputFormat=JSON"));
+            new connectToAPI().execute(new URL("https://lightway-90a9c.firebaseio.com/Pump.json"));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
