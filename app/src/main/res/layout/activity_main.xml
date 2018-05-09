@@ -44,5 +44,15 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <ImageButton
+        android:id="@+id/profileBtn"
+        android:layout_width="62dp"
+        android:layout_height="61dp"
+        android:onClick="showUserPopup"
+        android:scaleType="centerCrop"
+        android:src="@drawable/com_facebook_profile_picture_blank_square"
+        tools:layout_editor_absoluteX="322dp"
+        tools:layout_editor_absoluteY="0dp" />
+
 
 </android.support.constraint.ConstraintLayout>

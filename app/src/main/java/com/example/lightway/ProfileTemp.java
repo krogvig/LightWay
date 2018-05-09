@@ -24,8 +24,8 @@ public class ProfileTemp extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private Button changeProfilePic;
-    private ImageView profilePic;
-    private Button setFirebasePic;
+    public ImageView profilePic;
+    private Button btnSetFirebasePic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,9 +44,9 @@ public class ProfileTemp extends AppCompatActivity {
             }
         });
 
-        setFirebasePic = findViewById(R.id.setFirebasePic);
+        btnSetFirebasePic = findViewById(R.id.setFirebasePic);
 
-        setFirebasePic.setOnClickListener(new View.OnClickListener() {
+        btnSetFirebasePic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String facebookPic = gatherFBData();

@@ -1,6 +1,9 @@
 package com.example.lightway;
 
+import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -33,6 +36,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,8 +52,10 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -69,6 +75,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+
+import com.squareup.picasso.Picasso;
+
 
 public class GMapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -113,6 +122,13 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     //Used to draw out the navigational line
     private Polyline polyline;
 
+    //Used for Userinfo popup
+    Dialog myDialog;
+    public ImageView profilePic;
+    public String facebookPicID;
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -140,6 +156,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.gMap);
         mapFragment.getMapAsync(this);
 
+        myDialog = new Dialog(this);
         logOutButton = findViewById(R.id.log_out);
 
         logOutButton.setOnClickListener(new View.OnClickListener() {
@@ -159,6 +176,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 }
             }
         };
+
+        facebookPicID = gatherFBData();
+        setFirebasePic(facebookPicID);
+        changeImageViewPic();
 
 
     }
@@ -436,6 +457,79 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     public void parkingAPIActivity(View view) {
         Intent intent = new Intent(this, ParkingAPIActivity.class);
         startActivity(intent);
+    }
+
+    public void showUserPopup(View v){
+        TextView txtclose;
+        Button btnLogout;
+        myDialog.setContentView(R.layout.profile_popup);
+        txtclose = myDialog.findViewById(R.id.txtclose);
+        txtclose.setText("X");
+        btnLogout = myDialog.findViewById(R.id.btnLogout);
+        btnLogout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logout();
+            }
+        });
+
+        txtclose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+            }
+        });
+
+        //PROFILE PICTURE UPDATE
+        profilePic = myDialog.findViewById(R.id.profilePic);
+        //profilePic.setImageResource(Uri.parse(facebookPicID));
+
+        myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        myDialog.show();
+    }
+
+    private String gatherFBData(){
+        String facebookUserId = "";
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        // find the Facebook profile and get the user's id
+        for(UserInfo profile : user.getProviderData()) {
+            // check if the provider id matches "facebook.com"
+            if(FacebookAuthProvider.PROVIDER_ID.equals(profile.getProviderId())) {
+                facebookUserId = profile.getUid();
+            }
+        }
+
+        return "https://graph.facebook.com/" + facebookUserId + "/picture?height=500";
+
+    }
+
+    private void setFirebasePic(String facebookPicID){
+        FirebaseUser user = mAuth.getCurrentUser();
+        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                .setPhotoUri(Uri.parse(facebookPicID))
+                .build();
+        user.updateProfile(profileUpdates)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.d("Tag", "User profile updated.");
+                        }
+                    }
+                });
+    }
+
+    private void changeImageViewPic() {
+
+        Uri newPicture = mAuth.getCurrentUser().getPhotoUrl();
+
+        if(newPicture != null){
+            Picasso.get().load(newPicture).fit().centerCrop().into(profilePic);
+        }else{
+            Log.d("Tag", "newPicture is null");
+        }
+
     }
 
 
