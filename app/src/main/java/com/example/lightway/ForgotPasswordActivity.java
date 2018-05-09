@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -62,25 +63,26 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
         final String email = emailField.getText().toString().trim();
 
+        if(TextUtils.isEmpty(email)){
+            Toast.makeText(ForgotPasswordActivity.this, "Field is empty!", Toast.LENGTH_LONG).show();
+        }else{
+
         mAuth.sendPasswordResetEmail(email)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
+                        if(task.isSuccessful()){
+                            Toast.makeText(ForgotPasswordActivity.this, "Email sent!", Toast.LENGTH_LONG).show();
+                        }else if(!task.isSuccessful()){
+                            Toast.makeText(ForgotPasswordActivity.this, "Incorrect email!", Toast.LENGTH_LONG).show();}
 
-                    }
-                });
+                        }
+                    });
+                }}}
 
 
 
 
-        if(!TextUtils.isEmpty(email) ){
-
-
-
-                    }
-                }
-
-        }
 
 
 
