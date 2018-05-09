@@ -11,7 +11,7 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/log_out"
+        app:layout_constraintBottom_toTopOf="@+id/btnTestImage"
         app:layout_constraintTop_toTopOf="parent"
         tools:context=".GMapsActivity" />
 
@@ -26,13 +26,14 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/parking"
         app:layout_constraintHorizontal_bias="0.795"
-        app:layout_constraintStart_toEndOf="@+id/log_out" />
+        app:layout_constraintStart_toEndOf="@+id/btnTestImage" />
 
     <Button
-        android:id="@+id/log_out"
+        android:id="@+id/btnTestImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Log Out"
+        android:text="Test image"
+        android:onClick="testImageMethod"
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <Button
@@ -53,6 +54,16 @@
         android:src="@drawable/com_facebook_profile_picture_blank_square"
         tools:layout_editor_absoluteX="322dp"
         tools:layout_editor_absoluteY="0dp" />
+
+    <ImageView
+        android:id="@+id/testImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/com_facebook_close"
+        tools:layout_editor_absoluteX="119dp"
+        tools:layout_editor_absoluteY="260dp"
+        app:layout_constraintLeft_toLeftOf="@id/gMap"
+        app:layout_constraintBottom_toBottomOf="@id/gMap"/>
 
 
 </android.support.constraint.ConstraintLayout>

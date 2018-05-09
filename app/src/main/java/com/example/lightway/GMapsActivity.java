@@ -124,7 +124,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     //Used for Userinfo popup
     Dialog myDialog;
-    public ImageView profilePic;
+    public ImageView testImage;
     public String facebookPicID;
 
 
@@ -157,14 +157,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
 
         myDialog = new Dialog(this);
-        logOutButton = findViewById(R.id.log_out);
-
-        logOutButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                logout();
-            }
-        });
 
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -179,7 +171,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
         facebookPicID = gatherFBData();
         setFirebasePic(facebookPicID);
-        changeImageViewPic();
 
 
     }
@@ -462,8 +453,17 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         TextView txtclose;
         Button btnLogout;
         myDialog.setContentView(R.layout.profile_popup);
+
+
         txtclose = myDialog.findViewById(R.id.txtclose);
         txtclose.setText("X");
+        txtclose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+            }
+        });
+
         btnLogout = myDialog.findViewById(R.id.btnLogout);
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -472,16 +472,21 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             }
         });
 
-        txtclose.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                myDialog.dismiss();
-            }
-        });
+
 
         //PROFILE PICTURE UPDATE
-        profilePic = myDialog.findViewById(R.id.profilePic);
-        //profilePic.setImageResource(Uri.parse(facebookPicID));
+        //ImageView profilePic = myDialog.findViewById(R.id.profilePic);
+        //profilePic.setImageResource(testImage);
+
+        //Should work but ImageView turns black
+        testImage = myDialog.findViewById(R.id.profilePic);
+        Uri newPicture = mAuth.getCurrentUser().getPhotoUrl();
+
+        if(newPicture != null){
+            Picasso.get().load(newPicture).fit().centerCrop().into(testImage);
+        }else{
+            Log.d("Tag", "newPicture is null");
+        }
 
         myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         myDialog.show();
@@ -524,11 +529,24 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         Uri newPicture = mAuth.getCurrentUser().getPhotoUrl();
 
         if(newPicture != null){
-            Picasso.get().load(newPicture).fit().centerCrop().into(profilePic);
+            //Picasso.get().load(newPicture).fit().centerCrop().into(profilePic);
         }else{
             Log.d("Tag", "newPicture is null");
         }
 
+    }
+
+    public void testImageMethod(View v) {
+        //Change the small testing image to your current profile's profile picture
+
+        testImage = findViewById(R.id.testImage);
+        Uri newPicture = mAuth.getCurrentUser().getPhotoUrl();
+
+        if(newPicture != null){
+            Picasso.get().load(newPicture).fit().centerCrop().into(testImage);
+        }else{
+            Log.d("Tag", "newPicture is null");
+        }
     }
 
 

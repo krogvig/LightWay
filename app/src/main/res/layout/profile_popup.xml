@@ -3,7 +3,7 @@
     android:orientation="vertical"
     android:layout_width="350dp"
     android:layout_height="475dp"
-    android:background="@color/colorPrimaryDark"
+    android:background="@color/darkGrey"
     android:padding="5dp"
     android:layout_gravity="center">
     <TextView
@@ -25,7 +25,7 @@
         <ImageView
             android:id="@+id/profilePic"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="133dp"
             android:layout_gravity="center"
             android:layout_marginTop="15dp"
             android:src="@drawable/com_facebook_profile_picture_blank_square" />
