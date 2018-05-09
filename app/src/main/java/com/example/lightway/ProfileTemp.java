@@ -7,15 +7,19 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
+//import com.facebook.GraphRequest;
+//import com.facebook.GraphResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.UserInfo;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.squareup.picasso.Picasso;
@@ -26,6 +30,7 @@ public class ProfileTemp extends AppCompatActivity {
     private Button changeProfilePic;
     private ImageView profilePic;
     private Button setFirebasePic;
+    private EditText imageUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,12 +54,23 @@ public class ProfileTemp extends AppCompatActivity {
         setFirebasePic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String facebookPic = gatherFBData();
-                setFirebasePic(facebookPic);
+
+                String gatheredImageUri = imageUri.getText().toString().trim();
+
+                if(gatheredImageUri.isEmpty()){
+                    String providerPicture = gatherProviderData();
+                    if(providerPicture==null){
+                        setFirebasePic(providerPicture);
+                    }
+                }else{
+
+                    setFirebasePic(gatheredImageUri);
+                }
             }
         });
 
         profilePic = findViewById(R.id.facebookPicture);
+        imageUri = findViewById(R.id.imageUri);
 
     }
 
@@ -69,6 +85,7 @@ public class ProfileTemp extends AppCompatActivity {
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             Log.d("Tag", "User profile updated.");
+                            Toast.makeText(ProfileTemp.this, "Profile picture has been changed", Toast.LENGTH_LONG).show();
                         }
                     }
                 });
@@ -100,20 +117,24 @@ public class ProfileTemp extends AppCompatActivity {
         request.executeAsync();
     }*/
 
-    private String gatherFBData(){
-        String facebookUserId = "";
+    private String gatherProviderData(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         // find the Facebook profile and get the user's id
         for(UserInfo profile : user.getProviderData()) {
             // check if the provider id matches "facebook.com"
             if(FacebookAuthProvider.PROVIDER_ID.equals(profile.getProviderId())) {
-                facebookUserId = profile.getUid();
+                String facebookUserId = profile.getUid();
+                return "https://graph.facebook.com/" + facebookUserId + "/picture?height=400";
+            }
+            if(GoogleAuthProvider.PROVIDER_ID.equals(profile.getProviderId())){
+                String url= FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString();
+                url = url.replace("/s96-c/","/s300-c/");
+
+                return url;
             }
         }
-
-        return "https://graph.facebook.com/" + facebookUserId + "/picture?height=500";
-
+        return null;
     }
 
 }
