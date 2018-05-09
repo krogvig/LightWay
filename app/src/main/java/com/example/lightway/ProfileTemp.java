@@ -1,5 +1,7 @@
 package com.example.lightway;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -9,7 +11,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 //import com.facebook.GraphRequest;
@@ -27,10 +28,12 @@ import com.squareup.picasso.Picasso;
 public class ProfileTemp extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
-    private Button changeProfilePic;
+    private Button changePicBtn;
     private ImageView profilePic;
-    private Button setFirebasePic;
+    private Button setFirebasePicBtn;
     private EditText imageUri;
+    private Button uploadPhotoBtn;
+    public static final int GALLERY_REQUEST = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,9 +42,9 @@ public class ProfileTemp extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        changeProfilePic = findViewById(R.id.changeProfilePic);
+        changePicBtn = findViewById(R.id.changeProfilePic);
 
-        changeProfilePic.setOnClickListener(new View.OnClickListener() {
+        changePicBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 changeImageViewPic();
@@ -49,9 +52,9 @@ public class ProfileTemp extends AppCompatActivity {
             }
         });
 
-        setFirebasePic = findViewById(R.id.setFirebasePic);
+        setFirebasePicBtn = findViewById(R.id.setFirebasePic);
 
-        setFirebasePic.setOnClickListener(new View.OnClickListener() {
+        setFirebasePicBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -71,13 +74,20 @@ public class ProfileTemp extends AppCompatActivity {
 
         profilePic = findViewById(R.id.facebookPicture);
         imageUri = findViewById(R.id.imageUri);
+        uploadPhotoBtn = findViewById(R.id.uploadButton);
 
+        uploadPhotoBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GALLERY_REQUEST);
+            }
+        });
     }
 
-    private void setFirebasePic(String facebookPic){
+    private void setFirebasePic(String providerPic){
         FirebaseUser user = mAuth.getCurrentUser();
         UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                .setPhotoUri(Uri.parse(facebookPic))
+                .setPhotoUri(Uri.parse(providerPic))
                 .build();
         user.updateProfile(profileUpdates)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -135,6 +145,44 @@ public class ProfileTemp extends AppCompatActivity {
             }
         }
         return null;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        try {
+            switch (requestCode) {
+
+                case GALLERY_REQUEST:
+                    if (resultCode == Activity.RESULT_OK) {
+                        Uri selectedImage = data.getData();
+                        uploadImageToFirebase(selectedImage);
+                        break;
+                    } else if (resultCode == Activity.RESULT_CANCELED) {
+                        Log.e("TAG", "Selecting picture cancelled");
+                    }
+                    break;
+            }
+        } catch (Exception e) {
+            Log.e("ERROR", "Exception in onActivityResult : " + e.getMessage());
+        }
+    }
+
+    private void uploadImageToFirebase(Uri galleryphoto){
+        FirebaseUser user = mAuth.getCurrentUser();
+        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                .setPhotoUri(galleryphoto)
+                .build();
+        user.updateProfile(profileUpdates)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.d("Tag", "User profile updated.");
+                            Toast.makeText(ProfileTemp.this, "Profile picture has been changed", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
     }
 
 }
