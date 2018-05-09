@@ -70,6 +70,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".RegisterActivity"></activity>
+        <activity android:name=".ForgotPasswordActivity"></activity>
     </application>
 
 </manifest>

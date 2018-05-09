@@ -47,6 +47,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private Button mLoginbutton;
     private CallbackManager mCallbackManager;
     private Button mRegisterbutton;
+    private Button mForgotButton;
 
     final int SIGN_IN_CODE = 500;
 
@@ -66,6 +67,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         mPasswordField = findViewById(R.id.passwordField);
         mLoginbutton = findViewById(R.id.loginButton);
         mRegisterbutton = findViewById(R.id.registerButton);
+        mForgotButton = findViewById(R.id.forgotButton);
 
         signInButton = findViewById(R.id.gmailLoginButton);
         mAuth = FirebaseAuth.getInstance();
@@ -92,6 +94,13 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+            }
+        });
+
+        mForgotButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(LoginActivity.this, ForgotPasswordActivity.class));
             }
         });
 
