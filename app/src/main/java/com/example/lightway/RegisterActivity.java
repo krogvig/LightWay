@@ -6,9 +6,11 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -53,27 +55,47 @@ public class RegisterActivity extends AppCompatActivity {
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startRegister();
+                errorHandling();
             }
         });
 
     }
 
-    private void startRegister() {
-
+    private void errorHandling(){
+        boolean foundError;
         final String name = nameField.getText().toString().trim();
         String email = emailField.getText().toString().trim();
         String password = passwordField.getText().toString().trim();
 
-        if(!TextUtils.isEmpty(name) && !TextUtils.isEmpty(email) && !TextUtils.isEmpty(password)){
 
+        if (checkEmptyFields(email, password)){
+            foundError = true;
+            return;
+        } else {
+            startRegister(name, email, password);
+        }
+    }
+
+    private boolean checkEmptyFields(String email, String password){
+        boolean empty = false;
+        if(TextUtils.isEmpty(email) || TextUtils.isEmpty(password)){
+            Toast.makeText(RegisterActivity.this, "Fields are empty, please try again", Toast.LENGTH_LONG).show();
+            empty = true;
+            return empty;
+        }
+        return empty;
+    }
+
+    private void startRegister(final String name, String email, String password) {
+
+        if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(email) && !TextUtils.isEmpty(password)) {
 
             mProgress.setMessage("Creating account ...");
             mProgress.show();
             mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
-                    if(task.isSuccessful()){
+                    if (task.isSuccessful()) {
 
                         String user_id = mAuth.getCurrentUser().getUid();
 
@@ -92,4 +114,7 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
     }
+
 }
+
+
