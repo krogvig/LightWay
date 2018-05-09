@@ -187,7 +187,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     @Override
     protected void onStart(){
         super.onStart();
-
         mAuth.addAuthStateListener(mAuthListener);
     }
 
