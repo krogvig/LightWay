@@ -55,6 +55,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         super.onStart();
 
         mAuth.addAuthStateListener(mAuthListener);
+
     }
 
     @Override
@@ -79,6 +80,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 }
             }
         };
+
+
 
 
         mLoginbutton.setOnClickListener(new View.OnClickListener() {
@@ -153,12 +156,21 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
+
+                    if (!mAuth.getCurrentUser().isEmailVerified()) {
+                        Toast.makeText(LoginActivity.this, "Please verify your email", Toast.LENGTH_LONG).show();
+                        mAuth.signOut();
+                    }
+                        Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_LONG).show();
+
+
                     if(!task.isSuccessful()){
                         Toast.makeText(LoginActivity.this, "Sign In Problem", Toast.LENGTH_LONG).show();
                     }
 
                 }
             });
+
         }
 
     }

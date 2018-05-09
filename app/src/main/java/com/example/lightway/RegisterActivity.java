@@ -3,6 +3,7 @@ package com.example.lightway;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -16,6 +17,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -86,7 +88,23 @@ public class RegisterActivity extends AppCompatActivity {
         return empty;
     }
 
-    private void startRegister(final String name, String email, String password) {
+    private void sendVerificationEmail(final String email){
+        final FirebaseUser user = mAuth.getCurrentUser();
+        user.sendEmailVerification()
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if(task.isSuccessful()){
+                            Toast.makeText(RegisterActivity.this, "Verification email sent to " + email, Toast.LENGTH_LONG).show();
+                        } else {
+                            Log.e("asd", "sendEmailVerification", task.getException());
+                            Toast.makeText(RegisterActivity.this, "Failed to send verification email.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
+    private void startRegister(final String name, final String email, String password) {
 
         if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(email) && !TextUtils.isEmpty(password)) {
 
@@ -96,7 +114,7 @@ public class RegisterActivity extends AppCompatActivity {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (task.isSuccessful()) {
-
+                        sendVerificationEmail(email);
                         String user_id = mAuth.getCurrentUser().getUid();
 
                         DatabaseReference current_user_db = mDatabase.child(user_id);
@@ -106,6 +124,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                         mProgress.dismiss();
 
+                        mAuth.signOut();
                         Intent loginIntent = new Intent(RegisterActivity.this, LoginActivity.class);
                         startActivity(loginIntent);
                     }
