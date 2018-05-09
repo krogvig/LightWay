@@ -6,7 +6,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".RegisterActivity"
-    android:background="@drawable/maxres">
+    android:background="@drawable/maxres"
+    android:orientation="vertical">
+
+    <include
+        layout="@layout/toolbar_layout"/>
 
     <Button
         android:id="@+id/createAccountButton"
