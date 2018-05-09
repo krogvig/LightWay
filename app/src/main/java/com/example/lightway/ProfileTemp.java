@@ -40,7 +40,8 @@ public class ProfileTemp extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_temp);
 
-        mAuth = FirebaseAuth.getInstance();
+
+        mAuth = FirebaseAuth.getInstance(); //Gets the instance of the Firebase Login.
 
         changePicBtn = findViewById(R.id.changeProfilePic);
 
@@ -63,11 +64,12 @@ public class ProfileTemp extends AppCompatActivity {
                 if(gatheredImageUri.isEmpty()){
                     String providerPicture = gatherProviderData();
                     if(providerPicture==null){
-                        setFirebasePic(providerPicture);
+
+                        changePicWithUri(Uri.parse(gatheredImageUri));
                     }
                 }else{
 
-                    setFirebasePic(gatheredImageUri);
+                    changePicWithUri(Uri.parse(gatheredImageUri));
                 }
             }
         });
@@ -79,34 +81,19 @@ public class ProfileTemp extends AppCompatActivity {
         uploadPhotoBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //Opens up the gallery
                 startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GALLERY_REQUEST);
             }
         });
     }
 
-    private void setFirebasePic(String providerPic){
-        FirebaseUser user = mAuth.getCurrentUser();
-        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                .setPhotoUri(Uri.parse(providerPic))
-                .build();
-        user.updateProfile(profileUpdates)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            Log.d("Tag", "User profile updated.");
-                            Toast.makeText(ProfileTemp.this, "Profile picture has been changed", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                });
-    }
-
+    //Method is used to display photo in a imageview, can be changed so uri is taken through a parameter.
     private void changeImageViewPic() {
 
-        Uri newPicture = mAuth.getCurrentUser().getPhotoUrl();
+        Uri newPicture = mAuth.getCurrentUser().getPhotoUrl(); //Gets the firebase photo from the current user
 
         if(newPicture != null){
-            Picasso.get().load(newPicture).fit().centerCrop().into(profilePic);
+            Picasso.get().load(newPicture).fit().centerCrop().into(profilePic); // Displays the photo in the imageview
         }else{
             Log.d("Tag", "newPicture is null");
         }
@@ -127,6 +114,7 @@ public class ProfileTemp extends AppCompatActivity {
         request.executeAsync();
     }*/
 
+    // Gathers the profile picture of either Facebook or Google.
     private String gatherProviderData(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -137,6 +125,7 @@ public class ProfileTemp extends AppCompatActivity {
                 String facebookUserId = profile.getUid();
                 return "https://graph.facebook.com/" + facebookUserId + "/picture?height=400";
             }
+            //Checks if the provider id matches with "google.com"
             if(GoogleAuthProvider.PROVIDER_ID.equals(profile.getProviderId())){
                 String url= FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString();
                 url = url.replace("/s96-c/","/s300-c/");
@@ -147,33 +136,13 @@ public class ProfileTemp extends AppCompatActivity {
         return null;
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        try {
-            switch (requestCode) {
-
-                case GALLERY_REQUEST:
-                    if (resultCode == Activity.RESULT_OK) {
-                        Uri selectedImage = data.getData();
-                        uploadImageToFirebase(selectedImage);
-                        break;
-                    } else if (resultCode == Activity.RESULT_CANCELED) {
-                        Log.e("TAG", "Selecting picture cancelled");
-                    }
-                    break;
-            }
-        } catch (Exception e) {
-            Log.e("ERROR", "Exception in onActivityResult : " + e.getMessage());
-        }
-    }
-
-    private void uploadImageToFirebase(Uri galleryphoto){
-        FirebaseUser user = mAuth.getCurrentUser();
+    //This method can be used to change the firebase users profile pic with an Uri
+    private void changePicWithUri(Uri galleryphoto){
+        FirebaseUser user = mAuth.getCurrentUser(); //Gets the current user
         UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                .setPhotoUri(galleryphoto)
+                .setPhotoUri(galleryphoto) //Sets the photo from the picture gathered from the gallery
                 .build();
-        user.updateProfile(profileUpdates)
+        user.updateProfile(profileUpdates) //Updates the profile on firebase
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
@@ -183,6 +152,28 @@ public class ProfileTemp extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        try {
+            switch (requestCode) {
+
+                case GALLERY_REQUEST:
+                    if (resultCode == Activity.RESULT_OK) {
+                        Uri selectedImage = data.getData(); //Gets the data from the selected image.
+                        changePicWithUri(selectedImage); //Uploads the image to firebase
+                        break;
+                    } else if (resultCode == Activity.RESULT_CANCELED) {
+                        Log.e("TAG", "Selecting picture cancelled");
+                    }
+                    break;
+            }
+        } catch (Exception e) {
+            Log.e("ERROR", "Exception in onActivityResult : " + e.getMessage());
+        }
     }
 
 }
