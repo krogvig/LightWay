@@ -161,12 +161,12 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         Toast.makeText(LoginActivity.this, "Please verify your email", Toast.LENGTH_LONG).show();
                         mAuth.signOut();
                     }
-                        Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_LONG).show();
-
 
                     if(!task.isSuccessful()){
                         Toast.makeText(LoginActivity.this, "Sign In Problem", Toast.LENGTH_LONG).show();
                     }
+
+                    Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_LONG).show();
 
                 }
             });

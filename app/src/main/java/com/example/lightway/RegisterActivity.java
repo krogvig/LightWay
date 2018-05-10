@@ -1,6 +1,8 @@
 package com.example.lightway;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
@@ -64,14 +66,14 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void errorHandling(){
-        boolean foundError;
         final String name = nameField.getText().toString().trim();
         String email = emailField.getText().toString().trim();
         String password = passwordField.getText().toString().trim();
 
+        boolean emptyFields = checkEmptyFields(email, password);
+        boolean passwordFormat = correctPasswordFormat(password);
 
-        if (checkEmptyFields(email, password)){
-            foundError = true;
+        if (emptyFields || !passwordFormat){
             return;
         } else {
             startRegister(name, email, password);
@@ -79,13 +81,31 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private boolean checkEmptyFields(String email, String password){
-        boolean empty = false;
         if(TextUtils.isEmpty(email) || TextUtils.isEmpty(password)){
             Toast.makeText(RegisterActivity.this, "Fields are empty, please try again", Toast.LENGTH_LONG).show();
-            empty = true;
-            return empty;
+            return true;
         }
-        return empty;
+        return false;
+    }
+
+    private boolean correctPasswordFormat(String password){
+        if(password != null){
+            if(password.length() < 6){
+                AlertDialog alertDialog = new AlertDialog.Builder(RegisterActivity.this).create();
+                alertDialog.setTitle("Oops!");
+                alertDialog.setMessage("Password too short!" + '\n' + "Minimum 6 characters.");
+                alertDialog.setButton("Ok",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        });
+
+                alertDialog.show();
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     private void sendVerificationEmail(final String email){
