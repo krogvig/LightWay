@@ -1,21 +1,18 @@
 package com.example.lightway;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.facebook.login.LoginManager;
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -24,18 +21,15 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,8 +38,6 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.PlaceDetectionClient;
-import com.google.android.gms.location.places.PlaceLikelihood;
-import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
@@ -55,10 +47,9 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.UserInfo;
 import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import com.google.maps.DirectionsApi;
 import com.google.maps.GeoApiContext;
 import com.google.maps.android.PolyUtil;
@@ -73,10 +64,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-import com.squareup.picasso.Picasso;
+//import com.squareup.picasso.Callback;
+//import com.squareup.picasso.Picasso;
 
 
 public class GMapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -98,6 +89,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private static final int DEFAULT_ZOOM = 15;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean mLocationPermissionGranted;
+    public static final int AIRSTATION_REQUEST = 2; // Activitycode for airstations used in activityResult.
 
     // The geographical location where the device is currently located. That is, the last-known
     // location retrieved by the Fused Location Provider.
@@ -125,7 +117,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     //Used for Userinfo popup
     Dialog myDialog;
     public ImageView testImage;
-    public String facebookPicID;
+    public String providerData;
+    private Uri imageFromFirebase;
+    public static final int GALLERY_REQUEST = 1;
+
 
 
 
@@ -169,8 +164,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             }
         };
 
-        facebookPicID = gatherFBData();
-        setFirebasePic(facebookPicID);
+        providerData = gatherProviderData();
+        changePicWithUri(Uri.parse(providerData));
+        imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();
 
 
     }
@@ -367,7 +363,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }).start();
 
         Intent intent = new Intent(this, AirStationsAPIActivity.class);
-        startActivityForResult(intent, 0);      //Create a "startActivityForResult to be able to get the coordinates back to this activity from AirStationsAPIActivity. See: https://stackoverflow.com/questions/1124548/how-to-pass-the-values-from-one-activity-to-previous-activity
+        startActivityForResult(intent, AIRSTATION_REQUEST);      //Create a "startActivityForResult to be able to get the coordinates back to this activity from AirStationsAPIActivity. See: https://stackoverflow.com/questions/1124548/how-to-pass-the-values-from-one-activity-to-previous-activity
     }
 
     private void calcTrip(Marker destination) {     // This takes the destination marker (the one previously clicked) as input
@@ -434,13 +430,21 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     public void onActivityResult(int requestCode, int resultCode, Intent data) {        //Used to get the ArrayList back from AirStationsAPIActivity
         super.onActivityResult(requestCode, resultCode, data);
         switch(requestCode) {
-            case (0) : {
+            case (AIRSTATION_REQUEST) :
                 if (resultCode == AirStationsAPIActivity.RESULT_OK) {
                     ArrayList<String> coordsFromAPI = data.getStringArrayListExtra(AirStationsAPIActivity.PUBLIC_STATIC_STRING_IDENTIFIER);     //Get the ArrayList and then send it to addAllMarkersToMap to draw them
                     addAllMarkersToMap(coordsFromAPI);
                 }
                 break;
-            }
+            case (GALLERY_REQUEST) :
+                if (resultCode == Activity.RESULT_OK) {
+                    Uri selectedImage = data.getData(); //Gets the data from the selected image.
+                    changePicWithUri(selectedImage); //Uploads the image to firebase
+                    break;
+                } else if (resultCode == Activity.RESULT_CANCELED) {
+                    Log.e("TAG", "Selecting picture cancelled");
+                }
+                break;
         }
     }
 
@@ -473,70 +477,90 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         });
 
 
-
         //PROFILE PICTURE UPDATE
         //ImageView profilePic = myDialog.findViewById(R.id.profilePic);
         //profilePic.setImageResource(testImage);
 
         //Should work but ImageView turns black
         testImage = myDialog.findViewById(R.id.profilePic);
-        Uri newPicture = mAuth.getCurrentUser().getPhotoUrl();
+        setDisplayProfilePic();
 
-        if(newPicture != null){
-            Picasso.get().load(newPicture).fit().centerCrop().into(testImage);
+       /* if(newPicture != null){
+            Picasso.get().load(newPicture).fit().centerCrop().into(testImage, new Callback() {
+                @Override
+                public void onSuccess() {
+                    Log.d("TAG", "Picture load was Successful");
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    Log.d("ERROR", "Picture didnt load, Exception: " + e);
+                }
+            });
         }else{
             Log.d("Tag", "newPicture is null");
-        }
-
+        }*/
         myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         myDialog.show();
     }
 
-    private String gatherFBData(){
-        String facebookUserId = "";
+    // Gathers the profile picture of either Facebook or Google.
+    private String gatherProviderData(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         // find the Facebook profile and get the user's id
         for(UserInfo profile : user.getProviderData()) {
             // check if the provider id matches "facebook.com"
             if(FacebookAuthProvider.PROVIDER_ID.equals(profile.getProviderId())) {
-                facebookUserId = profile.getUid();
+                String facebookUserId = profile.getUid();
+                return "https://graph.facebook.com/" + facebookUserId + "/picture?height=300";
+            }
+            //Checks if the provider id matches with "google.com"
+            if(GoogleAuthProvider.PROVIDER_ID.equals(profile.getProviderId())){
+                String url= FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString();
+                url = url.replace("/s96-c/","/s300-c/");
+
+                return url;
             }
         }
-
-        return "https://graph.facebook.com/" + facebookUserId + "/picture?height=500";
-
+        return null;
     }
 
-    private void setFirebasePic(String facebookPicID){
-        FirebaseUser user = mAuth.getCurrentUser();
+    //This method can be used to change the firebase users profile pic with an Uri
+    private void changePicWithUri(Uri photo){
+        FirebaseUser user = mAuth.getCurrentUser(); //Gets the current user
         UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                .setPhotoUri(Uri.parse(facebookPicID))
+                .setPhotoUri(photo) //Sets the photo from the picture gathered
                 .build();
-        user.updateProfile(profileUpdates)
+        user.updateProfile(profileUpdates) //Updates the profile on firebase
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             Log.d("Tag", "User profile updated.");
+                            //Toast.makeText(GMapsActivity.this, "Profile picture has been changed", Toast.LENGTH_LONG).show();
                         }
                     }
                 });
     }
 
-    private void changeImageViewPic() {
+    private void setDisplayProfilePic() {
 
-        Uri newPicture = mAuth.getCurrentUser().getPhotoUrl();
+        RequestOptions options = new RequestOptions();
 
-        if(newPicture != null){
-            //Picasso.get().load(newPicture).fit().centerCrop().into(profilePic);
-        }else{
-            Log.d("Tag", "newPicture is null");
-        }
+        Glide.with(GMapsActivity.this)
+                .load(imageFromFirebase)
+                .apply(options.centerInside())
+                .into(testImage);
 
     }
 
-    public void testImageMethod(View v) {
+
+   /* public void changeProfilePic(){
+        startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GALLERY_REQUEST);
+    }
+*/
+    /*public void testImageMethod(View v) {
         //Change the small testing image to your current profile's profile picture
 
         testImage = findViewById(R.id.testImage);
@@ -547,7 +571,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }else{
             Log.d("Tag", "newPicture is null");
         }
-    }
+    }*/
 
 
 }

@@ -15,6 +15,8 @@ import android.widget.Toast;
 
 //import com.facebook.GraphRequest;
 //import com.facebook.GraphResponse;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FacebookAuthProvider;
@@ -23,7 +25,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.UserInfo;
 import com.google.firebase.auth.UserProfileChangeRequest;
-import com.squareup.picasso.Picasso;
+
 
 public class ProfileTemp extends AppCompatActivity {
 
@@ -33,6 +35,7 @@ public class ProfileTemp extends AppCompatActivity {
     private Button setFirebasePicBtn;
     private EditText imageUri;
     private Button uploadPhotoBtn;
+    private Uri urii;
     public static final int GALLERY_REQUEST = 1;
 
     @Override
@@ -48,7 +51,7 @@ public class ProfileTemp extends AppCompatActivity {
         changePicBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                changeImageViewPic();
+                //changeImageViewPic();
 
             }
         });
@@ -59,13 +62,16 @@ public class ProfileTemp extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+
+                // String providerPicture = gatherProviderData();
+                // changePicWithUri(Uri.parse(providerPicture));
                 String gatheredImageUri = imageUri.getText().toString().trim();
 
                 if(gatheredImageUri.isEmpty()){
                     String providerPicture = gatherProviderData();
-                    if(providerPicture==null){
+                    if(providerPicture!=null){
 
-                        changePicWithUri(Uri.parse(gatheredImageUri));
+                        changePicWithUri(Uri.parse(providerPicture));
                     }
                 }else{
 
@@ -85,20 +91,45 @@ public class ProfileTemp extends AppCompatActivity {
                 startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GALLERY_REQUEST);
             }
         });
+
+        urii = mAuth.getCurrentUser().getPhotoUrl();
+
+        RequestOptions options = new RequestOptions();
+
+        Glide.with(ProfileTemp.this)
+                .load(urii)
+                .apply(options.centerInside())
+                .into(profilePic);
+
+
     }
 
     //Method is used to display photo in a imageview, can be changed so uri is taken through a parameter.
-    private void changeImageViewPic() {
+    /*private void changeImageViewPic() {
 
-        Uri newPicture = mAuth.getCurrentUser().getPhotoUrl(); //Gets the firebase photo from the current user
+        Uri newPicture = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl(); //Gets the firebase photo from the current user
+
+        Picasso.get().setLoggingEnabled(true);
 
         if(newPicture != null){
-            Picasso.get().load(newPicture).fit().centerCrop().into(profilePic); // Displays the photo in the imageview
+            Picasso.get().load(newPicture).fit().centerCrop().into(profilePic, new Callback() {
+                @Override
+                public void onSuccess() {
+                    Log.d("TAG", "Picture load was Successful");
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    Log.d("ERROR", "Picture didnt load, Exception: " + e);
+                }
+            });
         }else{
             Log.d("Tag", "newPicture is null");
         }
 
-    }
+    }*/
+
+
     /*private void gatherFacebookPic(){
 
         GraphRequest request = GraphRequest.newGraphPathRequest(
@@ -123,7 +154,7 @@ public class ProfileTemp extends AppCompatActivity {
             // check if the provider id matches "facebook.com"
             if(FacebookAuthProvider.PROVIDER_ID.equals(profile.getProviderId())) {
                 String facebookUserId = profile.getUid();
-                return "https://graph.facebook.com/" + facebookUserId + "/picture?height=400";
+                return "https://graph.facebook.com/" + facebookUserId + "/picture?height=300";
             }
             //Checks if the provider id matches with "google.com"
             if(GoogleAuthProvider.PROVIDER_ID.equals(profile.getProviderId())){
