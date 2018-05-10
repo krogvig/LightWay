@@ -261,9 +261,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                             new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
-                                    double oldDistance = Double.parseDouble(dataSnapshot.getValue().toString());
-                                    double newDistance = oldDistance + distanceToAdd;
-                                    setDistanceValue(newDistance);
+                                    double oldDistance = 0;
+                                    if (dataSnapshot.getValue() != null) {
+                                        oldDistance = Double.parseDouble(dataSnapshot.getValue().toString());
+                                        double newDistance = oldDistance + distanceToAdd;
+                                        setDistanceValue(newDistance);
+                                    } else {
+                                        setDistanceValue(distanceToAdd);
+                                    }
                                 }
 
                                 @Override
@@ -271,8 +276,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
                                 }
                             });
-                } catch (NullPointerException e){
-                    setDistanceValue(distanceToAdd);
+                } catch (Exception e){
                 }
 
                 Toast toast = Toast.makeText(getApplicationContext(), "Let the light guide your way!", Toast.LENGTH_SHORT);
