@@ -61,16 +61,17 @@
             android:layout_height="100dp">
 
             <TextView
+                android:id="@+id/txtEmissions"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="150"
-                android:textSize="18sp"
-                android:textColor="@android:color/white"/>
+                android:text="10"
+                android:textColor="@android:color/white"
+                android:textSize="18sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="CO2 saved"
+                android:text="g CO2 saved"
                 android:textColor="@android:color/white"
                 android:textSize="18sp" />
         </LinearLayout>
@@ -83,11 +84,12 @@
             android:layout_height="100dp">
 
             <TextView
+                android:id="@+id/txtDistance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="19"
-                android:textSize="18sp"
-                android:textColor="@android:color/white"/>
+                android:textColor="@android:color/white"
+                android:textSize="18sp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -105,11 +107,12 @@
             android:layout_height="100dp">
 
             <TextView
+                android:id="@+id/txtNoOfRides"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="50"
-                android:textSize="18sp"
-                android:textColor="@android:color/white"/>
+                android:textColor="@android:color/white"
+                android:textSize="18sp" />
 
             <TextView
                 android:layout_width="wrap_content"

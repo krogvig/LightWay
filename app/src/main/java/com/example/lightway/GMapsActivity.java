@@ -50,6 +50,11 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.UserInfo;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.maps.DirectionsApi;
 import com.google.maps.GeoApiContext;
 import com.google.maps.android.PolyUtil;
@@ -121,6 +126,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private Uri imageFromFirebase;
     public static final int GALLERY_REQUEST = 1;
 
+    private double distanceTraveled;
+    private double totalEmissionsSaved;
+    private String userName;
+
 
 
 
@@ -168,6 +177,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         changePicWithUri(Uri.parse(providerData));
         imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();
 
+
+        //Loads name and km traveled + calculates emissions saved
+        loadProfileInfo();
 
     }
 
@@ -456,8 +468,11 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     public void showUserPopup(View v){
         TextView txtclose;
         Button btnLogout;
-        myDialog.setContentView(R.layout.profile_popup);
+        TextView txtEmissions;
+        TextView txtDistance;
+        TextView txtNoOfRides;
 
+        myDialog.setContentView(R.layout.profile_popup);
 
         txtclose = myDialog.findViewById(R.id.txtclose);
         txtclose.setText("X");
@@ -467,6 +482,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 myDialog.dismiss();
             }
         });
+
+        txtEmissions = myDialog.findViewById(R.id.txtEmissions);
+        txtEmissions.setText(Double.toString(totalEmissionsSaved));
+
+        txtDistance = myDialog.findViewById(R.id.txtDistance);
+        txtDistance.setText(Double.toString(distanceTraveled));
+
+        txtNoOfRides = myDialog.findViewById(R.id.txtNoOfRides);
 
         btnLogout = myDialog.findViewById(R.id.btnLogout);
         btnLogout.setOnClickListener(new View.OnClickListener() {
@@ -484,6 +507,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         //Should work but ImageView turns black
         testImage = myDialog.findViewById(R.id.profilePic);
         setDisplayProfilePic();
+
+
 
        /* if(newPicture != null){
             Picasso.get().load(newPicture).fit().centerCrop().into(testImage, new Callback() {
@@ -555,6 +580,46 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     }
 
+    private double calculateEmissions(double distance) {
+        double avgEmissionsPerKm = 134.64;
+
+        return (avgEmissionsPerKm * distance);
+    }
+
+    private void loadProfileInfo (){
+        DatabaseReference mDatabase;
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        mDatabase.child("Users").child(uid).child("distance_traveled").addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        distanceTraveled = (double) dataSnapshot.getValue();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+        mDatabase.child("Users").child(uid).child("name").addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        userName = (String) dataSnapshot.getValue();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+        totalEmissionsSaved = calculateEmissions(distanceTraveled);
+
+    }
 
    /* public void changeProfilePic(){
         startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GALLERY_REQUEST);
