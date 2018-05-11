@@ -101,11 +101,11 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     // A default location (Stockholm, Sweden) and default zoom to use when location permission is
     // not granted.
-    private final LatLng mDefaultLocation = new LatLng(59.334591, 18.063240);
+    private final LatLng mDefaultLocation = new LatLng(59.327528, 18.071843);
     private static final int DEFAULT_ZOOM = 15;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean mLocationPermissionGranted;
-    public static final int AIRSTATION_REQUEST = 2; // Activitycode for airstations used in activityResult.
+    public static final int AIRSTATION_REQUEST = 2; // Activity code for airstations used in activityResult.
 
     // The geographical location where the device is currently located. That is, the last-known
     // location retrieved by the Fused Location Provider.
@@ -184,11 +184,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         };
 
         // imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();  //moved to userpoup for now.
-
-
-        //Loads name, picture, distance traveled, number of rides
-        loadProfileInfo();
-
     }
 
     @Override
@@ -274,26 +269,26 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker m) {
-                String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                String[] snippet = m.getSnippet().split("Sträcka:");
+                String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();      //Get the user ID
+                String[] snippet = m.getSnippet().split("Sträcka:");        //Get the actual distance from the snippet string
                 snippet = snippet[1].split(" ");
                 final double distanceToAdd = Double.parseDouble(snippet[1]);
 
-                DatabaseReference mDatabase;
+                DatabaseReference mDatabase;        //Connect to the Firebase database
                 mDatabase = FirebaseDatabase.getInstance().getReference();
+
                 try {
-                    mDatabase.child("Users").child(uid).child("distance_traveled").addListenerForSingleValueEvent(
+                    mDatabase.child("Users").child(uid).child("distance_traveled").addListenerForSingleValueEvent(      //Connect to the "Distance traveled" child
                             new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     double oldDistance = 0;
+
                                     if (dataSnapshot.getValue() != null) {
-                                        oldDistance = Double.parseDouble(dataSnapshot.getValue().toString());
-                                        double newDistance = oldDistance + distanceToAdd;
-                                        setDistanceValue(newDistance);
-                                    } else {
-                                        setDistanceValue(distanceToAdd);
+                                        oldDistance = Double.parseDouble(dataSnapshot.getValue().toString());       //If there already is an entry in "distance_traveled", get it
                                     }
+
+                                    setDistanceValue(oldDistance + distanceToAdd);        //Add the previous and new values and upload them
                                 }
 
                                 @Override
@@ -301,7 +296,26 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
                                 }
                             });
-                } catch (Exception e) {
+
+                    mDatabase.child("Users").child(uid).child("no_of_rides").addListenerForSingleValueEvent(        //Connect to the "no_of_rides" child, then the same as above
+                            new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    int oldNo = 0;
+
+                                    if (dataSnapshot.getValue() != null) {
+                                        oldNo = Integer.parseInt(dataSnapshot.getValue().toString());
+                                    }
+                                    setNoOfRides(oldNo + 1);
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+
+                } catch (Exception e){
                 }
 
                 Toast toast = Toast.makeText(getApplicationContext(), "Let the light guide your way!", Toast.LENGTH_SHORT);
@@ -309,12 +323,19 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             }
         });
     }
-
     private void setDistanceValue(double newDistance) {
         DatabaseReference mDatabase;
         mDatabase = FirebaseDatabase.getInstance().getReference();
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         mDatabase.child("Users").child(uid).child("distance_traveled").setValue(newDistance);
+
+    }
+
+    private void setNoOfRides(int newNo){
+        DatabaseReference mDatabase;
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        mDatabase.child("Users").child(uid).child("no_of_rides").setValue(newNo);
     }
 
     /**
@@ -411,7 +432,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 mMap.setMyLocationEnabled(false);
                 mMap.getUiSettings().setMyLocationButtonEnabled(false);
                 mLastKnownLocation = null;
-                //getLocationPermission(); This is commented, since we don't want to fall into the "ask for permissions" loop. If the user says no we don't want to spam the question and crash the app
+                Toast.makeText(this, "För att kunna utnyttja appen till fullo behöver du tillåta att den använder din GPS",
+                        Toast.LENGTH_LONG).show();
             }
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
@@ -492,7 +514,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {        //Used to get the ArrayList back from AirStationsAPIActivity
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {        //Used to get the ArrayList back from AirStationsAPIActivity TODO: Loading spinner instead of showign new acitivty xml
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case (AIRSTATION_REQUEST):
@@ -513,66 +535,74 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
-    public void parkingAPIActivity(View view) {
+    public void parkingAPIActivity(View view) {     //TODO: Break out all the functionality from AirStationsAPIAcitivty and make sure parkingAPI can use it aswell
         Intent intent = new Intent(this, ParkingAPIActivity.class);
         startActivity(intent);
     }
 
     public void showUserPopup(View v) {
-        TextView txtclose;
-        Button btnLogout;
-        TextView txtEmissions;
-        TextView txtDistance;
-        TextView txtNoOfRides;
-        TextView txtUserName;
-
-        myDialog.setContentView(R.layout.profile_popup);
-
-        txtclose = myDialog.findViewById(R.id.txtclose);
-        txtclose.setText("X");
-        txtclose.setOnClickListener(new View.OnClickListener() {
+        runOnUiThread(new Runnable(){
             @Override
-            public void onClick(View v) {
-                myDialog.dismiss();
+            public void run(){
+                TextView txtclose;
+                Button btnLogout;
+                TextView txtEmissions;
+                TextView txtDistance;
+                TextView txtNoOfRides;
+                TextView txtUserName;
+
+                //Loads name, picture, distance traveled, number of rides
+                loadProfileInfo();
+
+                myDialog.setContentView(R.layout.profile_popup);
+
+                txtclose = myDialog.findViewById(R.id.txtclose);
+                txtclose.setText("X");
+                txtclose.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        myDialog.dismiss();
+                    }
+                });
+
+                //CONNECT AND UPDATE ALL TEXTFIELDS IN POPUP
+                //Emissions
+                DecimalFormat df = new DecimalFormat("#.###");
+                df.setRoundingMode(RoundingMode.CEILING);
+                totalEmissionsSaved = calculateEmissions(distanceTraveled);
+                txtEmissions = myDialog.findViewById(R.id.txtEmissions);
+                txtEmissions.setText(df.format(totalEmissionsSaved));
+
+                txtUserName = myDialog.findViewById(R.id.txtUserName);
+                txtUserName.setText(userName);
+
+                txtDistance = myDialog.findViewById(R.id.txtDistance);
+                txtDistance.setText("" + distanceTraveled);
+
+                txtNoOfRides = myDialog.findViewById(R.id.txtNoOfRides);
+                txtNoOfRides.setText("" + noOfRides);
+
+
+                btnLogout = myDialog.findViewById(R.id.btnLogout);
+                btnLogout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        logout();
+                    }
+                });
+
+
+                //PROFILE PICTURE UPDATE
+
+                imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();
+                testImage = myDialog.findViewById(R.id.profilePic);
+                setDisplayProfilePic();
+
+
+                myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                myDialog.show();
             }
         });
-
-        //CONNECT AND UPDATE ALL TEXTFIELDS IN POPUP
-        //Emissions
-        DecimalFormat df = new DecimalFormat("#.###");
-        df.setRoundingMode(RoundingMode.CEILING);
-        totalEmissionsSaved = calculateEmissions(distanceTraveled);
-        txtEmissions = myDialog.findViewById(R.id.txtEmissions);
-        txtEmissions.setText(df.format(totalEmissionsSaved));
-
-        txtUserName = myDialog.findViewById(R.id.txtUserName);
-        txtUserName.setText(userName);
-
-        txtDistance = myDialog.findViewById(R.id.txtDistance);
-        txtDistance.setText("" + distanceTraveled);
-
-        txtNoOfRides = myDialog.findViewById(R.id.txtNoOfRides);
-        txtNoOfRides.setText("" + noOfRides);
-
-
-        btnLogout = myDialog.findViewById(R.id.btnLogout);
-        btnLogout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                logout();
-            }
-        });
-
-
-        //PROFILE PICTURE UPDATE
-
-        imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();
-        testImage = myDialog.findViewById(R.id.profilePic);
-        setDisplayProfilePic();
-
-
-        myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        myDialog.show();
     }
 
     // Gathers the profile picture of either Facebook or Google.
@@ -599,20 +629,27 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     //This method can be used to change the firebase users profile pic with an Uri
     public void changePicWithUri(Uri photo) {
-        FirebaseUser user = mAuth.getCurrentUser(); //Gets the current user
-        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                .setPhotoUri(photo) //Sets the photo from the picture gathered
-                .build();
-        user.updateProfile(profileUpdates) //Updates the profile on firebase
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            Log.d("Tag", "User profile updated.");
-                            //Toast.makeText(GMapsActivity.this, "Profile picture has been changed", Toast.LENGTH_LONG).show();
+        FirebaseUser user = null;
+
+        try {
+            user = mAuth.getCurrentUser(); //Gets the current user
+
+            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                    .setPhotoUri(photo) //Sets the photo from the picture gathered
+                    .build();
+            user.updateProfile(profileUpdates) //Updates the profile on firebase
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                Log.d("Tag", "User profile updated.");
+                                //Toast.makeText(GMapsActivity.this, "Profile picture has been changed", Toast.LENGTH_LONG).show();
+                            }
                         }
-                    }
-                });
+                    });
+        } catch (NullPointerException e) {
+            System.out.print(e);
+        }
     }
 
     private void setDisplayProfilePic() {
@@ -634,7 +671,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     private void loadProfileInfo() {
-        DatabaseReference mDatabase;
+        DatabaseReference mDatabase;        //TODO: I think we can clear a more global mData base (this row and the one below) instead of creating a new one all the time. Maybe the UID aswell
         mDatabase = FirebaseDatabase.getInstance().getReference();
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
