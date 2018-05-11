@@ -13,7 +13,6 @@ import android.os.Bundle;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.facebook.login.LoginManager;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -127,7 +126,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private Button logOutButton;
-    private GoogleApiClient mGoogleApiClient;
 
     //Used to draw out the navigational line
     private Polyline polyline;
@@ -187,10 +185,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             }
         };
 
-        //Collect all profile picture data
-        providerData = gatherProviderData();
-        changePicWithUri(Uri.parse(providerData));
-        imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();
+       // imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();  //moved to userpoup for now.
 
 
         //Loads name, picture, distance traveled, number of rides
@@ -569,7 +564,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         });
 
 
-        //PROFILE PICTURE
+        //PROFILE PICTURE UPDATE
+
+        imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();
         testImage = myDialog.findViewById(R.id.profilePic);
         setDisplayProfilePic();
 
@@ -683,6 +680,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     }
                 });
 
+   /* public void changeProfilePic(){
+        startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GALLERY_REQUEST);
     }
 
     private void chooseUserDestination (View v){

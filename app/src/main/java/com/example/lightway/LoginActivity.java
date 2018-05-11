@@ -1,6 +1,8 @@
 package com.example.lightway;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -34,6 +36,13 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.UserInfo;
+import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -47,6 +56,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private Button mLoginbutton;
     private CallbackManager mCallbackManager;
     private Button mRegisterbutton;
+
+    private ProgressDialog mProgress;
+    private DatabaseReference mDatabase;
+
+    private String providerData;
 
     final int SIGN_IN_CODE = 500;
 
@@ -71,11 +85,13 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         signInButton = findViewById(R.id.gmailLoginButton);
         mAuth = FirebaseAuth.getInstance();
 
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
 
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 if (firebaseAuth.getCurrentUser() != null) {
+                    checkUserExist();
                     startActivity(new Intent(LoginActivity.this, GMapsActivity.class));
                 }
             }
@@ -144,6 +160,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 // ...
             }
         });
+
     }
 
     private void emailSignIn(){
@@ -250,6 +267,72 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         }
 
                         // ...
+                    }
+                });
+    }
+
+    private void checkUserExist(){
+        final String user_id = mAuth.getCurrentUser().getUid();
+
+        DatabaseReference userNameRef = mDatabase.child(user_id);
+        ValueEventListener eventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(!dataSnapshot.exists()) {
+                    DatabaseReference current_user_db = mDatabase.child(user_id);
+
+                    String name =  mAuth.getCurrentUser().getDisplayName();
+                    current_user_db.child("name").setValue(name);
+                    current_user_db.child("distance_traveled").setValue(0.0);
+                    current_user_db.child("no_of_rides").setValue(0);
+
+                    providerData = gatherProviderData();
+                    changePicWithUri(Uri.parse(providerData));
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        };
+        userNameRef.addListenerForSingleValueEvent(eventListener);
+
+    }
+
+    // Gathers the profile picture of either Facebook or Google.
+    private String gatherProviderData(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        // find the Facebook profile and get the user's id
+        for(UserInfo profile : user.getProviderData()) {
+            // check if the provider id matches "facebook.com"
+            if(FacebookAuthProvider.PROVIDER_ID.equals(profile.getProviderId())) {
+                String facebookUserId = profile.getUid();
+                return "https://graph.facebook.com/" + facebookUserId + "/picture?height=300";
+            }
+            //Checks if the provider id matches with "google.com"
+            if(GoogleAuthProvider.PROVIDER_ID.equals(profile.getProviderId())){
+                String url= FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString();
+                url = url.replace("/s96-c/","/s300-c/");
+
+                return url;
+            }
+        }
+        return "https://usercontent2.hubstatic.com/12593011_f520.jpg";
+    }
+
+    private void changePicWithUri(Uri photo){
+        FirebaseUser user = mAuth.getCurrentUser(); //Gets the current user
+        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                .setPhotoUri(photo) //Sets the photo from the picture gathered
+                .build();
+        user.updateProfile(profileUpdates) //Updates the profile on firebase
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.d("Tag", "User profile updated.");
+                            //Toast.makeText(GMapsActivity.this, "Profile picture has been changed", Toast.LENGTH_LONG).show();
+                        }
                     }
                 });
     }
