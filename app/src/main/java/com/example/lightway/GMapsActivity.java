@@ -124,7 +124,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     public ImageView testImage;
     public String providerData;
     private Uri imageFromFirebase;
-    public static final int GALLERY_REQUEST = 1;
+    public static final int GALLERY_REQUEST = 3;
 
     private double distanceTraveled;
     private double totalEmissionsSaved;
@@ -173,13 +173,11 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             }
         };
 
-        providerData = gatherProviderData();
-        changePicWithUri(Uri.parse(providerData));
-        imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();
+       // imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();  //moved to userpoup for now.
 
 
         //Loads name and km traveled + calculates emissions saved
-        loadProfileInfo();
+        //loadProfileInfo();
 
     }
 
@@ -501,55 +499,16 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
 
         //PROFILE PICTURE UPDATE
-        //ImageView profilePic = myDialog.findViewById(R.id.profilePic);
-        //profilePic.setImageResource(testImage);
 
-        //Should work but ImageView turns black
+        imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();
         testImage = myDialog.findViewById(R.id.profilePic);
         setDisplayProfilePic();
 
 
-
-       /* if(newPicture != null){
-            Picasso.get().load(newPicture).fit().centerCrop().into(testImage, new Callback() {
-                @Override
-                public void onSuccess() {
-                    Log.d("TAG", "Picture load was Successful");
-                }
-
-                @Override
-                public void onError(Exception e) {
-                    Log.d("ERROR", "Picture didnt load, Exception: " + e);
-                }
-            });
-        }else{
-            Log.d("Tag", "newPicture is null");
-        }*/
         myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         myDialog.show();
     }
 
-    // Gathers the profile picture of either Facebook or Google.
-    private String gatherProviderData(){
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-        // find the Facebook profile and get the user's id
-        for(UserInfo profile : user.getProviderData()) {
-            // check if the provider id matches "facebook.com"
-            if(FacebookAuthProvider.PROVIDER_ID.equals(profile.getProviderId())) {
-                String facebookUserId = profile.getUid();
-                return "https://graph.facebook.com/" + facebookUserId + "/picture?height=300";
-            }
-            //Checks if the provider id matches with "google.com"
-            if(GoogleAuthProvider.PROVIDER_ID.equals(profile.getProviderId())){
-                String url= FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString();
-                url = url.replace("/s96-c/","/s300-c/");
-
-                return url;
-            }
-        }
-        return null;
-    }
 
     //This method can be used to change the firebase users profile pic with an Uri
     private void changePicWithUri(Uri photo){
@@ -625,18 +584,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GALLERY_REQUEST);
     }
 */
-    /*public void testImageMethod(View v) {
-        //Change the small testing image to your current profile's profile picture
-
-        testImage = findViewById(R.id.testImage);
-        Uri newPicture = mAuth.getCurrentUser().getPhotoUrl();
-
-        if(newPicture != null){
-            Picasso.get().load(newPicture).fit().centerCrop().into(testImage);
-        }else{
-            Log.d("Tag", "newPicture is null");
-        }
-    }*/
 
 
 }
