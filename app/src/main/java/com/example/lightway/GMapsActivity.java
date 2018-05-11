@@ -1,14 +1,18 @@
 package com.example.lightway;
 
+import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
-import android.location.Address;
-import android.location.Geocoder;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
+import android.net.Uri;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.facebook.login.LoginManager;
-import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -18,18 +22,16 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,15 +39,23 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.PlaceDetectionClient;
-import com.google.android.gms.location.places.PlaceLikelihood;
-import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.UserInfo;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -63,6 +73,8 @@ import org.xml.sax.SAXParseException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -94,6 +106,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private static final int DEFAULT_ZOOM = 15;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean mLocationPermissionGranted;
+    public static final int AIRSTATION_REQUEST = 2; // Activitycode for airstations used in activityResult.
 
     // The geographical location where the device is currently located. That is, the last-known
     // location retrieved by the Fused Location Provider.
@@ -109,6 +122,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private String[] mLikelyPlaceAddresses;
     private String[] mLikelyPlaceAttributions;
     private LatLng[] mLikelyPlaceLatLngs;
+
+    // Used for Firebase
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private Button logOutButton;
@@ -116,6 +131,21 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     //Used to draw out the navigational line
     private Polyline polyline;
+
+    //Used for Userinfo popup
+    Dialog myDialog;
+    public ImageView testImage;
+    public String providerData;
+    private Uri imageFromFirebase;
+    public static final int GALLERY_REQUEST = 3;
+
+    private double distanceTraveled;
+    private double totalEmissionsSaved;
+    private String userName;
+    private int noOfRides;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,31 +174,33 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.gMap);
         mapFragment.getMapAsync(this);
 
-        logOutButton = findViewById(R.id.log_out);
-
-        logOutButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                logout();
-            }
-        });
+        myDialog = new Dialog(this);
 
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 if(firebaseAuth.getCurrentUser() == null){
+
                     startActivity(new Intent(GMapsActivity.this, LoginActivity.class));
                 }
             }
         };
+
+        //Collect all profile picture data
+        providerData = gatherProviderData();
+        changePicWithUri(Uri.parse(providerData));
+        imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();
+
+
+        //Loads name, picture, distance traveled, number of rides
+        loadProfileInfo();
 
     }
 
     @Override
     protected void onStart(){
         super.onStart();
-
         mAuth.addAuthStateListener(mAuthListener);
     }
 
@@ -401,7 +433,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }).start();
 
         Intent intent = new Intent(this, AirStationsAPIActivity.class);
-        startActivityForResult(intent, 0);      //Create a "startActivityForResult to be able to get the coordinates back to this activity from AirStationsAPIActivity. See: https://stackoverflow.com/questions/1124548/how-to-pass-the-values-from-one-activity-to-previous-activity
+        startActivityForResult(intent, AIRSTATION_REQUEST);      //Create a "startActivityForResult to be able to get the coordinates back to this activity from AirStationsAPIActivity. See: https://stackoverflow.com/questions/1124548/how-to-pass-the-values-from-one-activity-to-previous-activity
     }
 
     private void calcTrip(Marker destination) {     // This takes the destination marker (the one previously clicked) as input
@@ -468,19 +500,193 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     public void onActivityResult(int requestCode, int resultCode, Intent data) {        //Used to get the ArrayList back from AirStationsAPIActivity
         super.onActivityResult(requestCode, resultCode, data);
         switch(requestCode) {
-            case (0) : {
+            case (AIRSTATION_REQUEST) :
                 if (resultCode == AirStationsAPIActivity.RESULT_OK) {
                     ArrayList<String> coordsFromAPI = data.getStringArrayListExtra(AirStationsAPIActivity.PUBLIC_STATIC_STRING_IDENTIFIER);     //Get the ArrayList and then send it to addAllMarkersToMap to draw them
                     addAllMarkersToMap(coordsFromAPI);
                 }
                 break;
-            }
+            case (GALLERY_REQUEST) :
+                if (resultCode == Activity.RESULT_OK) {
+                    Uri selectedImage = data.getData(); //Gets the data from the selected image.
+                    changePicWithUri(selectedImage); //Uploads the image to firebase
+                    break;
+                } else if (resultCode == Activity.RESULT_CANCELED) {
+                    Log.e("TAG", "Selecting picture cancelled");
+                }
+                break;
         }
     }
 
     public void parkingAPIActivity(View view) {
         Intent intent = new Intent(this, ParkingAPIActivity.class);
         startActivity(intent);
+    }
+
+    public void showUserPopup(View v){
+        TextView txtclose;
+        Button btnLogout;
+        TextView txtEmissions;
+        TextView txtDistance;
+        TextView txtNoOfRides;
+        TextView txtUserName;
+
+        myDialog.setContentView(R.layout.profile_popup);
+
+        txtclose = myDialog.findViewById(R.id.txtclose);
+        txtclose.setText("X");
+        txtclose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+            }
+        });
+
+        //CONNECT AND UPDATE ALL TEXTFIELDS IN POPUP
+        //Emissions
+        DecimalFormat df = new DecimalFormat("#.###");
+        df.setRoundingMode(RoundingMode.CEILING);
+        totalEmissionsSaved = calculateEmissions(distanceTraveled);
+        txtEmissions = myDialog.findViewById(R.id.txtEmissions);
+        txtEmissions.setText(df.format(totalEmissionsSaved));
+
+        txtUserName = myDialog.findViewById(R.id.txtUserName);
+        txtUserName.setText(userName);
+
+        txtDistance = myDialog.findViewById(R.id.txtDistance);
+        txtDistance.setText(""+distanceTraveled);
+
+        txtNoOfRides = myDialog.findViewById(R.id.txtNoOfRides);
+        txtNoOfRides.setText(""+noOfRides);
+
+
+        btnLogout = myDialog.findViewById(R.id.btnLogout);
+        btnLogout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logout();
+            }
+        });
+
+
+        //PROFILE PICTURE
+        testImage = myDialog.findViewById(R.id.profilePic);
+        setDisplayProfilePic();
+
+
+        myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        myDialog.show();
+    }
+
+    // Gathers the profile picture of either Facebook or Google.
+    private String gatherProviderData(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        // find the Facebook profile and get the user's id
+        for(UserInfo profile : user.getProviderData()) {
+            // check if the provider id matches "facebook.com"
+            if(FacebookAuthProvider.PROVIDER_ID.equals(profile.getProviderId())) {
+                String facebookUserId = profile.getUid();
+                return "https://graph.facebook.com/" + facebookUserId + "/picture?height=300";
+            }
+            //Checks if the provider id matches with "google.com"
+            if(GoogleAuthProvider.PROVIDER_ID.equals(profile.getProviderId())){
+                String url= FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString();
+                url = url.replace("/s96-c/","/s300-c/");
+
+                return url;
+            }
+        }
+        return "http://2.bp.blogspot.com/-HzFJhEY3KtU/Tea7Ku92cpI/AAAAAAAAALw/uBMzwdFi_kA/s400/1.jpg";
+    }
+
+    //This method can be used to change the firebase users profile pic with an Uri
+    public void changePicWithUri(Uri photo){
+        FirebaseUser user = mAuth.getCurrentUser(); //Gets the current user
+        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                .setPhotoUri(photo) //Sets the photo from the picture gathered
+                .build();
+        user.updateProfile(profileUpdates) //Updates the profile on firebase
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.d("Tag", "User profile updated.");
+                            //Toast.makeText(GMapsActivity.this, "Profile picture has been changed", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+    }
+
+    private void setDisplayProfilePic() {
+
+        RequestOptions options = new RequestOptions();
+
+        Glide.with(GMapsActivity.this)
+                .load(imageFromFirebase)
+                .apply(options.centerInside())
+                .into(testImage);
+
+    }
+
+    private double calculateEmissions(double distance) {
+        double avgEmissionsPerKm = 134.64;
+        double totalEmissions = (avgEmissionsPerKm * distance) / 1000;
+
+        return (totalEmissions);
+    }
+
+    private void loadProfileInfo (){
+        DatabaseReference mDatabase;
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        mDatabase.child("Users").child(uid).child("distance_traveled").addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        distanceTraveled = Double.parseDouble(dataSnapshot.getValue().toString());
+                        Log.d("Distance", "Distance traveled: " + distanceTraveled);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+        mDatabase.child("Users").child(uid).child("name").addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        userName = dataSnapshot.getValue().toString();
+                        Log.d("Name", "Name is: " + userName);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+        mDatabase.child("Users").child(uid).child("no_of_rides").addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        noOfRides = Integer.parseInt(dataSnapshot.getValue().toString());
+                        Log.d("NoOFRides", "Number of rides: " + noOfRides);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+    }
+
+    private void chooseUserDestination (View v){
+        //do something
     }
 
 

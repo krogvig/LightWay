@@ -71,6 +71,14 @@
           }
         },
         {
+          "client_id": "361371227015-ku6af52l84ivta11tvo5odb9so54ql5c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.lightway",
+            "certificate_hash": "f2c39c9b57aa4279ded33b97bc40104e0dd76f52"
+          }
+        },
+        {
           "client_id": "361371227015-uvr6mnv48fuk87q6a1nt3rpo8u0fiouc.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
