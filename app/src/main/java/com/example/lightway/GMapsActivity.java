@@ -126,7 +126,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     public ImageView testImage;
     public String providerData;
     private Uri imageFromFirebase;
-    public static final int GALLERY_REQUEST = 1;
+    public static final int GALLERY_REQUEST = 3;
 
     private double distanceTraveled;
     private double totalEmissionsSaved;
