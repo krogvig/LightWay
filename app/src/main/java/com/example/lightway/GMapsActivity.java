@@ -188,8 +188,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
-        loadUsername();
         loadProfileInfo();
+        loadUsername();
 
         // imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();  //moved to userpoup for now.
     }
@@ -552,7 +552,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     public void showUserPopup(View v) {
         //Loads name, picture, distance traveled, number of rides
-
         runOnUiThread(new Runnable(){
             @Override
             public void run(){
