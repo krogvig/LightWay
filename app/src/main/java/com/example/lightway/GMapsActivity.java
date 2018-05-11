@@ -13,7 +13,6 @@ import android.os.Bundle;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.facebook.login.LoginManager;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -127,7 +126,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private Button logOutButton;
-    private GoogleApiClient mGoogleApiClient;
 
     //Used to draw out the navigational line
     private Polyline polyline;
@@ -143,8 +141,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private double totalEmissionsSaved;
     private String userName;
     private int noOfRides;
-
-
 
 
     @Override
@@ -180,17 +176,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                if(firebaseAuth.getCurrentUser() == null){
+                if (firebaseAuth.getCurrentUser() == null) {
 
                     startActivity(new Intent(GMapsActivity.this, LoginActivity.class));
                 }
             }
         };
 
-        //Collect all profile picture data
-        providerData = gatherProviderData();
-        changePicWithUri(Uri.parse(providerData));
-        imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();
+        // imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();  //moved to userpoup for now.
 
 
         //Loads name, picture, distance traveled, number of rides
@@ -199,12 +192,12 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     @Override
-    protected void onStart(){
+    protected void onStart() {
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
     }
 
-    private void logout(){
+    private void logout() {
         //Firebase sign out
         mAuth.signOut();
         //Facebook sign out
@@ -308,7 +301,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
                                 }
                             });
-                } catch (Exception e){
+                } catch (Exception e) {
                 }
 
                 Toast toast = Toast.makeText(getApplicationContext(), "Let the light guide your way!", Toast.LENGTH_SHORT);
@@ -316,6 +309,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             }
         });
     }
+
     private void setDistanceValue(double newDistance) {
         DatabaseReference mDatabase;
         mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -353,13 +347,12 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                         }
                     }
                 });
-            }
-            else {
+            } else {
                 Toast.makeText(this, "För att kunna utnyttja appen till fullo behöver du tillåta att den använder din GPS",
                         Toast.LENGTH_LONG).show();
             }
 
-        } catch (SecurityException e)  {
+        } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
         }
     }
@@ -420,7 +413,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 mLastKnownLocation = null;
                 //getLocationPermission(); This is commented, since we don't want to fall into the "ask for permissions" loop. If the user says no we don't want to spam the question and crash the app
             }
-        } catch (SecurityException e)  {
+        } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
         }
     }
@@ -474,11 +467,11 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     private void addAllMarkersToMap(ArrayList<String> inputCoords) {        //Take an arraylist of strings as input. The strings are the LatLong coordinates in the following format: "Latitude,Longitude"
         try {
-            for (int x = 0; x<inputCoords.size(); x++) {        //For loop since we need to go through all coordinates
+            for (int x = 0; x < inputCoords.size(); x++) {        //For loop since we need to go through all coordinates
                 double latitude = Double.parseDouble(inputCoords.get(x).split(",")[0]);     //Split the strings into latitude and longitude
                 double longitude = Double.parseDouble(inputCoords.get(x).split(",")[1]);
 
-                mMap.addMarker(new MarkerOptions().position(new LatLng(latitude,longitude)));       //Add the marker and its title
+                mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)));       //Add the marker and its title
             }
 
         } catch (Exception e) {
@@ -486,27 +479,29 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
-    private String getEndLocationSnippet(DirectionsResult results){       //This can be used later on
-        return  "Tid: "+ results.routes[0].legs[0].duration.humanReadable + " Sträcka: " + results.routes[0].legs[0].distance.humanReadable;
+    private String getEndLocationSnippet(DirectionsResult results) {       //This can be used later on
+        return "Tid: " + results.routes[0].legs[0].duration.humanReadable + " Sträcka: " + results.routes[0].legs[0].distance.humanReadable;
     }
 
     private void addPolyline(DirectionsResult results, GoogleMap mMap) {
         List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
-        if (polyline != null) { polyline.remove(); }        //Remove the previous polyline, if it exists
+        if (polyline != null) {
+            polyline.remove();
+        }        //Remove the previous polyline, if it exists
         polyline = mMap.addPolyline(new PolylineOptions().addAll(decodedPath));     //Add the polyline
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {        //Used to get the ArrayList back from AirStationsAPIActivity
         super.onActivityResult(requestCode, resultCode, data);
-        switch(requestCode) {
-            case (AIRSTATION_REQUEST) :
+        switch (requestCode) {
+            case (AIRSTATION_REQUEST):
                 if (resultCode == AirStationsAPIActivity.RESULT_OK) {
                     ArrayList<String> coordsFromAPI = data.getStringArrayListExtra(AirStationsAPIActivity.PUBLIC_STATIC_STRING_IDENTIFIER);     //Get the ArrayList and then send it to addAllMarkersToMap to draw them
                     addAllMarkersToMap(coordsFromAPI);
                 }
                 break;
-            case (GALLERY_REQUEST) :
+            case (GALLERY_REQUEST):
                 if (resultCode == Activity.RESULT_OK) {
                     Uri selectedImage = data.getData(); //Gets the data from the selected image.
                     changePicWithUri(selectedImage); //Uploads the image to firebase
@@ -523,7 +518,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         startActivity(intent);
     }
 
-    public void showUserPopup(View v){
+    public void showUserPopup(View v) {
         TextView txtclose;
         Button btnLogout;
         TextView txtEmissions;
@@ -554,10 +549,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         txtUserName.setText(userName);
 
         txtDistance = myDialog.findViewById(R.id.txtDistance);
-        txtDistance.setText(""+distanceTraveled);
+        txtDistance.setText("" + distanceTraveled);
 
         txtNoOfRides = myDialog.findViewById(R.id.txtNoOfRides);
-        txtNoOfRides.setText(""+noOfRides);
+        txtNoOfRides.setText("" + noOfRides);
 
 
         btnLogout = myDialog.findViewById(R.id.btnLogout);
@@ -569,7 +564,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         });
 
 
-        //PROFILE PICTURE
+        //PROFILE PICTURE UPDATE
+
+        imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();
         testImage = myDialog.findViewById(R.id.profilePic);
         setDisplayProfilePic();
 
@@ -579,20 +576,20 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     // Gathers the profile picture of either Facebook or Google.
-    private String gatherProviderData(){
+    private String gatherProviderData() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         // find the Facebook profile and get the user's id
-        for(UserInfo profile : user.getProviderData()) {
+        for (UserInfo profile : user.getProviderData()) {
             // check if the provider id matches "facebook.com"
-            if(FacebookAuthProvider.PROVIDER_ID.equals(profile.getProviderId())) {
+            if (FacebookAuthProvider.PROVIDER_ID.equals(profile.getProviderId())) {
                 String facebookUserId = profile.getUid();
                 return "https://graph.facebook.com/" + facebookUserId + "/picture?height=300";
             }
             //Checks if the provider id matches with "google.com"
-            if(GoogleAuthProvider.PROVIDER_ID.equals(profile.getProviderId())){
-                String url= FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString();
-                url = url.replace("/s96-c/","/s300-c/");
+            if (GoogleAuthProvider.PROVIDER_ID.equals(profile.getProviderId())) {
+                String url = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl().toString();
+                url = url.replace("/s96-c/", "/s300-c/");
 
                 return url;
             }
@@ -601,7 +598,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     //This method can be used to change the firebase users profile pic with an Uri
-    public void changePicWithUri(Uri photo){
+    public void changePicWithUri(Uri photo) {
         FirebaseUser user = mAuth.getCurrentUser(); //Gets the current user
         UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                 .setPhotoUri(photo) //Sets the photo from the picture gathered
@@ -636,7 +633,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         return (totalEmissions);
     }
 
-    private void loadProfileInfo (){
+    private void loadProfileInfo() {
         DatabaseReference mDatabase;
         mDatabase = FirebaseDatabase.getInstance().getReference();
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -682,12 +679,17 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
                     }
                 });
-
     }
+
+    /*public void changeProfilePic(){
+        startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GALLERY_REQUEST);
+    }*/
 
     private void chooseUserDestination (View v){
         //do something
     }
 
-
 }
+
+
+
