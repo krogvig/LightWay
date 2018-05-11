@@ -687,7 +687,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        distanceTraveled = Double.parseDouble(dataSnapshot.getValue().toString());
+                        if (dataSnapshot.getValue() != null) {
+                            distanceTraveled = Double.parseDouble(dataSnapshot.getValue().toString());
+                        }
                         Log.d("Distance", "Distance traveled: " + distanceTraveled);
                     }
 
@@ -701,7 +703,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        noOfRides = Integer.parseInt(dataSnapshot.getValue().toString());
+                        if (dataSnapshot.getValue() != null) {
+                            noOfRides = Integer.parseInt(dataSnapshot.getValue().toString());
+                        }
                         Log.d("NoOFRides", "Number of rides: " + noOfRides);
                     }
 
@@ -726,7 +730,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        userName = dataSnapshot.getValue().toString();
+                        if (dataSnapshot.getValue() != null) {
+                            userName = dataSnapshot.getValue().toString();
+                        }
                         Log.d("Name", "Name is: " + userName);
                     }
 
