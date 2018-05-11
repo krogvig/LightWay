@@ -27,6 +27,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DatabaseReference;
@@ -192,6 +193,16 @@ public class RegisterActivity extends AppCompatActivity {
                         mAuth.signOut();
                         Intent loginIntent = new Intent(RegisterActivity.this, LoginActivity.class);
                         startActivity(loginIntent);
+                    } else {
+                        try
+                        {
+                            throw task.getException();
+                        } catch (FirebaseAuthUserCollisionException existEmail){
+                            mProgress.cancel();
+                            Toast.makeText(RegisterActivity.this, "Email already in use.", Toast.LENGTH_SHORT).show();
+                        } catch (Exception e) {
+                            mProgress.cancel();
+                        }
                     }
                 }
             });
