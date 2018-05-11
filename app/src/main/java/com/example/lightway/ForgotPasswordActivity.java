@@ -17,14 +17,9 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class ForgotPasswordActivity extends AppCompatActivity {
 
-
     private EditText emailField;
-
     private Button forgotButton;
-
     private FirebaseAuth mAuth;
-
-
     private DatabaseReference mDatabase;
 
     @Override
@@ -34,29 +29,19 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-
-
         mDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
-
-
 
         emailField = findViewById(R.id.emailAddress);
 
-
         forgotButton = findViewById(R.id.forgotButton);
-
 
         forgotButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startReset();
 
-
-
             }
         });
-
-
     }
 
     private void startReset() {
@@ -73,12 +58,14 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<Void> task) {
                         if(task.isSuccessful()){
                             Toast.makeText(ForgotPasswordActivity.this, "Email sent!", Toast.LENGTH_LONG).show();
-                        }else if(!task.isSuccessful()){
+                        } else if(!task.isSuccessful()){
                             Toast.makeText(ForgotPasswordActivity.this, "Incorrect email!", Toast.LENGTH_LONG).show();}
 
                         }
                     });
-                }}}
+                }
+    }
+}
 
 
 

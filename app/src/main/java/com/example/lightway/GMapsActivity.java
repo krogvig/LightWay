@@ -541,18 +541,18 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     public void showUserPopup(View v) {
+        //Loads name, picture, distance traveled, number of rides
+        loadProfileInfo();
+
         runOnUiThread(new Runnable(){
             @Override
             public void run(){
-                TextView txtclose;
                 Button btnLogout;
+                TextView txtclose;
                 TextView txtEmissions;
                 TextView txtDistance;
                 TextView txtNoOfRides;
                 TextView txtUserName;
-
-                //Loads name, picture, distance traveled, number of rides
-                loadProfileInfo();
 
                 myDialog.setContentView(R.layout.profile_popup);
 
@@ -599,10 +599,12 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 setDisplayProfilePic();
 
 
-                myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                myDialog.show();
+
             }
         });
+
+        myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        myDialog.show();
     }
 
     // Gathers the profile picture of either Facebook or Google.
