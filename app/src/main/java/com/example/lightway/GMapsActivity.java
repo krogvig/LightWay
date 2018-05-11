@@ -126,7 +126,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private Uri imageFromFirebase;
     public static final int GALLERY_REQUEST = 1;
 
-    private double distanceTraveled;
+    private String distanceTraveled;
     private double totalEmissionsSaved;
     private String userName;
 
@@ -487,7 +487,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         txtEmissions.setText(Double.toString(totalEmissionsSaved));
 
         txtDistance = myDialog.findViewById(R.id.txtDistance);
-        txtDistance.setText(Double.toString(distanceTraveled));
+        txtDistance.setText(distanceTraveled);
 
         txtNoOfRides = myDialog.findViewById(R.id.txtNoOfRides);
 
@@ -548,7 +548,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 return url;
             }
         }
-        return null;
+        return "http://2.bp.blogspot.com/-HzFJhEY3KtU/Tea7Ku92cpI/AAAAAAAAALw/uBMzwdFi_kA/s400/1.jpg";
     }
 
     //This method can be used to change the firebase users profile pic with an Uri
@@ -595,7 +595,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        distanceTraveled = (double) dataSnapshot.getValue();
+                        distanceTraveled = (String) dataSnapshot.getValue();
+                        Log.d("Distance", "Distance traveled: " + distanceTraveled);
                     }
 
                     @Override
@@ -609,6 +610,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         userName = (String) dataSnapshot.getValue();
+                        Log.d("Name", "Name is: " + userName);
                     }
 
                     @Override
@@ -617,7 +619,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     }
                 });
 
-        totalEmissionsSaved = calculateEmissions(distanceTraveled);
+
+        //totalEmissionsSaved = calculateEmissions(Double.parseDouble(distanceTraveled));
 
     }
 
