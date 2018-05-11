@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,7 +28,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class RegisterActivity extends AppCompatActivity {
 
-
+    private final String pattern = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{6,32}";
     private EditText emailField;
     private EditText nameField;
     private EditText passwordField;
@@ -84,14 +85,28 @@ public class RegisterActivity extends AppCompatActivity {
         String email = emailField.getText().toString().trim();
         String password = passwordField.getText().toString().trim();
 
-        boolean emptyFields = checkEmptyFields(email, password);
-        boolean passwordFormat = correctPasswordFormat(password);
-
-        if (emptyFields || !passwordFormat){
+        if(checkEmptyFields(email, password)){
             return;
-        } else {
+        } else if (!(isEmailValid(email))){
+            return;
+        } else if(!(correctPasswordFormat(password))){
+            return;
+        }else {
             startRegister(name, email, password);
         }
+    }
+
+    private void errorMessage(String message){
+        AlertDialog alertDialog = new AlertDialog.Builder(RegisterActivity.this).create();
+        alertDialog.setTitle("Oops!");
+        alertDialog.setMessage(message);
+        alertDialog.setButton("Ok",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+
+        alertDialog.show();
     }
 
     private boolean checkEmptyFields(String email, String password){
@@ -102,19 +117,23 @@ public class RegisterActivity extends AppCompatActivity {
         return false;
     }
 
+    private boolean isEmailValid (String email){
+        if(!(!TextUtils.isEmpty(email) && Patterns.EMAIL_ADDRESS.matcher(email).matches())){
+            errorMessage("Incorrect email input!" + '\n' + "Email should look like: example@domain.com");
+            return false;
+        }
+        return true;
+    }
+
     private boolean correctPasswordFormat(String password){
         if(password != null){
-            if(password.length() < 6){
-                AlertDialog alertDialog = new AlertDialog.Builder(RegisterActivity.this).create();
-                alertDialog.setTitle("Oops!");
-                alertDialog.setMessage("Password too short!" + '\n' + "Minimum 6 characters.");
-                alertDialog.setButton("Ok",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        });
-
-                alertDialog.show();
+            if(!(password.matches(pattern))){
+                errorMessage("Invalid password!" + '\n' + "Password should contain:" + '\n'
+                + "a digit" + '\n'
+                + "a lowercase letter" + '\n'
+                + "an uppercase letter" + '\n'
+                + "no spaces" + '\n'
+                + "and be 6 to 32 characters long" + '\n');
                 return false;
             }
             return true;
