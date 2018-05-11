@@ -65,6 +65,8 @@ import com.google.maps.model.TravelMode;
 import org.joda.time.DateTime;
 
 import java.io.IOException;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -126,9 +128,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private Uri imageFromFirebase;
     public static final int GALLERY_REQUEST = 1;
 
-    private String distanceTraveled;
+    private double distanceTraveled;
     private double totalEmissionsSaved;
     private String userName;
+    private int noOfRides;
 
 
 
@@ -173,12 +176,13 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             }
         };
 
+        //Collect all profile picture data
         providerData = gatherProviderData();
         changePicWithUri(Uri.parse(providerData));
         imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();
 
 
-        //Loads name and km traveled + calculates emissions saved
+        //Loads name, picture, distance traveled, number of rides
         loadProfileInfo();
 
     }
@@ -471,6 +475,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         TextView txtEmissions;
         TextView txtDistance;
         TextView txtNoOfRides;
+        TextView txtUserName;
 
         myDialog.setContentView(R.layout.profile_popup);
 
@@ -483,13 +488,23 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             }
         });
 
+        //CONNECT AND UPDATE ALL TEXTFIELDS IN POPUP
+        //Emissions
+        DecimalFormat df = new DecimalFormat("#.###");
+        df.setRoundingMode(RoundingMode.CEILING);
+        totalEmissionsSaved = calculateEmissions(distanceTraveled);
         txtEmissions = myDialog.findViewById(R.id.txtEmissions);
-        txtEmissions.setText(Double.toString(totalEmissionsSaved));
+        txtEmissions.setText(df.format(totalEmissionsSaved));
+
+        txtUserName = myDialog.findViewById(R.id.txtUserName);
+        txtUserName.setText(userName);
 
         txtDistance = myDialog.findViewById(R.id.txtDistance);
-        txtDistance.setText(distanceTraveled);
+        txtDistance.setText(""+distanceTraveled);
 
         txtNoOfRides = myDialog.findViewById(R.id.txtNoOfRides);
+        txtNoOfRides.setText(""+noOfRides);
+
 
         btnLogout = myDialog.findViewById(R.id.btnLogout);
         btnLogout.setOnClickListener(new View.OnClickListener() {
@@ -500,31 +515,11 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         });
 
 
-        //PROFILE PICTURE UPDATE
-        //ImageView profilePic = myDialog.findViewById(R.id.profilePic);
-        //profilePic.setImageResource(testImage);
-
-        //Should work but ImageView turns black
+        //PROFILE PICTURE
         testImage = myDialog.findViewById(R.id.profilePic);
         setDisplayProfilePic();
 
 
-
-       /* if(newPicture != null){
-            Picasso.get().load(newPicture).fit().centerCrop().into(testImage, new Callback() {
-                @Override
-                public void onSuccess() {
-                    Log.d("TAG", "Picture load was Successful");
-                }
-
-                @Override
-                public void onError(Exception e) {
-                    Log.d("ERROR", "Picture didnt load, Exception: " + e);
-                }
-            });
-        }else{
-            Log.d("Tag", "newPicture is null");
-        }*/
         myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         myDialog.show();
     }
@@ -552,7 +547,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     //This method can be used to change the firebase users profile pic with an Uri
-    private void changePicWithUri(Uri photo){
+    public void changePicWithUri(Uri photo){
         FirebaseUser user = mAuth.getCurrentUser(); //Gets the current user
         UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                 .setPhotoUri(photo) //Sets the photo from the picture gathered
@@ -582,8 +577,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     private double calculateEmissions(double distance) {
         double avgEmissionsPerKm = 134.64;
+        double totalEmissions = (avgEmissionsPerKm * distance) / 1000;
 
-        return (avgEmissionsPerKm * distance);
+        return (totalEmissions);
     }
 
     private void loadProfileInfo (){
@@ -595,7 +591,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        distanceTraveled = (String) dataSnapshot.getValue();
+                        distanceTraveled = Double.parseDouble(dataSnapshot.getValue().toString());
                         Log.d("Distance", "Distance traveled: " + distanceTraveled);
                     }
 
@@ -609,7 +605,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        userName = (String) dataSnapshot.getValue();
+                        userName = dataSnapshot.getValue().toString();
                         Log.d("Name", "Name is: " + userName);
                     }
 
@@ -619,27 +615,25 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     }
                 });
 
+        mDatabase.child("Users").child(uid).child("no_of_rides").addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        noOfRides = Integer.parseInt(dataSnapshot.getValue().toString());
+                        Log.d("NoOFRides", "Number of rides: " + noOfRides);
+                    }
 
-        //totalEmissionsSaved = calculateEmissions(Double.parseDouble(distanceTraveled));
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
 
     }
 
-   /* public void changeProfilePic(){
-        startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GALLERY_REQUEST);
+    private void chooseUserDestination (View v){
+        //do something
     }
-*/
-    /*public void testImageMethod(View v) {
-        //Change the small testing image to your current profile's profile picture
-
-        testImage = findViewById(R.id.testImage);
-        Uri newPicture = mAuth.getCurrentUser().getPhotoUrl();
-
-        if(newPicture != null){
-            Picasso.get().load(newPicture).fit().centerCrop().into(testImage);
-        }else{
-            Log.d("Tag", "newPicture is null");
-        }
-    }*/
 
 
 }
