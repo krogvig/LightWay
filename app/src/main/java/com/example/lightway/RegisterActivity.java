@@ -183,8 +183,8 @@ public class RegisterActivity extends AppCompatActivity {
                         current_user_db.child("distance_traveled").setValue(0.0);
                         current_user_db.child("no_of_rides").setValue(0);
 
-                       gmaps.changePicWithUri(Uri.parse("http://2.bp.blogspot.com/-HzFJhEY3KtU/Tea7Ku92cpI/AAAAAAAAALw/uBMzwdFi_kA/s400/1.jpg"));
-
+                       Uri uri = Uri.parse("http://2.bp.blogspot.com/-HzFJhEY3KtU/Tea7Ku92cpI/AAAAAAAAALw/uBMzwdFi_kA/s400/1.jpg");
+                       changePicWithUri(uri);
 
 
                         mProgress.dismiss();
@@ -197,6 +197,30 @@ public class RegisterActivity extends AppCompatActivity {
             });
         }
 
+    }
+
+    public void changePicWithUri(Uri photo) {
+        FirebaseUser user;
+
+        try {
+            user = mAuth.getCurrentUser(); //Gets the current user
+
+            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                    .setPhotoUri(photo) //Sets the photo from the picture gathered
+                    .build();
+            user.updateProfile(profileUpdates) //Updates the profile on firebase
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                Log.d("Tag", "User profile updated.");
+                                //Toast.makeText(GMapsActivity.this, "Profile picture has been changed", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    });
+        } catch (NullPointerException e) {
+            System.out.print(e);
+        }
     }
 
 }

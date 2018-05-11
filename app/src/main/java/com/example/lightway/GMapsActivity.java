@@ -638,7 +638,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     //This method can be used to change the firebase users profile pic with an Uri
     public void changePicWithUri(Uri photo) {
-        FirebaseUser user = null;
+        FirebaseUser user;
 
         try {
             user = mAuth.getCurrentUser(); //Gets the current user
