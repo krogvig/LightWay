@@ -127,6 +127,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private FirebaseAuth.AuthStateListener mAuthListener;
     private Button logOutButton;
 
+    private Button cancelButton;
+
     //Used to draw out the navigational line
     private Polyline polyline;
 
@@ -183,6 +185,17 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 }
             }
         };
+
+        cancelButton = findViewById(R.id.btnCancel);
+
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                cancel();
+                cancelButton.setVisibility(View.GONE);
+            }
+        });
 
 
 
@@ -268,8 +281,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker m) {
+
                 calcTrip(m);        // When a marker is clicked, call the method to calculate the trip to it from the phones position
                 return true;
+
             }
         });
 
@@ -277,6 +292,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker m) {
+                cancelButton.setVisibility(View.VISIBLE);
                 String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();      //Get the user ID
                 String[] snippet = m.getSnippet().split("Sträcka:");        //Get the actual distance from the snippet string
                 snippet = snippet[1].split(" ");
@@ -548,6 +564,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     public void parkingAPIActivity(View view) {     //TODO: Break out all the functionality from AirStationsAPIAcitivty and make sure parkingAPI can use it aswell
         Intent intent = new Intent(this, ParkingAPIActivity.class);
         startActivity(intent);
+    }
+
+
+    //Clears the map of the polyline
+    private void cancel() {
+        if (polyline != null) {     //Remove the previous polyline, if it exists
+            polyline.remove();
+        }
     }
 
     public void showUserPopup(View v) {
