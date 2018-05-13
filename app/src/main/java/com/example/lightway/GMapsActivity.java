@@ -557,7 +557,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
 
-
+    //Clears the map of markers
     private void cancel() {
         mMap.clear();
     }
