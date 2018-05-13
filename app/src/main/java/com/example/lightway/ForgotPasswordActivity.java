@@ -2,7 +2,9 @@ package com.example.lightway;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -17,46 +19,41 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class ForgotPasswordActivity extends AppCompatActivity {
 
-
     private EditText emailField;
-
     private Button forgotButton;
-
     private FirebaseAuth mAuth;
-
-
     private DatabaseReference mDatabase;
+
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forgot_password);
 
+        toolbar = findViewById(R.id.toolBar);
+        setSupportActionBar(toolbar);
+
+        if(getSupportActionBar() !=null) getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+
         mAuth = FirebaseAuth.getInstance();
-
-
 
         mDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
 
-
-
         emailField = findViewById(R.id.emailAddress);
 
-
         forgotButton = findViewById(R.id.forgotButton);
-
 
         forgotButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startReset();
 
-
-
             }
         });
-
-
     }
 
     private void startReset() {
@@ -73,12 +70,14 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<Void> task) {
                         if(task.isSuccessful()){
                             Toast.makeText(ForgotPasswordActivity.this, "Email sent!", Toast.LENGTH_LONG).show();
-                        }else if(!task.isSuccessful()){
+                        } else if(!task.isSuccessful()){
                             Toast.makeText(ForgotPasswordActivity.this, "Incorrect email!", Toast.LENGTH_LONG).show();}
 
                         }
                     });
-                }}}
+                }
+    }
+}
 
 
 

@@ -183,10 +183,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
 
-                    if (!mAuth.getCurrentUser().isEmailVerified()) {
+                    /*if (mAuth.getCurrentUser().isEmailVerified()) {
                         Toast.makeText(LoginActivity.this, "Please verify your email", Toast.LENGTH_LONG).show();
                         mAuth.signOut();
-                    }
+                    }*/
 
                     if(!task.isSuccessful()){
                         Toast.makeText(LoginActivity.this, "Sign In Problem", Toast.LENGTH_LONG).show();

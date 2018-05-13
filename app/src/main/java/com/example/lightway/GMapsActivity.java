@@ -143,6 +143,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private double totalEmissionsSaved;
     private String userName;
     private int noOfRides;
+    private DatabaseReference mDatabase;
 
 
     @Override
@@ -195,6 +196,13 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 cancelButton.setVisibility(View.GONE);
             }
         });
+
+
+
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        loadProfileInfo();
+        loadUsername();
 
         // imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();  //moved to userpoup for now.
     }
@@ -323,6 +331,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                                         oldNo = Integer.parseInt(dataSnapshot.getValue().toString());
                                     }
                                     setNoOfRides(oldNo + 1);
+                                    loadProfileInfo();
                                 }
 
                                 @Override
@@ -338,6 +347,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 toast.show();
             }
         });
+
     }
     private void setDistanceValue(double newDistance) {
         DatabaseReference mDatabase;
@@ -563,18 +573,16 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     public void showUserPopup(View v) {
+        //Loads name, picture, distance traveled, number of rides
         runOnUiThread(new Runnable(){
             @Override
             public void run(){
-                TextView txtclose;
                 Button btnLogout;
+                TextView txtclose;
                 TextView txtEmissions;
                 TextView txtDistance;
                 TextView txtNoOfRides;
                 TextView txtUserName;
-
-                //Loads name, picture, distance traveled, number of rides
-                loadProfileInfo();
 
                 myDialog.setContentView(R.layout.profile_popup);
 
@@ -620,11 +628,11 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 testImage = myDialog.findViewById(R.id.profilePic);
                 setDisplayProfilePic();
 
-
-                myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                myDialog.show();
             }
         });
+
+        myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        myDialog.show();
     }
 
     // Gathers the profile picture of either Facebook or Google.
@@ -651,7 +659,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     //This method can be used to change the firebase users profile pic with an Uri
     public void changePicWithUri(Uri photo) {
-        FirebaseUser user = null;
+        FirebaseUser user;
 
         try {
             user = mAuth.getCurrentUser(); //Gets the current user
@@ -693,35 +701,22 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     private void loadProfileInfo() {
-        DatabaseReference mDatabase;        //TODO: I think we can clear a more global mData base (this row and the one below) instead of creating a new one all the time. Maybe the UID aswell
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        String uid = mAuth.getCurrentUser().getUid();
 
         mDatabase.child("Users").child(uid).child("distance_traveled").addListenerForSingleValueEvent(
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        distanceTraveled = Double.parseDouble(dataSnapshot.getValue().toString());
+                        if (dataSnapshot.getValue() != null) {
+                            distanceTraveled = Double.parseDouble(dataSnapshot.getValue().toString());
+                        }
                         Log.d("Distance", "Distance traveled: " + distanceTraveled);
                     }
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-
-        mDatabase.child("Users").child(uid).child("name").addListenerForSingleValueEvent(
-                new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        userName = dataSnapshot.getValue().toString();
-                        Log.d("Name", "Name is: " + userName);
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
+                        Log.d("ERROR", "Error: " + databaseError);
                     }
                 });
 
@@ -729,13 +724,15 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        noOfRides = Integer.parseInt(dataSnapshot.getValue().toString());
+                        if (dataSnapshot.getValue() != null) {
+                            noOfRides = Integer.parseInt(dataSnapshot.getValue().toString());
+                        }
                         Log.d("NoOFRides", "Number of rides: " + noOfRides);
                     }
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
-
+                        Log.d("ERROR", "Error: " + databaseError);
                     }
                 });
     }
@@ -746,6 +743,25 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     private void chooseUserDestination (View v){
         //do something
+    }
+
+    private void loadUsername(){
+        String uid = mAuth.getCurrentUser().getUid();
+        mDatabase.child("Users").child(uid).child("name").addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.getValue() != null) {
+                            userName = dataSnapshot.getValue().toString();
+                        }
+                        Log.d("Name", "Name is: " + userName);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.d("ERROR", "Error: " + databaseError);
+                    }
+                });
     }
 
 }
