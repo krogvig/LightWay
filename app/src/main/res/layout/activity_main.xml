@@ -11,58 +11,69 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnUserDestination"
+        app:layout_constraintBottom_toTopOf="@+id/air_stations"
         app:layout_constraintTop_toTopOf="parent"
         tools:context=".GMapsActivity" />
+
+    <Button
+        android:id="@+id/btnCancel"
+        android:layout_width="wrap_content"
+        android:layout_height="27dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/custom_button"
+        android:paddingTop="4dp"
+        android:shadowColor="#000000"
+        android:shadowDx="5"
+        android:shadowDy="5"
+        android:shadowRadius="10"
+        android:text="Avbryt resa"
+        android:textColor="@color/common_google_signin_btn_text_dark_default"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/air_stations"
         android:layout_width="120dp"
         android:layout_height="27dp"
         android:layout_marginBottom="8dp"
-        android:layout_marginStart="96dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
         android:background="@drawable/custom_button"
         android:onClick="airStationsAPIActivity"
         android:paddingTop="4dp"
-        android:text="@string/air_stations"
-        android:textColor="@color/common_google_signin_btn_text_dark_default"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/gMap"
-        app:layout_constraintVertical_bias="0.0"
         android:shadowColor="#000000"
         android:shadowDx="5"
         android:shadowDy="5"
-        android:shadowRadius="10"/>
-
-    <Button
-        android:id="@+id/btnUserDestination"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Eget val"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        android:shadowRadius="10"
+        android:text="@string/air_stations"
+        android:textColor="@color/common_google_signin_btn_text_dark_default"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/parking"
+        app:layout_constraintTop_toBottomOf="@+id/gMap"
+        app:layout_constraintVertical_bias="0.0" />
 
     <Button
         android:id="@+id/parking"
         android:layout_width="120dp"
         android:layout_height="27dp"
         android:layout_marginBottom="8dp"
-        android:layout_marginEnd="28dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
         android:background="@drawable/custom_button"
         android:onClick="parkingAPIActivity"
         android:paddingTop="4dp"
+        android:shadowColor="#000000"
+        android:shadowDx="5"
+        android:shadowDy="5"
+        android:shadowRadius="10"
         android:text="@string/parking"
         android:textColor="@color/common_google_signin_btn_text_dark_default"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/gMap"
-        app:layout_constraintVertical_bias="0.0"
-        android:shadowColor="#000000"
-        android:shadowDx="5"
-        android:shadowDy="5"
-        android:shadowRadius="10"/>
+        app:layout_constraintVertical_bias="0.0" />
 
     <ImageButton
         android:id="@+id/profileBtn"
@@ -73,16 +84,6 @@
         android:src="@drawable/com_facebook_profile_picture_blank_square"
         tools:layout_editor_absoluteX="322dp"
         tools:layout_editor_absoluteY="0dp" />
-
-    <Button
-        android:id="@+id/cancel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="cancel"
-        android:text="Avbryt"
-        android:visibility="gone"
-        tools:layout_editor_absoluteX="88dp"
-        tools:layout_editor_absoluteY="44dp" />
 
 
 </android.support.constraint.ConstraintLayout>

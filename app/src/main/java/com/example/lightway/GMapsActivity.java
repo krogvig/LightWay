@@ -186,7 +186,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             }
         };
 
-        cancelButton = findViewById(R.id.cancel);
+        cancelButton = findViewById(R.id.btnCancel);
 
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -567,9 +567,11 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
 
-    //Clears the map of markers
+    //Clears the map of the polyline
     private void cancel() {
-        mMap.clear();
+        if (polyline != null) {     //Remove the previous polyline, if it exists
+            polyline.remove();
+        }
     }
 
     public void showUserPopup(View v) {
