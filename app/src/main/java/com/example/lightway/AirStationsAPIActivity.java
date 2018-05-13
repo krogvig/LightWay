@@ -16,6 +16,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 public class AirStationsAPIActivity extends AppCompatActivity  {
@@ -31,7 +32,7 @@ public class AirStationsAPIActivity extends AppCompatActivity  {
 
     private void callAPI() {      //Create new thread that can work in the background fetching the API and use the API URL as parameter
         try {
-            new connectToAPI().execute(new URL("https://lightway-90a9c.firebaseio.com/Pump.json"));
+            new connectToAPI().execute(new URL("https://lightway-90a9c.firebaseio.com/Test.json"));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -81,7 +82,27 @@ public class AirStationsAPIActivity extends AppCompatActivity  {
             List<String[]> allUTMCoordsArraysAsList = new ArrayList<String[]>();
             JsonElement jelement = new JsonParser().parse(jsonLine);    //Sort of starting it all
             JsonObject  jobject = jelement.getAsJsonObject();       //Gets the first object
+
+            for(Map.Entry<String,JsonElement> entry : jobject.entrySet()) {
+                String key = entry.getKey();
+                JsonObject value = entry.getValue().getAsJsonObject();
+
+                String type = value.getAsJsonPrimitive("type").getAsString();
+                String id = value.getAsJsonPrimitive("id").getAsString();
+                double[] coordinates = {value.getAsJsonArray("coordinates").get(0).getAsDouble(),value.getAsJsonArray("coordinates").get(1).getAsDouble()};
+                String geometry_name = value.getAsJsonPrimitive("geometry_name").getAsString();
+                JsonObject jsonProperties = value.getAsJsonObject("properties");
+                String object_id = jsonProperties.getAsJsonPrimitive("OBJECT_ID").getAsString();
+                String adress = jsonProperties.getAsJsonPrimitive("Adress").getAsString();
+                String ventiler = jsonProperties.getAsJsonPrimitive("Ventiler").getAsString();
+                String modell = jsonProperties.getAsJsonPrimitive("Modell").getAsString();
+                String status = jsonProperties.getAsJsonPrimitive("Status").getAsString();
+
+                //TODO: Add a "pump" object to a HashMap with all pump objects with the following parameters: pump(type, id, coordinates, geometry_name, object_id, adress, ventiler, modell, status)
+            }
+
             JsonArray jarrayAll = jobject.getAsJsonArray("features");      //Get the array named "features" which contains everything as an array
+
             for (int x = 0; x<64; x++ )
             {
                 jobject = jarrayAll.get(x).getAsJsonObject();      //Iterate every array
@@ -94,38 +115,17 @@ public class AirStationsAPIActivity extends AppCompatActivity  {
 
             /*
             * The JSON we get looks sort of like this:
-             {
-             "features":[
-                    {
-                        "type":"Feature",
-                        "id":"Cykelpump_Punkt.1531149101137275",
-                        "geometry":{"type":"Point","coordinates":[144199.483974,6585325.351304,0]},
-                        "geometry_name":"GEOMETRY",
-                        "properties": {
-                            "OBJECT_ID":15311491,
-                            "VERSION_ID":1,
-                            "FEATURE_TYPE_NAME":"Cykelpump",
-                            "FEATURE_TYPE_OBJECT_ID":12436332,
-                            "FEATURE_TYPE_VERSION_ID":1,
-                            "MAIN_ATTRIBUTE_NAME":"Adress",
-                            "MAIN_ATTRIBUTE_VALUE":"Spånga stationsplan ",
-                            "MAIN_ATTRIBUTE_DESCRIPTION":"Spånga stationsplan ",
-                            "Adress":"Spånga stationsplan ",
-                            "Index":"1150056CP",
-                            "Ventiler":"Cykelventil och bilventil",
-                            "Modell":"Cykelpump integrerad",
-                            "Status":"Driftsatt",
-                            "Kommentar":" monterad i WC ",
-                            "VALID_FROM":201801080000,
-                            "VALID_TO":null,
-                            "CID":1531149101137275
-                            }
-                    }
-                ],
-
-            "crs":{
-                "type":"name",
-                "properties":{ "name":"urn:ogc:def:crs:EPSG::3011" }
+                {
+				"type":"Cykelpump",
+                "id":"Cykelpump_Punkt.1531149101137275",
+                "coordinates":[144199.483974,6585325.351304],
+                "geometry_name":"GEOMETRY",
+                "properties": {
+                    "OBJECT_ID":15311491,
+                    "Adress":"Spånga stationsplan ",
+                    "Ventiler":"Cykelventil och bilventil",
+                    "Modell":"Cykelpump integrerad",
+                    "Status":"Driftsatt",
                 }
             }
             */
