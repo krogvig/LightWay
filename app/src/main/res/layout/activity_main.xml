@@ -74,5 +74,15 @@
         tools:layout_editor_absoluteX="322dp"
         tools:layout_editor_absoluteY="0dp" />
 
+    <Button
+        android:id="@+id/cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="cancel"
+        android:text="Avbryt"
+        android:visibility="gone"
+        tools:layout_editor_absoluteX="88dp"
+        tools:layout_editor_absoluteY="44dp" />
+
 
 </android.support.constraint.ConstraintLayout>
