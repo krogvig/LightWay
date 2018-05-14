@@ -202,7 +202,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         loadProfileInfo();
-        loadUsername();
 
         // imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();  //moved to userpoup for now.
     }
@@ -605,6 +604,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 txtEmissions = myDialog.findViewById(R.id.txtEmissions);
                 txtEmissions.setText(df.format(totalEmissionsSaved));
 
+                loadUsername();
                 txtUserName = myDialog.findViewById(R.id.txtUserName);
                 txtUserName.setText(userName);
 
@@ -747,23 +747,11 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         //do something
     }
 
-    private void loadUsername(){
-        String uid = mAuth.getCurrentUser().getUid();
-        mDatabase.child("Users").child(uid).child("name").addListenerForSingleValueEvent(
-                new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.getValue() != null) {
-                            userName = dataSnapshot.getValue().toString();
-                        }
-                        Log.d("Name", "Name is: " + userName);
-                    }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.d("ERROR", "Error: " + databaseError);
-                    }
-                });
+    // Using firebase .getdDisplayName instead of the "name" in the database. So that the name shows up properly for google/facebook users.
+    private void loadUsername(){
+        userName = mAuth.getCurrentUser().getDisplayName();
+
     }
 
 }

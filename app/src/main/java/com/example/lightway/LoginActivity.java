@@ -270,7 +270,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w("Facebook", "signInWithCredential:failure", task.getException());
-                            Toast.makeText(LoginActivity.this, "Här går det åt helvete.",
+                            Toast.makeText(LoginActivity.this, "Email might already be in use",
                                     Toast.LENGTH_SHORT).show();
                             // updateUI(null);
                         }
@@ -290,8 +290,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 if(!dataSnapshot.exists()) {
                     DatabaseReference current_user_db = mDatabase.child(user_id);
 
-                    String name =  mAuth.getCurrentUser().getDisplayName();
-                    current_user_db.child("name").setValue(name);
+
                     current_user_db.child("distance_traveled").setValue(0.0);
                     current_user_db.child("no_of_rides").setValue(0);
 
@@ -346,20 +345,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 });
     }
 
-
-//    private void handleSignInResult(GoogleSignInResult result) {
-//        if(result.isSuccess()){
-//            goMainScreen();
-//        } else {
-//            Toast.makeText(this, "failed to login", Toast.LENGTH_SHORT).show();
-//        }
-//    }
-
-//    private void goMainScreen() {
-//        Intent intent = new Intent(this, MainActivity.class);
-//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-//        startActivity(intent);
-//    }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
