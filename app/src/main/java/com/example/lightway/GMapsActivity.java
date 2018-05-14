@@ -5,6 +5,8 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.support.v4.app.FragmentActivity;
@@ -26,8 +28,12 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -91,6 +97,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private static final String TAG = GMapsActivity.class.getSimpleName();
     private GoogleMap mMap;
     private CameraPosition mCameraPosition;
+
+    // widget for the Searchbar
+    private EditText mSearchText;
 
     // The entry points to the Places API.
     private GeoDataClient mGeoDataClient;
@@ -159,6 +168,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_main);
 
+        //
+        mSearchText = (EditText) findViewById(R.id.input_search);
+
         // Construct a GeoDataClient.
         mGeoDataClient = Places.getGeoDataClient(this, null);
 
@@ -204,6 +216,50 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         loadProfileInfo();
 
         // imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();  //moved to userpoup for now.
+    }
+
+    private void init(){
+        Log.d(TAG, "init: initializing");
+
+        mSearchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if(actionId == EditorInfo.IME_ACTION_SEARCH
+                        || actionId == EditorInfo.IME_ACTION_DONE
+                        || event.getAction() == KeyEvent.ACTION_DOWN
+                        || event.getAction() == KeyEvent.KEYCODE_ENTER){
+                    //execute our method for searching
+                    geoLocate();
+                }
+
+                return false;
+            }
+        });
+
+        hideSoftKeyboard();
+    }
+
+    private void geoLocate(){
+        Log.d(TAG, "goeLocate: geolocating");
+
+        String searchString = mSearchText.getText().toString();
+
+        Geocoder geocoder = new Geocoder(GMapsActivity.this);
+        List<Address> list = new ArrayList<>();
+        try{
+            list = geocoder.getFromLocationName(searchString, 1);
+        }catch (IOException e){
+            Log.e(TAG, "goeLocate: IOExeption: " + e.getMessage() );
+        }
+        if(list.size() > 0){
+            Address address = list.get(0);
+
+            Log.d(TAG, "gorLocate: found a location: " + address.toString());
+            //Toast.makeText(this, address.toString(), Toast.LENGTH_SHORT).show();
+
+            moveCamera(new LatLng(address.getLatitude(), address.getLongitude()), DEFAULT_ZOOM,
+            address.getAddressLine(0));
+        }
     }
 
     @Override
@@ -403,6 +459,18 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
+    private void moveCamera(LatLng latLng, float zoom, String title){
+        Log.d(TAG, "moveCamera: moving the camera to: lat: " + latLng.latitude + ", lng: " + latLng.longitude );
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
+
+        MarkerOptions options = new MarkerOptions()
+                .position(latLng)
+                .title(title);
+        mMap.addMarker(options);
+
+        hideSoftKeyboard();
+
+    }
 
     /**
      * Prompts the user for permission to use the device location.
@@ -460,6 +528,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 Toast.makeText(this, "För att kunna utnyttja appen till fullo behöver du tillåta att den använder din GPS",
                         Toast.LENGTH_LONG).show();
             }
+            init();
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
         }
@@ -752,6 +821,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private void loadUsername(){
         userName = mAuth.getCurrentUser().getDisplayName();
 
+    }
+
+    private void hideSoftKeyboard(){
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
 
 }
