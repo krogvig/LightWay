@@ -148,7 +148,8 @@ public class RegisterActivity extends AppCompatActivity {
         return false;
     }
 
-    private void sendVerificationEmail(final String email){
+   /*
+   private void sendVerificationEmail(final String email){
         final FirebaseUser user = mAuth.getCurrentUser();
         user.sendEmailVerification()
                 .addOnCompleteListener(this, new OnCompleteListener<Void>() {
@@ -163,6 +164,7 @@ public class RegisterActivity extends AppCompatActivity {
                     }
                 });
     }
+     */
 
     private void startRegister(final String name, final String email, String password) {
         final GMapsActivity gmaps = new GMapsActivity();
@@ -175,7 +177,6 @@ public class RegisterActivity extends AppCompatActivity {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (task.isSuccessful()) {
-                        sendVerificationEmail(email);
                         String user_id = mAuth.getCurrentUser().getUid();
 
                         DatabaseReference current_user_db = mDatabase.child(user_id);
@@ -189,8 +190,7 @@ public class RegisterActivity extends AppCompatActivity {
 
 
                         mProgress.dismiss();
-
-                        mAuth.signOut();
+                        
                         Intent loginIntent = new Intent(RegisterActivity.this, LoginActivity.class);
                         startActivity(loginIntent);
                     } else {
