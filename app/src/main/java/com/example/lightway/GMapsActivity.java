@@ -127,6 +127,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private FirebaseAuth.AuthStateListener mAuthListener;
     private Button logOutButton;
 
+    private Button cancelButton;
+
     //Used to draw out the navigational line
     private Polyline polyline;
 
@@ -184,12 +186,22 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             }
         };
 
+        cancelButton = findViewById(R.id.btnCancel);
+
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                cancel();
+                cancelButton.setVisibility(View.GONE);
+            }
+        });
+
 
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         loadProfileInfo();
-        loadUsername();
 
         // imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();  //moved to userpoup for now.
     }
@@ -268,8 +280,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker m) {
+
                 calcTrip(m);        // When a marker is clicked, call the method to calculate the trip to it from the phones position
                 return true;
+
             }
         });
 
@@ -277,6 +291,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker m) {
+                cancelButton.setVisibility(View.VISIBLE);
                 String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();      //Get the user ID
                 String[] snippet = m.getSnippet().split("Sträcka:");        //Get the actual distance from the snippet string
                 snippet = snippet[1].split(" ");
@@ -550,6 +565,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         startActivity(intent);
     }
 
+
+    //Clears the map of the polyline
+    private void cancel() {
+        if (polyline != null) {     //Remove the previous polyline, if it exists
+            polyline.remove();
+        }
+    }
+
     public void showUserPopup(View v) {
         //Loads name, picture, distance traveled, number of rides
         runOnUiThread(new Runnable(){
@@ -581,6 +604,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 txtEmissions = myDialog.findViewById(R.id.txtEmissions);
                 txtEmissions.setText(df.format(totalEmissionsSaved));
 
+                loadUsername();
                 txtUserName = myDialog.findViewById(R.id.txtUserName);
                 txtUserName.setText(userName);
 
@@ -723,23 +747,11 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         //do something
     }
 
-    private void loadUsername(){
-        String uid = mAuth.getCurrentUser().getUid();
-        mDatabase.child("Users").child(uid).child("name").addListenerForSingleValueEvent(
-                new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.getValue() != null) {
-                            userName = dataSnapshot.getValue().toString();
-                        }
-                        Log.d("Name", "Name is: " + userName);
-                    }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.d("ERROR", "Error: " + databaseError);
-                    }
-                });
+    // Using firebase .getdDisplayName instead of the "name" in the database. So that the name shows up properly for google/facebook users.
+    private void loadUsername(){
+        userName = mAuth.getCurrentUser().getDisplayName();
+
     }
 
 }

@@ -148,7 +148,8 @@ public class RegisterActivity extends AppCompatActivity {
         return false;
     }
 
-    private void sendVerificationEmail(final String email){
+   /*
+   private void sendVerificationEmail(final String email){
         final FirebaseUser user = mAuth.getCurrentUser();
         user.sendEmailVerification()
                 .addOnCompleteListener(this, new OnCompleteListener<Void>() {
@@ -163,6 +164,7 @@ public class RegisterActivity extends AppCompatActivity {
                     }
                 });
     }
+     */
 
     private void startRegister(final String name, final String email, String password) {
         final GMapsActivity gmaps = new GMapsActivity();
@@ -175,22 +177,19 @@ public class RegisterActivity extends AppCompatActivity {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (task.isSuccessful()) {
-                        sendVerificationEmail(email);
                         String user_id = mAuth.getCurrentUser().getUid();
 
                         DatabaseReference current_user_db = mDatabase.child(user_id);
 
-                        current_user_db.child("name").setValue(name);
                         current_user_db.child("distance_traveled").setValue(0.0);
                         current_user_db.child("no_of_rides").setValue(0);
 
                        Uri uri = Uri.parse("http://2.bp.blogspot.com/-HzFJhEY3KtU/Tea7Ku92cpI/AAAAAAAAALw/uBMzwdFi_kA/s400/1.jpg");
-                       changePicWithUri(uri);
+                       updateFirebaseInfo(uri, name);
 
 
                         mProgress.dismiss();
-
-                        mAuth.signOut();
+                        
                         Intent loginIntent = new Intent(RegisterActivity.this, LoginActivity.class);
                         startActivity(loginIntent);
                     } else {
@@ -210,13 +209,14 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
-    public void changePicWithUri(Uri photo) {
+    public void updateFirebaseInfo(Uri photo, String name) {
         FirebaseUser user;
 
         try {
             user = mAuth.getCurrentUser(); //Gets the current user
 
             UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                    .setDisplayName(name)
                     .setPhotoUri(photo) //Sets the photo from the picture gathered
                     .build();
             user.updateProfile(profileUpdates) //Updates the profile on firebase
