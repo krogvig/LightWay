@@ -38,7 +38,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -870,6 +872,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     }
 
+    // Hides the soft keyboard after having pressed enter while searching for a destination
     private void hideSoftKeyboard(){
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
@@ -946,6 +949,25 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             places.release();
         }
     };
+
+   // public void setPadding(View view) {
+     //   mMap.setPadding(0, 100, 0, 0);
+    //}
+//
+//
+  //  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    //    View view = inflater.inflate(R.layout.activity_main, null);
+//
+  //      view.setPadding(0,100,0,0);
+//
+//        return view;
+  //  }
+
+//    UIEdgeInsets Padding = mapView_.padding;
+
+  //  mapView_.padding = UIEdgeInsetsMake(0, 0, kOverlayHeight, 0);
+    //mapView_.padding = UIEdgeInsetsZero;
+
 }
 
 

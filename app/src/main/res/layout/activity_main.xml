@@ -16,33 +16,54 @@
         tools:context=".GMapsActivity" />
 
     <RelativeLayout
+        android:id="@+id/relLayout1"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginLeft="10dp"
-        android:elevation="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="8dp"
         android:background="@drawable/white_border"
-        android:id="@+id/relLayout1">
+        android:elevation="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/gMap">
+
+        <ImageButton
+            android:id="@+id/profileBtn"
+
+            android:layout_width="45dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
+
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="0dp"
+            android:layout_marginEnd="0dp"
+            android:onClick="showUserPopup"
+            android:scaleType="centerCrop"
+            android:src="@drawable/com_facebook_profile_picture_blank_square" />
 
         <ImageView
+            android:id="@+id/ic_magnify"
             android:layout_width="15dp"
             android:layout_height="15dp"
-            android:id="@+id/ic_magnify"
             android:layout_centerVertical="true"
             android:layout_marginLeft="10dp"
             android:src="@drawable/ic_magnify" />
 
         <AutoCompleteTextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_toRightOf="@+id/ic_magnify"
-            android:layout_centerVertical="true"
-            android:textSize="15sp"
-            android:textColor="#000"
             android:id="@+id/input_search"
+            android:layout_width="279dp"
+            android:layout_height="match_parent"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_toRightOf="@+id/ic_magnify"
             android:background="@null"
-            android:hint="  Enter Adress, City or Zip Code" />
+            android:hint="Enter Adress, City or Zip Code"
+            android:singleLine="true"
+            android:textColor="#000"
+            android:textSize="15sp" />
+
     </RelativeLayout>
 
     <Button
@@ -104,16 +125,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/gMap"
         app:layout_constraintVertical_bias="0.0" />
-
-    <ImageButton
-        android:id="@+id/profileBtn"
-        android:layout_width="62dp"
-        android:layout_height="61dp"
-        android:onClick="showUserPopup"
-        android:scaleType="centerCrop"
-        android:src="@drawable/com_facebook_profile_picture_blank_square"
-        tools:layout_editor_absoluteX="322dp"
-        tools:layout_editor_absoluteY="0dp" />
-
 
 </android.support.constraint.ConstraintLayout>
