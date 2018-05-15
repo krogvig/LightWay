@@ -119,13 +119,20 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/btnLogout"
+    android:id="@+id/btnLogout"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
+    android:layout_marginTop="25dp"
+    android:background="@drawable/button_style"
+    android:text="Log out"
+    android:textColor="@android:color/white" />
+    <Button
+        android:id="@+id/btnDelete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="25dp"
+        android:layout_gravity="left"
         android:background="@drawable/button_style"
-        android:text="Log out"
+        android:text="Delete Account"
         android:textColor="@android:color/white" />
-
 </LinearLayout>
