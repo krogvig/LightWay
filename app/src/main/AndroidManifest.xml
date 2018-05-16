@@ -73,6 +73,7 @@
             android:parentActivityName=".LoginActivity"/>
         <activity android:name=".ForgotPasswordActivity"
             android:parentActivityName=".LoginActivity"/>
+        <activity android:name=".CallAPI" />
     </application>
 
 </manifest>

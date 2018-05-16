@@ -6,6 +6,14 @@
     android:layout_height="match_parent"
     tools:context="com.example.lightway.GMapsActivity">
 
+    <FrameLayout
+        class = "com.example.lightway.CallAPI"
+        android:id="@+id/callAPIDialog"
+        android:tag="callAPIDialog"
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <fragment
         android:id="@+id/gMap"
         android:name="com.google.android.gms.maps.SupportMapFragment"
