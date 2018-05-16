@@ -43,6 +43,7 @@ public class DeleteUserActivity extends AppCompatActivity {
         alertDialog.show();
 
     }
+
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     public void deleteUser(){
 

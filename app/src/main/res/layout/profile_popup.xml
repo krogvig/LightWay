@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="350dp"
     android:layout_height="475dp"
@@ -123,16 +124,20 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
-    android:layout_marginTop="25dp"
+    android:layout_marginTop="20dp"
     android:background="@drawable/button_style"
     android:text="Log out"
     android:textColor="@android:color/white" />
+
     <Button
         android:id="@+id/btnDelete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="left"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="5dp"
         android:background="@drawable/button_style"
         android:text="Delete Account"
-        android:textColor="@android:color/white" />
+
+        android:textColor="@android:color/white"
+        app:layout_constraintTop_toBottomOf="@+id/btnLogout" />
 </LinearLayout>

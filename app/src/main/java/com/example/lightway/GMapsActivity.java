@@ -2,6 +2,7 @@ package com.example.lightway;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -25,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -579,6 +581,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             @Override
             public void run(){
                 Button btnLogout;
+                Button btnDeleteUser;
                 TextView txtclose;
                 TextView txtEmissions;
                 TextView txtDistance;
@@ -620,6 +623,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     @Override
                     public void onClick(View v) {
                         logout();
+                    }
+                });
+
+                btnDeleteUser = myDialog.findViewById(R.id.btnDelete);
+                btnDeleteUser.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showDeleteUserPopup();
                     }
                 });
 
@@ -752,6 +763,45 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private void loadUsername(){
         userName = mAuth.getCurrentUser().getDisplayName();
 
+    }
+
+    public void showDeleteUserPopup() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Are you sure you want to delete your account?");
+
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //perform any action
+                Toast.makeText(getApplicationContext(), "Yes clicked", Toast.LENGTH_SHORT).show();
+                deleteUser();
+
+            }
+        });
+
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //perform any action
+                Toast.makeText(getApplicationContext(), "No clicked", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        //creating alert dialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    public void deleteUser(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        user.delete()
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+
+                        }
+                    }});
     }
 
 }
