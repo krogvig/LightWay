@@ -248,6 +248,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         // imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();  //moved to userpoup for now.
     }
 
+    //
     private void init(){
         Log.d(TAG, "init: initializing");
 
@@ -283,6 +284,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         hideSoftKeyboard();
     }
 
+    //searching for a custom location
     private void geoLocate(){
         Log.d(TAG, "goeLocate: geolocating");
 
@@ -503,6 +505,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
+    //moves camera to searched destination and adds a marker to the location
     private void moveCamera(LatLng latLng, float zoom, String title){
         Log.d(TAG, "moveCamera: moving the camera to: lat: " + latLng.latitude + ", lng: " + latLng.longitude );
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
@@ -629,8 +632,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     private void addAllMarkersToMap(ArrayList<String> inputCoords) {        //Take an arraylist of strings as input. The strings are the LatLong coordinates in the following format: "Latitude,Longitude"
 
-        // Rensar kartan på markers från egen destionationssökning innan pumpmarkers placeras ut
-        mMap.clear();
+        mMap.clear(); // Rensar kartan på markers från egen destionationssökning innan pumpmarkers placeras ut
 
         try {
             for (int x = 0; x < inputCoords.size(); x++) {        //For loop since we need to go through all coordinates
