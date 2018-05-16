@@ -2,12 +2,10 @@ package com.example.lightway;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.support.v4.app.FragmentActivity;
@@ -16,38 +14,23 @@ import android.os.Bundle;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.facebook.login.LoginManager;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.location.places.AutocompletePrediction;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -64,6 +47,8 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -102,29 +87,17 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class GMapsActivity extends FragmentActivity implements OnMapReadyCallback,
-        GoogleApiClient.OnConnectionFailedListener{
+public class GMapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private static final String TAG = GMapsActivity.class.getSimpleName();
     private GoogleMap mMap;
     private CameraPosition mCameraPosition;
-
-    // widget for the Searchbar
-    private AutoCompleteTextView mSearchText;
-
-
-    private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(
-            new LatLng(-40, -168), new LatLng(71, 136));
-
-
-    // adapter object for AutocompleteTextView
-    private PlaceAutocompleteAdapter mPlaceAutocompleteAdapter;
-    private GoogleApiClient mGoogleApiClient;
-    private PlaceInfo mPlace;
 
     // The entry points to the Places API.
     private GeoDataClient mGeoDataClient;
@@ -180,10 +153,17 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private int noOfRides;
     private DatabaseReference mDatabase;
 
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+    public void setAllPumps(String key, Pump value) {
+        allPumps.put(key, value);
     }
+
+    public void setAllParkings(String key, Parking value) {
+        allParkings.put(key, value);
+    }
+
+    private static HashMap<String, Pump>  allPumps = new HashMap<>();
+    private static HashMap<String, Parking>  allParkings = new HashMap<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -197,9 +177,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
         // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_main);
-
-        //
-        mSearchText = (AutoCompleteTextView) findViewById(R.id.input_search);
 
         // Construct a GeoDataClient.
         mGeoDataClient = Places.getGeoDataClient(this, null);
@@ -246,66 +223,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         loadProfileInfo();
 
         // imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();  //moved to userpoup for now.
-    }
-
-    //
-    private void init(){
-        Log.d(TAG, "init: initializing");
-
-        mGoogleApiClient = new GoogleApiClient
-                .Builder(this)
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-                .enableAutoManage(this, this)
-                .build();
-
-        mSearchText.setOnItemClickListener(mAutocompleteClickListener);
-
-        mPlaceAutocompleteAdapter = new PlaceAutocompleteAdapter(this, mGeoDataClient,
-                LAT_LNG_BOUNDS, null);
-
-        mSearchText.setAdapter(mPlaceAutocompleteAdapter);
-
-        mSearchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if(actionId == EditorInfo.IME_ACTION_SEARCH
-                        || actionId == EditorInfo.IME_ACTION_DONE
-                        || event.getAction() == KeyEvent.ACTION_DOWN
-                        || event.getAction() == KeyEvent.KEYCODE_ENTER){
-                    //execute our method for searching
-                    geoLocate();
-                }
-
-                return false;
-            }
-        });
-
-        hideSoftKeyboard();
-    }
-
-    //searching for a custom location
-    private void geoLocate(){
-        Log.d(TAG, "goeLocate: geolocating");
-
-        String searchString = mSearchText.getText().toString();
-
-        Geocoder geocoder = new Geocoder(GMapsActivity.this);
-        List<Address> list = new ArrayList<>();
-        try{
-            list = geocoder.getFromLocationName(searchString, 1);
-        }catch (IOException e){
-            Log.e(TAG, "goeLocate: IOExeption: " + e.getMessage() );
-        }
-        if(list.size() > 0){
-            Address address = list.get(0);
-
-            Log.d(TAG, "gorLocate: found a location: " + address.toString());
-            //Toast.makeText(this, address.toString(), Toast.LENGTH_SHORT).show();
-
-            moveCamera(new LatLng(address.getLatitude(), address.getLongitude()), DEFAULT_ZOOM,
-            address.getAddressLine(0));
-        }
     }
 
     @Override
@@ -505,21 +422,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
-    //moves camera to searched destination and adds a marker to the location
-    private void moveCamera(LatLng latLng, float zoom, String title){
-        Log.d(TAG, "moveCamera: moving the camera to: lat: " + latLng.latitude + ", lng: " + latLng.longitude );
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
-
-        mMap.clear();
-
-        MarkerOptions options = new MarkerOptions()
-                .position(latLng)
-                .title(title);
-        mMap.addMarker(options);
-
-        hideSoftKeyboard();
-
-    }
 
     /**
      * Prompts the user for permission to use the device location.
@@ -577,7 +479,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 Toast.makeText(this, "För att kunna utnyttja appen till fullo behöver du tillåta att den använder din GPS",
                         Toast.LENGTH_LONG).show();
             }
-            init();
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
         }
@@ -589,9 +490,21 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 getDeviceLocation();        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
             }
         }).start();
-        mMap.clear();
-        Intent intent = new Intent(this, AirStationsAPIActivity.class);
-        startActivityForResult(intent, AIRSTATION_REQUEST);      //Create a "startActivityForResult to be able to get the coordinates back to this activity from AirStationsAPIActivity. See: https://stackoverflow.com/questions/1124548/how-to-pass-the-values-from-one-activity-to-previous-activity
+
+        if (allPumps.isEmpty()) {
+            Bundle args = new Bundle();
+            CallAPI callAPIFragment;
+            FragmentManager fm = getSupportFragmentManager();
+
+            callAPIFragment = new CallAPI();
+            fm.beginTransaction().add(callAPIFragment, "callAPIDialog").commit();
+            args.putString("url", "https://lightway-90a9c.firebaseio.com/Test.json");
+            callAPIFragment.putArguments(args);
+            callAPIFragment.onDestroy();
+        }
+        else {
+            addAllMarkersToMap("pump");
+        }
     }
 
     private void calcTrip(Marker destination) {     // This takes the destination marker (the one previously clicked) as input
@@ -630,19 +543,26 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
-    private void addAllMarkersToMap(ArrayList<String> inputCoords) {        //Take an arraylist of strings as input. The strings are the LatLong coordinates in the following format: "Latitude,Longitude"
-
-        mMap.clear(); // Rensar kartan på markers från egen destionationssökning innan pumpmarkers placeras ut
-
+    public void addAllMarkersToMap(String objType) {        //Take an arraylist of strings as input. The strings are the LatLong coordinates in the following format: "Latitude,Longitude"
         try {
-            for (int x = 0; x < inputCoords.size(); x++) {        //For loop since we need to go through all coordinates
-                double latitude = Double.parseDouble(inputCoords.get(x).split(",")[0]);     //Split the strings into latitude and longitude
-                double longitude = Double.parseDouble(inputCoords.get(x).split(",")[1]);
+            mMap.clear();
+            if (objType.equals("pump")) {
+                for(Map.Entry<String,Pump> entry : allPumps.entrySet()) {
+                    double latitude = entry.getValue().getCoordinates()[0];     //Split the strings into latitude and longitude
+                    double longitude = entry.getValue().getCoordinates()[1];
 
-                mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)));       //Add the marker and its title
-            }
+                    mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)));       //Add the marker and its title
+                    }
+                }
+                else {
+                    for(Map.Entry<String,Parking> entry : allParkings.entrySet()) {
+                        double latitude = entry.getValue().getCoordinates()[0];     //Split the strings into latitude and longitude
+                        double longitude = entry.getValue().getCoordinates()[1];
 
-        } catch (Exception e) {
+                        mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)));       //Add the marker and its title
+                    }
+                }
+            } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -660,16 +580,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {        //Used to get the ArrayList back from AirStationsAPIActivity TODO: Loading spinner instead of showign new acitivty xml
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {        //Used to get the ArrayList back from AirStationsAPIActivity
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-            case (AIRSTATION_REQUEST):
-                if (resultCode == AirStationsAPIActivity.RESULT_OK) {
-                    ArrayList<String> coordsFromAPI = data.getStringArrayListExtra(AirStationsAPIActivity.PUBLIC_STATIC_STRING_IDENTIFIER);     //Get the ArrayList and then send it to addAllMarkersToMap to draw them
-                    addAllMarkersToMap(coordsFromAPI);
-                }
-                break;
-            case (GALLERY_REQUEST):
+                case (GALLERY_REQUEST):
                 if (resultCode == Activity.RESULT_OK) {
                     Uri selectedImage = data.getData(); //Gets the data from the selected image.
                     changePicWithUri(selectedImage); //Uploads the image to firebase
@@ -681,15 +595,26 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
-    public void parkingAPIActivity(View view) {     //TODO: Break out all the functionality from AirStationsAPIAcitivty and make sure parkingAPI can use it aswell
-        new Thread(new Runnable() {
+    public void parkingAPIActivity(View view) {
+            new Thread(new Runnable() {
             public void run() {
                 getDeviceLocation();        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
             }
         }).start();
-        mMap.clear();
-        Intent intent = new Intent(this, ParkingAPIActivity.class);
-        startActivityForResult(intent, PARKING_REQUEST);
+
+            if (allParkings.isEmpty()) {
+                Bundle args = new Bundle();
+                CallAPI callAPIFragment;
+                FragmentManager fm = getSupportFragmentManager();
+
+                callAPIFragment = new CallAPI();
+                fm.beginTransaction().add(callAPIFragment, "callAPIDialog").commit();
+                args.putString("url", "https://lightway-90a9c.firebaseio.com/Test2.json");
+                callAPIFragment.putArguments(args);
+            }
+            else {
+                addAllMarkersToMap("parking");
+            }
     }
 
 
@@ -706,6 +631,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             @Override
             public void run(){
                 Button btnLogout;
+                Button btnDeleteUser;
                 TextView txtclose;
                 TextView txtEmissions;
                 TextView txtDistance;
@@ -747,6 +673,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     @Override
                     public void onClick(View v) {
                         logout();
+                    }
+                });
+
+                btnDeleteUser = myDialog.findViewById(R.id.btnDelete);
+                btnDeleteUser.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showDeleteUserPopup();
                     }
                 });
 
@@ -881,101 +815,57 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     }
 
-    // Hides the soft keyboard after having pressed enter while searching for a destination
-    private void hideSoftKeyboard(){
-        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+    public void showDeleteUserPopup() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Are you sure you want to delete your account?");
 
-        InputMethodManager imm = (InputMethodManager)
-                getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromInputMethod(mSearchText.getWindowToken(), 0);
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //perform any action
+                Toast.makeText(getApplicationContext(), "Yes clicked", Toast.LENGTH_LONG).show();
+                deleteUser();
 
-        View view = this.getCurrentFocus();
-        if (view != null) {
-            InputMethodManager immm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            immm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        }
+            }
+        });
 
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //perform any action
+                Toast.makeText(getApplicationContext(), "No clicked", Toast.LENGTH_LONG).show();
+            }
+        });
+
+
+        //creating alert dialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+        //set Backgroundcolour for NO-button
+        Button nbutton = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+        nbutton.setBackgroundColor(Color.GREEN);
+        //set Backgroundcolour for YES-button
+        Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        pbutton.setBackgroundColor(Color.RED);
     }
 
-    /*
-        ------------------- google places API autocomplete suggestions ----------------------------
-     */
+    public void deleteUser(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-    private AdapterView.OnItemClickListener mAutocompleteClickListener = new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            hideSoftKeyboard();
 
-            final AutocompletePrediction item = mPlaceAutocompleteAdapter.getItem(i);
-            final String placeId = item.getPlaceId();
 
-            PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
-                    .getPlaceById(mGoogleApiClient, placeId);
-            placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
 
-        }
-    };
+        user.delete()
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            startActivity(new Intent(GMapsActivity.this, LoginActivity.class));
 
-    private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback = new ResultCallback<PlaceBuffer>() {
-        @Override
-        public void onResult(@NonNull PlaceBuffer places) {
-            if(!places.getStatus().isSuccess()){
-                Log.d(TAG, "onResult: Place query did not complete successfully: " + places.getStatus().toString());
-                places.release();
-                return;
-            }
-            final Place place = places.get(0);
 
-            try{
-                mPlace = new PlaceInfo();
-                mPlace.setName(place.getName().toString());
-                Log.d(TAG, "onResult: name: " + place.getName());
-//                mPlace.setAttributions(place.getAttributions().toString());
-//                Log.d(TAG, "onResult: attributions: " + place.getAttributions());
-                mPlace.setAddress(place.getAddress().toString());
-                Log.d(TAG, "onResult: address: " + place.getAddress());
-                mPlace.setId(place.getId());
-                Log.d(TAG, "onResult: id: " + place.getId());
-                mPlace.setLatlng(place.getLatLng());
-                Log.d(TAG, "onResult: latlng: " + place.getLatLng());
-                mPlace.setRating(place.getRating());
-                Log.d(TAG, "onResult: rating: " + place.getRating());
-                mPlace.setPhoneNumber(place.getPhoneNumber().toString());
-                Log.d(TAG, "onResult: phone number: " + place.getPhoneNumber());
-                mPlace.setWebsiteURI(place.getWebsiteUri());
-                Log.d(TAG, "onResult: website uri: " + place.getWebsiteUri());
-
-                Log.d(TAG, "onResult: place: " + mPlace.toString());
-            }catch (NullPointerException e){
-                Log.e(TAG, "onResult: NullPointerException: " + e.getMessage());
-            }
-
-//            nedan ifall vi får nullpointers
-//            moveCamera(new LatLng(place.getViewport().getCenter().latitude,
-//                    place.getViewport().getCenter().longitude), DEFAULT_ZOOM, mPlace.getName());
-            moveCamera(mPlace.getLatlng(), DEFAULT_ZOOM, mPlace.getName());
-
-            places.release();
-        }
-    };
-
-   // public void setPadding(View view) {
-     //   mMap.setPadding(0, 100, 0, 0);
-    //}
-//
-//
-  //  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    //    View view = inflater.inflate(R.layout.activity_main, null);
-//
-  //      view.setPadding(0,100,0,0);
-//
-//        return view;
-  //  }
-
-//    UIEdgeInsets Padding = mapView_.padding;
-
-  //  mapView_.padding = UIEdgeInsetsMake(0, 0, kOverlayHeight, 0);
-    //mapView_.padding = UIEdgeInsetsZero;
+                        }
+                    }});
+    }
 
 }
 
