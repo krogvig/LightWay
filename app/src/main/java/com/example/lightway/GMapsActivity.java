@@ -489,20 +489,18 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }).start();
 
         if (allPumps.isEmpty()) {
-
             FragmentManager fm = getSupportFragmentManager();
-            CallAPI apiFragment = (CallAPI) fm.findFragmentByTag("task_fragment");
+            CallAPI callAPIFragment = (CallAPI) fm.findFragmentByTag("callAPIDialog");
 
             // if it's null, it was created, otherwise it was created and retained
-            if (apiFragment == null) {
-                apiFragment = new CallAPI();
-                fm.beginTransaction().add(apiFragment, "task_fragment").commit();
+            if (callAPIFragment == null) {
+                callAPIFragment = new CallAPI();
+                fm.beginTransaction().add(callAPIFragment, "callAPIDialog").commit();
             }
 
             Bundle args = new Bundle();
             args.putString("url", "https://lightway-90a9c.firebaseio.com/Test.json");
-            CallAPI myFragment = (CallAPI) getSupportFragmentManager().findFragmentById(R.id.callAPIDialog);
-            myFragment.putArguments(args);
+            callAPIFragment.putArguments(args);
         }
         addAllMarkersToMap("pump");
     }
@@ -603,10 +601,18 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }).start();
 
             if (allParkings.isEmpty()) {
+                FragmentManager fm = getSupportFragmentManager();
+                CallAPI callAPIFragment = (CallAPI) fm.findFragmentByTag("callAPIDialog");
+
+                // if it's null, it was created, otherwise it was created and retained
+                if (callAPIFragment == null) {
+                    callAPIFragment = new CallAPI();
+                    fm.beginTransaction().add(callAPIFragment, "callAPIDialog").commit();
+                }
+
                 Bundle args = new Bundle();
                 args.putString("url", "https://lightway-90a9c.firebaseio.com/Test2.json");
-                CallAPI myFragment = (CallAPI) getSupportFragmentManager().findFragmentById(R.id.callAPIDialog);
-                myFragment.putArguments(args);
+                callAPIFragment.putArguments(args);
             }
             addAllMarkersToMap("parking");
     }

@@ -1,6 +1,8 @@
 package com.example.lightway;
 
 import android.app.Activity;
+import android.content.Context;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
@@ -24,22 +26,18 @@ public class CallAPI extends Fragment {
 
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
+    public void onAttach(Activity activity){
+        super.onAttach (activity);
+            progressDialog = new ProgressDialog(activity);
+            progressDialog.setMessage("Var god vänta...");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.show();
     }
-
     public void putArguments(Bundle args) {
         url = args.getString("url");
 
         try {
-            try {
-                new connectToAPI(getActivity()).execute(new URL(url)).get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
+            new connectToAPI(getActivity()).execute(new URL(url));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -53,15 +51,8 @@ public class CallAPI extends Fragment {
         }
 
         @Override
-        protected void onPreExecute() {
-            progressDialog = new ProgressDialog(getActivity());
-            progressDialog.setMessage("Var god vänta...");
-            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            progressDialog.show();
-        }
-
-        @Override
         protected Boolean doInBackground(URL... urlInput){       //Take in the API URL, try to return the response as String
+
             Boolean allGood = false;
             try {
                 URL url = urlInput[0];
@@ -96,6 +87,7 @@ public class CallAPI extends Fragment {
             return allGood;        //Return the list of LatLong coord arrays, which will be returned to onPostExecute()
         }
 
+        @Override
         protected void onPostExecute(boolean result) {
             if (progressDialog.isShowing()) {
                 progressDialog.dismiss();
@@ -107,6 +99,9 @@ public class CallAPI extends Fragment {
         }
 
         private boolean parse(String jsonLine, String objType) {
+            if (Looper.myLooper() == null) {
+                Looper.prepare();
+            }
                GMapsActivity gma = new GMapsActivity();
             JsonElement jelement = new JsonParser().parse(jsonLine);    //Sort of starting it all
             JsonObject  jobject = jelement.getAsJsonObject();       //Gets the first object
