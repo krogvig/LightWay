@@ -46,6 +46,8 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -791,21 +793,27 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         //creating alert dialog
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
-        //set colours for buttons
+        //set Backgroundcolour for NO-button
         Button nbutton = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
         nbutton.setBackgroundColor(Color.GREEN);
-
+        //set Backgroundcolour for YES-button
         Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
         pbutton.setBackgroundColor(Color.RED);
     }
 
     public void deleteUser(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+ 
+
+
+
         user.delete()
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
+                            startActivity(new Intent(GMapsActivity.this, LoginActivity.class));
+
 
                         }
                     }});
