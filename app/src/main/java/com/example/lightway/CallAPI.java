@@ -43,7 +43,7 @@ public class CallAPI extends Fragment {
         }
     }
 
-    private class connectToAPI extends AsyncTask<URL, Integer, Boolean> {        //Create a "ASyncTask" so that the API can be fetched in the background (think AJAX). https://stackoverflow.com/questions/18289623/how-to-use-asynctask/18289746#18289746
+    private class connectToAPI extends AsyncTask<URL, Integer, String> {        //Create a "ASyncTask" so that the API can be fetched in the background (think AJAX). https://stackoverflow.com/questions/18289623/how-to-use-asynctask/18289746#18289746
         Activity gMapsActivity;
 
         public connectToAPI (Activity a) {
@@ -51,9 +51,9 @@ public class CallAPI extends Fragment {
         }
 
         @Override
-        protected Boolean doInBackground(URL... urlInput){       //Take in the API URL, try to return the response as String
+        protected String doInBackground(URL... urlInput){       //Take in the API URL, try to return the response as String
 
-            Boolean allGood = false;
+            String type = "";
             try {
                 URL url = urlInput[0];
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();       //Open the connection via HTTPS
@@ -68,7 +68,6 @@ public class CallAPI extends Fragment {
                 in.close();
                 con.disconnect();       //Close connection
 
-                String type = "";
                 if (url.toString().contains("Test2")) {
                     type = "parking";
                 }
@@ -76,25 +75,22 @@ public class CallAPI extends Fragment {
                 else if (url.toString().contains("Test")){
                     type = "pump";
                 }
-                allGood = parse(content.toString(), type);
+                parse(content.toString(), type);
 
-                allGood = true;
             }
 
             catch (IOException e) {
                 System.out.println(e);
             }
-            return allGood;        //Return the list of LatLong coord arrays, which will be returned to onPostExecute()
+            return type;        //Return the list of LatLong coord arrays, which will be returned to onPostExecute()
         }
 
         @Override
-        protected void onPostExecute(boolean result) {
+        protected void onPostExecute(String type) {
+            GMapsActivity gmaps = ((GMapsActivity) getActivity());
+            gmaps.addAllMarkersToMap(type);
             if (progressDialog.isShowing()) {
                 progressDialog.dismiss();
-            }
-
-            if (result) {
-                //finish();
             }
         }
 
@@ -102,7 +98,8 @@ public class CallAPI extends Fragment {
             if (Looper.myLooper() == null) {
                 Looper.prepare();
             }
-               GMapsActivity gma = new GMapsActivity();
+
+            GMapsActivity gma = ((GMapsActivity) getActivity());
             JsonElement jelement = new JsonParser().parse(jsonLine);    //Sort of starting it all
             JsonObject  jobject = jelement.getAsJsonObject();       //Gets the first object
 
@@ -111,7 +108,6 @@ public class CallAPI extends Fragment {
                     for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
                         String key = entry.getKey();
                         JsonObject value = entry.getValue().getAsJsonObject();
-                        double[] latLongCoords = new CoordCalc().calculateCoord("34 V " + value.getAsJsonArray("coordinates").get(0).getAsString() + " " + value.getAsJsonArray("coordinates").get(1).getAsString());
                         String adress = "N/A";
                         String ventiler = "N/A";
                         String modell = "N/A";
@@ -120,7 +116,7 @@ public class CallAPI extends Fragment {
 
                         String type = value.getAsJsonPrimitive("type").getAsString();
                         String id = value.getAsJsonPrimitive("id").getAsString();
-                        double[] coordinates = {latLongCoords[0], latLongCoords[1]};
+                        double[] coordinates = {value.getAsJsonArray("coordinates").get(1).getAsDouble(), value.getAsJsonArray("coordinates").get(0).getAsDouble()};
                         String geometry_name = value.getAsJsonPrimitive("geometry_name").getAsString();
                         JsonObject jsonProperties = value.getAsJsonObject("properties");
                         if (jsonProperties.getAsJsonPrimitive("OBJECT_ID") != null) { object_id = jsonProperties.getAsJsonPrimitive("OBJECT_ID").getAsString(); }
@@ -136,7 +132,6 @@ public class CallAPI extends Fragment {
                     for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
                         String key = entry.getKey();
                         JsonObject value = entry.getValue().getAsJsonObject();
-                        double[] latLongCoords = new CoordCalc().calculateCoord("34 V " + value.getAsJsonArray("coordinates").get(0).getAsString() + " " + value.getAsJsonArray("coordinates").get(1).getAsString());
                         String typ = "N/A";
                         String antal_enheter = "N/A";
                         String antal_platser= "N/A";
@@ -144,7 +139,7 @@ public class CallAPI extends Fragment {
 
                         String type = value.getAsJsonPrimitive("type").getAsString();
                         String id = value.getAsJsonPrimitive("id").getAsString();
-                        double[] coordinates = {latLongCoords[0], latLongCoords[1]};
+                        double[] coordinates = {value.getAsJsonArray("coordinates").get(1).getAsDouble(), value.getAsJsonArray("coordinates").get(0).getAsDouble()};
                         String geometry_name = value.getAsJsonPrimitive("geometry_name").getAsString();
                         JsonObject jsonProperties = value.getAsJsonObject("properties");
                         if (jsonProperties.getAsJsonPrimitive("OBJECT_ID") != null) { object_id = jsonProperties.getAsJsonPrimitive("OBJECT_ID").getAsString(); }

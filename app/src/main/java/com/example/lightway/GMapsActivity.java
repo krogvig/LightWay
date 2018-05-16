@@ -489,20 +489,19 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }).start();
 
         if (allPumps.isEmpty()) {
-            FragmentManager fm = getSupportFragmentManager();
-            CallAPI callAPIFragment = (CallAPI) fm.findFragmentByTag("callAPIDialog");
-
-            // if it's null, it was created, otherwise it was created and retained
-            if (callAPIFragment == null) {
-                callAPIFragment = new CallAPI();
-                fm.beginTransaction().add(callAPIFragment, "callAPIDialog").commit();
-            }
-
             Bundle args = new Bundle();
+            CallAPI callAPIFragment;
+            FragmentManager fm = getSupportFragmentManager();
+
+            callAPIFragment = new CallAPI();
+            fm.beginTransaction().add(callAPIFragment, "callAPIDialog").commit();
             args.putString("url", "https://lightway-90a9c.firebaseio.com/Test.json");
             callAPIFragment.putArguments(args);
+            callAPIFragment.onDestroy();
         }
-        addAllMarkersToMap("pump");
+        else {
+            addAllMarkersToMap("pump");
+        }
     }
 
     private void calcTrip(Marker destination) {     // This takes the destination marker (the one previously clicked) as input
@@ -541,7 +540,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
-    private void addAllMarkersToMap(String objType) {        //Take an arraylist of strings as input. The strings are the LatLong coordinates in the following format: "Latitude,Longitude"
+    public void addAllMarkersToMap(String objType) {        //Take an arraylist of strings as input. The strings are the LatLong coordinates in the following format: "Latitude,Longitude"
         try {
             mMap.clear();
             if (objType.equals("pump")) {
@@ -601,20 +600,18 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }).start();
 
             if (allParkings.isEmpty()) {
-                FragmentManager fm = getSupportFragmentManager();
-                CallAPI callAPIFragment = (CallAPI) fm.findFragmentByTag("callAPIDialog");
-
-                // if it's null, it was created, otherwise it was created and retained
-                if (callAPIFragment == null) {
-                    callAPIFragment = new CallAPI();
-                    fm.beginTransaction().add(callAPIFragment, "callAPIDialog").commit();
-                }
-
                 Bundle args = new Bundle();
+                CallAPI callAPIFragment;
+                FragmentManager fm = getSupportFragmentManager();
+
+                callAPIFragment = new CallAPI();
+                fm.beginTransaction().add(callAPIFragment, "callAPIDialog").commit();
                 args.putString("url", "https://lightway-90a9c.firebaseio.com/Test2.json");
                 callAPIFragment.putArguments(args);
             }
-            addAllMarkersToMap("parking");
+            else {
+                addAllMarkersToMap("parking");
+            }
     }
 
 
