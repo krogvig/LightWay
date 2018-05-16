@@ -32,7 +32,7 @@ public class AirStationsAPIActivity extends AppCompatActivity  {
 
     private void callAPI() {      //Create new thread that can work in the background fetching the API and use the API URL as parameter
         try {
-            new connectToAPI().execute(new URL("https://lightway-90a9c.firebaseio.com/Pump.json"));
+            new connectToAPI().execute(new URL("https://lightway-90a9c.firebaseio.com/Test.json"));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -59,7 +59,7 @@ public class AirStationsAPIActivity extends AppCompatActivity  {
                 //Call this method and send in UTM-String in this form: 34 V 327680.04 6543920.33
                 List<String[]> latLongCoordArray = parse(content.toString());     //Send everything we got for parsing and get back only the corrdinates
                 for (int x = 0; x < latLongCoordArray.size(); x++) {
-                    allLatLongCoordsArraysAsList.add(""+latLongCoordArray.get(x)[0]+","+latLongCoordArray.get(x)[1]);       //Format to the correct string for input to the Directions API
+                    allLatLongCoordsArraysAsList.add(""+latLongCoordArray.get(x)[1]+","+latLongCoordArray.get(x)[0]);       //Format to the correct string for input to the Directions API
                 }
             }
 
