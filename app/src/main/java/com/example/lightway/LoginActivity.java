@@ -18,6 +18,7 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.Auth;
@@ -272,6 +273,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                             Log.w("Facebook", "signInWithCredential:failure", task.getException());
                             Toast.makeText(LoginActivity.this, "Email might already be in use",
                                     Toast.LENGTH_SHORT).show();
+                            LoginManager.getInstance().logOut();
                             // updateUI(null);
                         }
 

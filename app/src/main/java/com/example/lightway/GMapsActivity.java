@@ -140,6 +140,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private boolean mLocationPermissionGranted;
     public static final int AIRSTATION_REQUEST = 2; // Activity code for airstations used in activityResult.
+    public static final int PARKING_REQUEST = 2; // Activity code for parkings used in activityResult.
 
     // The geographical location where the device is currently located. That is, the last-known
     // location retrieved by the Fused Location Provider.
@@ -585,7 +586,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 getDeviceLocation();        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
             }
         }).start();
-
+        mMap.clear();
         Intent intent = new Intent(this, AirStationsAPIActivity.class);
         startActivityForResult(intent, AIRSTATION_REQUEST);      //Create a "startActivityForResult to be able to get the coordinates back to this activity from AirStationsAPIActivity. See: https://stackoverflow.com/questions/1124548/how-to-pass-the-values-from-one-activity-to-previous-activity
     }
@@ -679,8 +680,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     public void parkingAPIActivity(View view) {     //TODO: Break out all the functionality from AirStationsAPIAcitivty and make sure parkingAPI can use it aswell
+        new Thread(new Runnable() {
+            public void run() {
+                getDeviceLocation();        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
+            }
+        }).start();
+        mMap.clear();
         Intent intent = new Intent(this, ParkingAPIActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, PARKING_REQUEST);
     }
 
 
