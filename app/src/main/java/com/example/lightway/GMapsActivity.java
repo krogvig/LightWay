@@ -2,6 +2,7 @@ package com.example.lightway;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -24,7 +25,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -44,6 +47,8 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -82,8 +87,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class GMapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -145,6 +152,17 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private String userName;
     private int noOfRides;
     private DatabaseReference mDatabase;
+
+    public void setAllPumps(String key, Pump value) {
+        allPumps.put(key, value);
+    }
+
+    public void setAllParkings(String key, Parking value) {
+        allParkings.put(key, value);
+    }
+
+    private static HashMap<String, Pump>  allPumps = new HashMap<>();
+    private static HashMap<String, Parking>  allParkings = new HashMap<>();
 
 
     @Override
@@ -472,9 +490,21 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 getDeviceLocation();        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
             }
         }).start();
-        mMap.clear();
-        Intent intent = new Intent(this, AirStationsAPIActivity.class);
-        startActivityForResult(intent, AIRSTATION_REQUEST);      //Create a "startActivityForResult to be able to get the coordinates back to this activity from AirStationsAPIActivity. See: https://stackoverflow.com/questions/1124548/how-to-pass-the-values-from-one-activity-to-previous-activity
+
+        if (allPumps.isEmpty()) {
+            Bundle args = new Bundle();
+            CallAPI callAPIFragment;
+            FragmentManager fm = getSupportFragmentManager();
+
+            callAPIFragment = new CallAPI();
+            fm.beginTransaction().add(callAPIFragment, "callAPIDialog").commit();
+            args.putString("url", "https://lightway-90a9c.firebaseio.com/Test.json");
+            callAPIFragment.putArguments(args);
+            callAPIFragment.onDestroy();
+        }
+        else {
+            addAllMarkersToMap("pump");
+        }
     }
 
     private void calcTrip(Marker destination) {     // This takes the destination marker (the one previously clicked) as input
@@ -513,16 +543,26 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
-    private void addAllMarkersToMap(ArrayList<String> inputCoords) {        //Take an arraylist of strings as input. The strings are the LatLong coordinates in the following format: "Latitude,Longitude"
+    public void addAllMarkersToMap(String objType) {        //Take an arraylist of strings as input. The strings are the LatLong coordinates in the following format: "Latitude,Longitude"
         try {
-            for (int x = 0; x < inputCoords.size(); x++) {        //For loop since we need to go through all coordinates
-                double latitude = Double.parseDouble(inputCoords.get(x).split(",")[0]);     //Split the strings into latitude and longitude
-                double longitude = Double.parseDouble(inputCoords.get(x).split(",")[1]);
+            mMap.clear();
+            if (objType.equals("pump")) {
+                for(Map.Entry<String,Pump> entry : allPumps.entrySet()) {
+                    double latitude = entry.getValue().getCoordinates()[0];     //Split the strings into latitude and longitude
+                    double longitude = entry.getValue().getCoordinates()[1];
 
-                mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)));       //Add the marker and its title
-            }
+                    mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)));       //Add the marker and its title
+                    }
+                }
+                else {
+                    for(Map.Entry<String,Parking> entry : allParkings.entrySet()) {
+                        double latitude = entry.getValue().getCoordinates()[0];     //Split the strings into latitude and longitude
+                        double longitude = entry.getValue().getCoordinates()[1];
 
-        } catch (Exception e) {
+                        mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)));       //Add the marker and its title
+                    }
+                }
+            } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -540,16 +580,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {        //Used to get the ArrayList back from AirStationsAPIActivity TODO: Loading spinner instead of showign new acitivty xml
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {        //Used to get the ArrayList back from AirStationsAPIActivity
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-            case (AIRSTATION_REQUEST):
-                if (resultCode == AirStationsAPIActivity.RESULT_OK) {
-                    ArrayList<String> coordsFromAPI = data.getStringArrayListExtra(AirStationsAPIActivity.PUBLIC_STATIC_STRING_IDENTIFIER);     //Get the ArrayList and then send it to addAllMarkersToMap to draw them
-                    addAllMarkersToMap(coordsFromAPI);
-                }
-                break;
-            case (GALLERY_REQUEST):
+                case (GALLERY_REQUEST):
                 if (resultCode == Activity.RESULT_OK) {
                     Uri selectedImage = data.getData(); //Gets the data from the selected image.
                     changePicWithUri(selectedImage); //Uploads the image to firebase
@@ -561,15 +595,26 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
-    public void parkingAPIActivity(View view) {     //TODO: Break out all the functionality from AirStationsAPIAcitivty and make sure parkingAPI can use it aswell
-        new Thread(new Runnable() {
+    public void parkingAPIActivity(View view) {
+            new Thread(new Runnable() {
             public void run() {
                 getDeviceLocation();        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
             }
         }).start();
-        mMap.clear();
-        Intent intent = new Intent(this, ParkingAPIActivity.class);
-        startActivityForResult(intent, PARKING_REQUEST);
+
+            if (allParkings.isEmpty()) {
+                Bundle args = new Bundle();
+                CallAPI callAPIFragment;
+                FragmentManager fm = getSupportFragmentManager();
+
+                callAPIFragment = new CallAPI();
+                fm.beginTransaction().add(callAPIFragment, "callAPIDialog").commit();
+                args.putString("url", "https://lightway-90a9c.firebaseio.com/Test2.json");
+                callAPIFragment.putArguments(args);
+            }
+            else {
+                addAllMarkersToMap("parking");
+            }
     }
 
 
@@ -586,6 +631,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             @Override
             public void run(){
                 Button btnLogout;
+                Button btnDeleteUser;
                 TextView txtclose;
                 TextView txtEmissions;
                 TextView txtDistance;
@@ -627,6 +673,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     @Override
                     public void onClick(View v) {
                         logout();
+                    }
+                });
+
+                btnDeleteUser = myDialog.findViewById(R.id.btnDelete);
+                btnDeleteUser.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showDeleteUserPopup();
                     }
                 });
 
@@ -759,6 +813,58 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private void loadUsername(){
         userName = mAuth.getCurrentUser().getDisplayName();
 
+    }
+
+    public void showDeleteUserPopup() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Are you sure you want to delete your account?");
+
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //perform any action
+                Toast.makeText(getApplicationContext(), "Yes clicked", Toast.LENGTH_LONG).show();
+                deleteUser();
+
+            }
+        });
+
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //perform any action
+                Toast.makeText(getApplicationContext(), "No clicked", Toast.LENGTH_LONG).show();
+            }
+        });
+
+
+        //creating alert dialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+        //set Backgroundcolour for NO-button
+        Button nbutton = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+        nbutton.setBackgroundColor(Color.GREEN);
+        //set Backgroundcolour for YES-button
+        Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        pbutton.setBackgroundColor(Color.RED);
+    }
+
+    public void deleteUser(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+
+
+
+        user.delete()
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            startActivity(new Intent(GMapsActivity.this, LoginActivity.class));
+
+
+                        }
+                    }});
     }
 
 }
