@@ -773,7 +773,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //perform any action
-                Toast.makeText(getApplicationContext(), "Yes clicked", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Yes clicked", Toast.LENGTH_LONG).show();
                 deleteUser();
 
             }
@@ -783,13 +783,20 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //perform any action
-                Toast.makeText(getApplicationContext(), "No clicked", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "No clicked", Toast.LENGTH_LONG).show();
             }
         });
+
 
         //creating alert dialog
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
+        //set colours for buttons
+        Button nbutton = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+        nbutton.setBackgroundColor(Color.GREEN);
+
+        Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        pbutton.setBackgroundColor(Color.RED);
     }
 
     public void deleteUser(){
