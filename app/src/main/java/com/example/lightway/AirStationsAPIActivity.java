@@ -16,6 +16,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 public class AirStationsAPIActivity extends AppCompatActivity  {
@@ -56,11 +57,9 @@ public class AirStationsAPIActivity extends AppCompatActivity  {
                 con.disconnect();       //Close connection
 
                 //Call this method and send in UTM-String in this form: 34 V 327680.04 6543920.33
-                List<String[]> utmCoordArray = parse(content.toString());     //Send everything we got for parsing and get back only the corrdinates
-                for (int x = 0; x < utmCoordArray.size(); x++) {
-                    String coords = "34 V " + utmCoordArray.get(x)[0] + " " + utmCoordArray.get(x)[1];        //Format to the correct string for input to the conversion
-                    double[] convertedCoords = new CoordCalc().calculateCoord(coords);      // For each string, convert the coordinates to "our" LatLong format
-                    allLatLongCoordsArraysAsList.add(""+convertedCoords[0]+","+convertedCoords[1]);       //Format to the correct string for input to the Directions API
+                List<String[]> latLongCoordArray = parse(content.toString());     //Send everything we got for parsing and get back only the corrdinates
+                for (int x = 0; x < latLongCoordArray.size(); x++) {
+                    allLatLongCoordsArraysAsList.add(""+latLongCoordArray.get(x)[0]+","+latLongCoordArray.get(x)[1]);       //Format to the correct string for input to the Directions API
                 }
             }
 
@@ -78,19 +77,19 @@ public class AirStationsAPIActivity extends AppCompatActivity  {
         }
 
         private List<String[]> parse(String jsonLine) {
-            List<String[]> allUTMCoordsArraysAsList = new ArrayList<String[]>();
+            List<String[]> allCoordsArraysAsList = new ArrayList<String[]>();
             JsonElement jelement = new JsonParser().parse(jsonLine);    //Sort of starting it all
             JsonObject  jobject = jelement.getAsJsonObject();       //Gets the first object
-            JsonArray jarrayAll = jobject.getAsJsonArray("features");      //Get the array named "features" which contains everything as an array
-            for (int x = 0; x<64; x++ )
+
+            for (Map.Entry<String, JsonElement> entry : jobject.entrySet())
             {
-                jobject = jarrayAll.get(x).getAsJsonObject();      //Iterate every array
-                jobject = jobject.getAsJsonObject("geometry");        //Get the object "geometry", which contains the coordinates we are interested in
-                JsonArray jarrayCurrentObject = jobject.getAsJsonArray("coordinates");      //Get the coordinates
-                String[] coordinates = {jarrayCurrentObject.get(0).getAsString(),jarrayCurrentObject.get(1).getAsString()};     //Add the coordinates to it's own string in the following format: Latitude,Longitude
-                allUTMCoordsArraysAsList.add(coordinates);        //Add the string to our list
+                String key = entry.getKey();
+                JsonObject value = entry.getValue().getAsJsonObject();
+                String[] coordinates = {value.getAsJsonArray("coordinates").get(0).getAsString(), value.getAsJsonArray("coordinates").get(1).getAsString()};     //Add the coordinates to it's own string in the following format: Latitude,Longitude
+                allCoordsArraysAsList.add(coordinates);        //Add the string to our list
             }
-            return allUTMCoordsArraysAsList ;
+            return allCoordsArraysAsList ;
+
 
             /*
             * The JSON we get looks sort of like this:
