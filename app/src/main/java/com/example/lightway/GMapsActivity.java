@@ -580,7 +580,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {        //Used to get the ArrayList back from AirStationsAPIActivity TODO: Loading spinner instead of showign new acitivty xml
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {        //Used to get the ArrayList back from AirStationsAPIActivity
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
                 case (GALLERY_REQUEST):
