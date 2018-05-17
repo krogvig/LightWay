@@ -823,7 +823,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //perform any action
-                Toast.makeText(getApplicationContext(), "Yes clicked", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Account deleted", Toast.LENGTH_LONG).show();
                 deleteUser();
 
             }
@@ -833,7 +833,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //perform any action
-                Toast.makeText(getApplicationContext(), "No clicked", Toast.LENGTH_LONG).show();
             }
         });
 
