@@ -87,7 +87,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
-    private void errorHandling(){
+    public void errorHandling(){
         final String name = nameField.getText().toString().trim();
         String email = emailField.getText().toString().trim();
         String password = passwordField.getText().toString().trim();
@@ -103,7 +103,7 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    private void errorMessage(String message){
+    public void errorMessage(String message){
         AlertDialog alertDialog = new AlertDialog.Builder(RegisterActivity.this).create();
         alertDialog.setTitle("Oops!");
         alertDialog.setMessage(message);
@@ -132,7 +132,7 @@ public class RegisterActivity extends AppCompatActivity {
         return true;
     }
 
-    private boolean correctPasswordFormat(String password){
+    public boolean correctPasswordFormat(String password){
         if(password != null){
             if(!(password.matches(pattern))){
                 errorMessage("Invalid password!" + '\n' + "Password should contain:" + '\n'
@@ -189,7 +189,7 @@ public class RegisterActivity extends AppCompatActivity {
 
 
                         mProgress.dismiss();
-                        
+
                         Intent loginIntent = new Intent(RegisterActivity.this, LoginActivity.class);
                         startActivity(loginIntent);
                     } else {

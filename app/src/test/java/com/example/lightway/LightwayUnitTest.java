@@ -9,9 +9,12 @@ import static org.junit.Assert.*;
  *
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
-public class ExampleUnitTest {
+public class LightwayUnitTest {
+
+    RegisterActivity registerActivity = new RegisterActivity();
+
     @Test
-    public void addition_isCorrect() {
-        assertEquals(4, 2 + 2);
+    public void incorrectPasswordFormat() throws Exception {
+        assertFalse(registerActivity.correctPasswordFormat("test1"));
     }
 }
