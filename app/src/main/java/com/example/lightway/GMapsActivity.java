@@ -858,18 +858,13 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            removeUserFromDatabase();
+                            userToBeRemoved.removeValue(); //removes the user from the database
                             LoginManager.getInstance().logOut();
                             startActivity(new Intent(GMapsActivity.this, LoginActivity.class));
 
 
                         }
                     }});
-    }
-
-    private void removeUserFromDatabase(){
-        userToBeRemoved.removeValue();
-
     }
 
 }
