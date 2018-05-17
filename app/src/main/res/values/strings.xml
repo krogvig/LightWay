@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">LightWay</string>
     <string name="city_bikes">CityBikes</string>
-    <string name="air_stations">Luftpumpar</string>
-    <string name="parking">Parkeringar</string>
-    <string name="map">Karta</string>
+    <string name="air_stations">Pumps</string>
+    <string name="parking">Parking</string>
+    <string name="map">Map</string>
     <string name="title_activity_gmaps">GoogleMaps</string>
     <string name="title_activity_maps">Current Place Details</string>
     <string name="default_info_title">Default Location</string>

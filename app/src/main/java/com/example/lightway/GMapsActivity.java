@@ -135,7 +135,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private FirebaseAuth.AuthStateListener mAuthListener;
     private Button logOutButton;
 
+    private Button btnFinish;
+
     private Button cancelButton;
+    private Marker endDestination;
 
     //Used to draw out the navigational line
     private Polyline polyline;
@@ -153,6 +156,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private int noOfRides;
     private DatabaseReference mDatabase;
     private DatabaseReference userToBeRemoved;
+
+
 
     public void setAllPumps(String key, Pump value) {
         allPumps.put(key, value);
@@ -207,16 +212,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         };
 
         cancelButton = findViewById(R.id.btnCancel);
-
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                cancel();
-                cancelButton.setVisibility(View.GONE);
-            }
-        });
-
+        btnFinish = findViewById(R.id.btnFinishTrip);
 
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -307,67 +303,76 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             }
         });
 
+
         // Listen for clicks on any InfoWindow
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker m) {
+
                 cancelButton.setVisibility(View.VISIBLE);
-                String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();      //Get the user ID
-                String[] snippet = m.getSnippet().split("Sträcka:");        //Get the actual distance from the snippet string
-                snippet = snippet[1].split(" ");
-                final double distanceToAdd = Double.parseDouble(snippet[1]);
-
-                DatabaseReference mDatabase;        //Connect to the Firebase database
-                mDatabase = FirebaseDatabase.getInstance().getReference();
-
-                try {
-                    mDatabase.child("Users").child(uid).child("distance_traveled").addListenerForSingleValueEvent(      //Connect to the "Distance traveled" child
-                            new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    double oldDistance = 0;
-
-                                    if (dataSnapshot.getValue() != null) {
-                                        oldDistance = Double.parseDouble(dataSnapshot.getValue().toString());       //If there already is an entry in "distance_traveled", get it
-                                    }
-
-                                    setDistanceValue(oldDistance + distanceToAdd);        //Add the previous and new values and upload them
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-
-                                }
-                            });
-
-                    mDatabase.child("Users").child(uid).child("no_of_rides").addListenerForSingleValueEvent(        //Connect to the "no_of_rides" child, then the same as above
-                            new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    int oldNo = 0;
-
-                                    if (dataSnapshot.getValue() != null) {
-                                        oldNo = Integer.parseInt(dataSnapshot.getValue().toString());
-                                    }
-                                    setNoOfRides(oldNo + 1);
-                                    loadProfileInfo();
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-
-                                }
-                            });
-
-                } catch (Exception e){
-                }
-
+                btnFinish.setVisibility(View.VISIBLE);
+                endDestination = m;
                 Toast toast = Toast.makeText(getApplicationContext(), "Let the light guide your way!", Toast.LENGTH_SHORT);
                 toast.show();
             }
         });
 
     }
+    public void finishTrip(View v){
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();      //Get the user ID
+        String[] snippet = endDestination.getSnippet().split("Sträcka:");        //Get the actual distance from the snippet string
+        snippet = snippet[1].split(" ");
+        final double distanceToAdd = Double.parseDouble(snippet[1]);
+
+        DatabaseReference mDatabase;        //Connect to the Firebase database
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        try {
+            mDatabase.child("Users").child(uid).child("distance_traveled").addListenerForSingleValueEvent(      //Connect to the "Distance traveled" child
+                    new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            double oldDistance = 0;
+
+                            if (dataSnapshot.getValue() != null) {
+                                oldDistance = Double.parseDouble(dataSnapshot.getValue().toString());       //If there already is an entry in "distance_traveled", get it
+                            }
+
+                            setDistanceValue(oldDistance + distanceToAdd);        //Add the previous and new values and upload them
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
+            mDatabase.child("Users").child(uid).child("no_of_rides").addListenerForSingleValueEvent(        //Connect to the "no_of_rides" child, then the same as above
+                    new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            int oldNo = 0;
+
+                            if (dataSnapshot.getValue() != null) {
+                                oldNo = Integer.parseInt(dataSnapshot.getValue().toString());
+                            }
+                            setNoOfRides(oldNo + 1);
+                            loadProfileInfo();
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
+        cancelTrip(v);
+
+
+        } catch (Exception e){
+        }
+    }
+
     private void setDistanceValue(double newDistance) {
         DatabaseReference mDatabase;
         mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -620,10 +625,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
 
     //Clears the map of the polyline
-    private void cancel() {
+    public void cancelTrip(View v) {
         if (polyline != null) {     //Remove the previous polyline, if it exists
             polyline.remove();
         }
+        Toast.makeText(getApplicationContext(), "Trip finished!", Toast.LENGTH_LONG).show();
+        cancelButton.setVisibility(View.GONE);
+        btnFinish.setVisibility(View.GONE);
+        mMap.clear();
     }
 
     public void showUserPopup(View v) {
@@ -663,7 +672,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 txtUserName.setText(userName);
 
                 txtDistance = myDialog.findViewById(R.id.txtDistance);
-                txtDistance.setText("" + distanceTraveled);
+                txtDistance.setText(df.format(distanceTraveled));
 
                 txtNoOfRides = myDialog.findViewById(R.id.txtNoOfRides);
                 txtNoOfRides.setText("" + noOfRides);
@@ -759,9 +768,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     private double calculateEmissions(double distance) {
         double avgEmissionsPerKm = 134.64;
-        double totalEmissions = (avgEmissionsPerKm * distance) / 1000;
 
-        return (totalEmissions);
+        return ((avgEmissionsPerKm * distance) / 1000);
     }
 
     private void loadProfileInfo() {
