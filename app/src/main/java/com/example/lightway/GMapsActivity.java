@@ -16,6 +16,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -302,7 +303,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             public boolean onMarkerClick(Marker m) {
 
                 calcTrip(m);        // When a marker is clicked, call the method to calculate the trip to it from the phones position
-                return true;
+                mMap.getUiSettings().setMapToolbarEnabled(true);
+                // return true will prevent any further map action from happening
+                return false;
 
             }
         });
