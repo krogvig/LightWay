@@ -152,6 +152,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private String userName;
     private int noOfRides;
     private DatabaseReference mDatabase;
+    private DatabaseReference userToBeRemoved;
 
     public void setAllPumps(String key, Pump value) {
         allPumps.put(key, value);
@@ -850,20 +851,25 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     public void deleteUser(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-
-
-
+        String uid = user.getUid();
+        userToBeRemoved = FirebaseDatabase.getInstance().getReference().child("Users").child(uid);
         user.delete()
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
+                            removeUserFromDatabase();
+                            LoginManager.getInstance().logOut();
                             startActivity(new Intent(GMapsActivity.this, LoginActivity.class));
 
 
                         }
                     }});
+    }
+
+    private void removeUserFromDatabase(){
+        userToBeRemoved.removeValue();
+
     }
 
 }
