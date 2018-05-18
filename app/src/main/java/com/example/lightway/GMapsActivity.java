@@ -420,7 +420,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
     public void finishTrip(View v){
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();      //Get the user ID
-        String[] snippet = endDestination.getSnippet().split("Sträcka:");        //Get the actual distance from the snippet string
+        String[] snippet = endDestination.getSnippet().split("Distance:");        //Get the actual distance from the snippet string
         snippet = snippet[1].split(" ");
         final double distanceToAdd = Double.parseDouble(snippet[1]);
 
@@ -519,7 +519,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     }
                 });
             } else {
-                Toast.makeText(this, "För att kunna utnyttja appen till fullo behöver du tillåta att den använder din GPS",
+                Toast.makeText(this, "Application requires access to your GPS location",
                         Toast.LENGTH_LONG).show();
             }
 
@@ -597,7 +597,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 mMap.setMyLocationEnabled(false);
                 mMap.getUiSettings().setMyLocationButtonEnabled(false);
                 mLastKnownLocation = null;
-                Toast.makeText(this, "För att kunna utnyttja appen till fullo behöver du tillåta att den använder din GPS",
+                Toast.makeText(this, "Application requires access to your GPS location",
                         Toast.LENGTH_LONG).show();
             }
             init();
@@ -692,7 +692,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     private String getEndLocationSnippet(DirectionsResult results) {       //This can be used later on
-        return "Tid: " + results.routes[0].legs[0].duration.humanReadable + " Sträcka: " + results.routes[0].legs[0].distance.humanReadable;
+        return "Tid: " + results.routes[0].legs[0].duration.humanReadable + " Distance: " + results.routes[0].legs[0].distance.humanReadable;
     }
 
     private void addPolyline(DirectionsResult results, GoogleMap mMap) {

@@ -29,7 +29,7 @@ public class CallAPI extends Fragment {
     public void onAttach(Activity activity){
         super.onAttach (activity);
             progressDialog = new ProgressDialog(activity);
-            progressDialog.setMessage("Var god vänta...");
+            progressDialog.setMessage("Please wait...");
             progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progressDialog.show();
     }
