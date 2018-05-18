@@ -377,6 +377,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 TextView snippet = infoWindow.findViewById(R.id.snippet);
                 snippet.setText(marker.getSnippet());
 
+                TextView startTrip = infoWindow.findViewById(R.id.startTrip);
+
                 return infoWindow;
             }
         });
