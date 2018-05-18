@@ -23,8 +23,10 @@
         android:id="@+id/startTrip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5sp"
         android:textColor="#ff000000"
-        android:text="Start Trip"
+        android:text=" Start Trip "
         android:layout_gravity="center_horizontal"
-        android:textSize="28sp" />
+        android:background="#99CCCC"
+        android:textSize="24sp" />
 </LinearLayout>
