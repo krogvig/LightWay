@@ -88,6 +88,7 @@ import com.google.maps.GeoApiContext;
 import com.google.maps.android.PolyUtil;
 import com.google.maps.errors.ApiException;
 import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.DirectionsStep;
 import com.google.maps.model.TravelMode;
 
 import org.joda.time.DateTime;
@@ -414,7 +415,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker m) {
-
+                activateTripOnServer(m);        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
                 cancelButton.setVisibility(View.VISIBLE);
                 btnFinish.setVisibility(View.VISIBLE);
                 endDestination = m;
@@ -619,6 +620,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     public void airStationsAPIActivity(View view) {
         mMap.clear();
+        //Button pumpBtn =  findViewById(R.id.air_stations);    TODO: To set the color of the button when clicked, but not sure which color or which color to change back to...
+        //pumpBtn.setBackgroundColor(Color.BLUE);
 
         if (allPumps.isEmpty()) {
             Bundle args = new Bundle();
@@ -633,6 +636,26 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
         else {
             addAllMarkersToMap("pump");
+        }
+    }
+
+    public void parkingAPIActivity(View view) {
+        mMap.clear();
+        //Button parkingBtn =  findViewById(R.id.parking);    TODO: To set the color of the button when clicked, but not sure which color or which color to change back to...
+        //parkingBtn.setBackgroundColor(Color.BLUE);
+
+        if (allParkings.isEmpty()) {
+            Bundle args = new Bundle();
+            CallAPI callAPIFragment;
+            FragmentManager fm = getSupportFragmentManager();
+
+            callAPIFragment = new CallAPI();
+            fm.beginTransaction().add(callAPIFragment, "callAPIDialog").commit();
+            args.putString("url", "https://lightway-90a9c.firebaseio.com/Test2.json");
+            callAPIFragment.putArguments(args);
+        }
+        else {
+            addAllMarkersToMap("parking");
         }
     }
 
@@ -657,8 +680,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     .departureTime(now)
                     .await();
 
+            String[] endAddress = result.routes[0].legs[0].endAddress.split(",");
             destination.setSnippet(getEndLocationSnippet(result));        //Get time and distance and add it to the InfoWindow snippet
-            destination.setTitle(result.routes[0].legs[0].endAddress);      //Get the adress and add it to the InfoWindow snippet
+            destination.setTitle(endAddress[0]);      //Get the adress and add it to the InfoWindow snippet
             addPolyline(result, mMap);      //Draw the navigational line
             destination.showInfoWindow();       //Display the InfoWindow snippet
 
@@ -697,7 +721,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     private String getEndLocationSnippet(DirectionsResult results) {       //This can be used later on
-        return "Tid: " + results.routes[0].legs[0].duration.humanReadable + " Distance: " + results.routes[0].legs[0].distance.humanReadable;
+        return "Time: " + results.routes[0].legs[0].duration.humanReadable + "\nDistance: " + results.routes[0].legs[0].distance.humanReadable;
     }
 
     private void addPolyline(DirectionsResult results, GoogleMap mMap) {
@@ -708,8 +732,52 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         polyline = mMap.addPolyline(new PolylineOptions().addAll(decodedPath));     //Add the polyline
     }
 
+    private void activateTripOnServer(Marker destination) {
+        GeoApiContext geoApiContext = new GeoApiContext();
+        Date date = Calendar.getInstance().getTime();       //Get the current time so we can display how long the ride will take
+        DateTime now = new DateTime(date.getTime());
+
+        geoApiContext = geoApiContext.setQueryRateLimit(3)      //Set everything needed for the API connection, the key should be moved to the strings
+                .setApiKey(getString(R.string.directionsApiKey))
+                .setConnectTimeout(1, TimeUnit.SECONDS)
+                .setReadTimeout(1, TimeUnit.SECONDS)
+                .setWriteTimeout(1, TimeUnit.SECONDS);
+
+        String origin = "" + mLastKnownLocation.getLatitude() + "," + mLastKnownLocation.getLongitude();        //Get the start-location so we now from where the polygon should draw
+        String destinationString = "" + destination.getPosition().latitude + "," + destination.getPosition().longitude;
+
+        try {
+            DirectionsResult result = DirectionsApi.newRequest(geoApiContext)       //Get information from the API about the trip
+                    .mode(TravelMode.BICYCLING).origin(origin)
+                    .destination(destinationString)
+                    .departureTime(now)
+                    .await();
+
+            DirectionsStep[] steps = result.routes[0].legs[0].steps;
+            String[] lightWay = new String[steps.length+1];
+            lightWay[0] = steps[0].startLocation.toString();
+            lightWay[1] = steps[0].endLocation.toString();
+
+            for (int x = 1; x < steps.length; x++) {
+                lightWay[x] = steps[x-1].endLocation.toString();
+                System.out.print(lightWay[x].toString());       //TODO: Send this string to the server
+            }
+
+            destination.setTitle("Your trip ID:");
+            destination.setSnippet("XX");
+            destination.showInfoWindow();
+
+        } catch (ApiException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {        //Used to get the ArrayList back from AirStationsAPIActivity
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
                 case (GALLERY_REQUEST):
@@ -723,25 +791,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 break;
         }
     }
-
-    public void parkingAPIActivity(View view) {
-         mMap.clear();
-
-            if (allParkings.isEmpty()) {
-                Bundle args = new Bundle();
-                CallAPI callAPIFragment;
-                FragmentManager fm = getSupportFragmentManager();
-
-                callAPIFragment = new CallAPI();
-                fm.beginTransaction().add(callAPIFragment, "callAPIDialog").commit();
-                args.putString("url", "https://lightway-90a9c.firebaseio.com/Test2.json");
-                callAPIFragment.putArguments(args);
-            }
-            else {
-                addAllMarkersToMap("parking");
-            }
-    }
-
 
     //Clears the map of the polyline
     public void cancelTrip(View v) {
@@ -1073,10 +1122,4 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             places.release();
         }
     };
-
-
-
 }
-
-
-
