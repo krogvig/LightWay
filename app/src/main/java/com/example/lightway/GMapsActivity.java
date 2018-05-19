@@ -52,8 +52,10 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -112,7 +114,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class GMapsActivity extends FragmentActivity implements OnMapReadyCallback,
-        GoogleApiClient.OnConnectionFailedListener{
+        GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = GMapsActivity.class.getSimpleName();
     private GoogleMap mMap;
@@ -165,7 +167,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     // Used for Firebase
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-    private Button logOutButton;
+
 
     private Button btnFinish;
 
@@ -177,10 +179,12 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     //Used for Userinfo popup
     Dialog myDialog;
+    Dialog videoDialog;
     public ImageView testImage;
     public String providerData;
     private Uri imageFromFirebase;
     public static final int GALLERY_REQUEST = 3;
+    public VideoView introVideo;
 
     private double distanceTraveled;
     private double totalEmissionsSaved;
@@ -202,8 +206,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         allParkings.put(key, value);
     }
 
-    private static HashMap<String, Pump>  allPumps = new HashMap<>();
-    private static HashMap<String, Parking>  allParkings = new HashMap<>();
+    private static HashMap<String, Pump> allPumps = new HashMap<>();
+    private static HashMap<String, Parking> allParkings = new HashMap<>();
 
 
     @Override
@@ -236,7 +240,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.gMap);
         mapFragment.getMapAsync(this);
 
-        myDialog = new Dialog(this);
 
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -249,6 +252,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             }
         };
 
+        //POP-UP ITEMS
+        myDialog = new Dialog(this);
+        videoDialog = new Dialog(this);
+
         cancelButton = findViewById(R.id.btnCancel);
         btnFinish = findViewById(R.id.btnFinishTrip);
 
@@ -256,12 +263,24 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         loadProfileInfo();
+        //showVideoPopup();
+
+
+        //Check if first run and then show tutorial
+        Boolean isFirstRun = getSharedPreferences("PREFERENCE", MODE_PRIVATE)
+                .getBoolean("isfirstrun", true);
+        if (isFirstRun) {
+            // do some thing
+            //showVideoPopup();
+            getSharedPreferences("PREFERENCE", MODE_PRIVATE).edit()
+                    .putBoolean("isfirstrun", false).apply();
+        }
 
         // imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();  //moved to userpoup for now.
     }
 
     //
-    private void init(){
+    private void init() {
         Log.d(TAG, "init: initializing");
 
         mGoogleApiClient = new GoogleApiClient
@@ -281,10 +300,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mSearchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if(actionId == EditorInfo.IME_ACTION_SEARCH
+                if (actionId == EditorInfo.IME_ACTION_SEARCH
                         || actionId == EditorInfo.IME_ACTION_DONE
                         || event.getAction() == KeyEvent.ACTION_DOWN
-                        || event.getAction() == KeyEvent.KEYCODE_ENTER){
+                        || event.getAction() == KeyEvent.KEYCODE_ENTER) {
                     //execute our method for searching
                     geoLocate();
                 }
@@ -297,19 +316,19 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     //searching for a custom location
-    private void geoLocate(){
+    private void geoLocate() {
         Log.d(TAG, "goeLocate: geolocating");
 
         String searchString = mSearchText.getText().toString();
 
         Geocoder geocoder = new Geocoder(GMapsActivity.this);
         List<Address> list = new ArrayList<>();
-        try{
+        try {
             list = geocoder.getFromLocationName(searchString, 1);
-        }catch (IOException e){
-            Log.e(TAG, "goeLocate: IOExeption: " + e.getMessage() );
+        } catch (IOException e) {
+            Log.e(TAG, "goeLocate: IOExeption: " + e.getMessage());
         }
-        if(list.size() > 0){
+        if (list.size() > 0) {
             Address address = list.get(0);
 
             Log.d(TAG, "gorLocate: found a location: " + address.toString());
@@ -424,7 +443,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         });
 
     }
-    public void finishTrip(View v){
+
+    public void finishTrip(View v) {
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();      //Get the user ID
         String[] snippet = endDestination.getSnippet().split("Distance:");        //Get the actual distance from the snippet string
         snippet = snippet[1].split(" ");
@@ -475,10 +495,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                         }
                     });
 
-        cancelTrip(v);
+            cancelTrip(v);
 
 
-        } catch (Exception e){
+        } catch (Exception e) {
         }
     }
 
@@ -490,7 +510,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     }
 
-    private void setNoOfRides(int newNo){
+    private void setNoOfRides(int newNo) {
         DatabaseReference mDatabase;
         mDatabase = FirebaseDatabase.getInstance().getReference();
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -540,8 +560,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     //moves camera to searched destination and adds a marker to the location
-    private void moveCamera(LatLng latLng, float zoom, String title){
-        Log.d(TAG, "moveCamera: moving the camera to: lat: " + latLng.latitude + ", lng: " + latLng.longitude );
+    private void moveCamera(LatLng latLng, float zoom, String title) {
+        Log.d(TAG, "moveCamera: moving the camera to: lat: " + latLng.latitude + ", lng: " + latLng.longitude);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
 
         mMap.clear();
@@ -630,8 +650,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             args.putString("url", "https://lightway-90a9c.firebaseio.com/Test.json");
             callAPIFragment.putArguments(args);
             callAPIFragment.onDestroy();
-        }
-        else {
+        } else {
             addAllMarkersToMap("pump");
         }
     }
@@ -676,22 +695,21 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         try {
             mMap.clear();
             if (objType.equals("pump")) {
-                for(Map.Entry<String,Pump> entry : allPumps.entrySet()) {
+                for (Map.Entry<String, Pump> entry : allPumps.entrySet()) {
                     double latitude = entry.getValue().getCoordinates()[0];     //Split the strings into latitude and longitude
                     double longitude = entry.getValue().getCoordinates()[1];
 
                     mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)));       //Add the marker and its title
-                    }
                 }
-                else {
-                    for(Map.Entry<String,Parking> entry : allParkings.entrySet()) {
-                        double latitude = entry.getValue().getCoordinates()[0];     //Split the strings into latitude and longitude
-                        double longitude = entry.getValue().getCoordinates()[1];
+            } else {
+                for (Map.Entry<String, Parking> entry : allParkings.entrySet()) {
+                    double latitude = entry.getValue().getCoordinates()[0];     //Split the strings into latitude and longitude
+                    double longitude = entry.getValue().getCoordinates()[1];
 
-                        mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)));       //Add the marker and its title
-                    }
+                    mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)));       //Add the marker and its title
                 }
-            } catch (Exception e) {
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -712,7 +730,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     public void onActivityResult(int requestCode, int resultCode, Intent data) {        //Used to get the ArrayList back from AirStationsAPIActivity
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-                case (GALLERY_REQUEST):
+            case (GALLERY_REQUEST):
                 if (resultCode == Activity.RESULT_OK) {
                     Uri selectedImage = data.getData(); //Gets the data from the selected image.
                     changePicWithUri(selectedImage); //Uploads the image to firebase
@@ -725,21 +743,20 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     public void parkingAPIActivity(View view) {
-         mMap.clear();
+        mMap.clear();
 
-            if (allParkings.isEmpty()) {
-                Bundle args = new Bundle();
-                CallAPI callAPIFragment;
-                FragmentManager fm = getSupportFragmentManager();
+        if (allParkings.isEmpty()) {
+            Bundle args = new Bundle();
+            CallAPI callAPIFragment;
+            FragmentManager fm = getSupportFragmentManager();
 
-                callAPIFragment = new CallAPI();
-                fm.beginTransaction().add(callAPIFragment, "callAPIDialog").commit();
-                args.putString("url", "https://lightway-90a9c.firebaseio.com/Test2.json");
-                callAPIFragment.putArguments(args);
-            }
-            else {
-                addAllMarkersToMap("parking");
-            }
+            callAPIFragment = new CallAPI();
+            fm.beginTransaction().add(callAPIFragment, "callAPIDialog").commit();
+            args.putString("url", "https://lightway-90a9c.firebaseio.com/Test2.json");
+            callAPIFragment.putArguments(args);
+        } else {
+            addAllMarkersToMap("parking");
+        }
     }
 
 
@@ -758,9 +775,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     public void showUserPopup(View v) {
         //Loads name, picture, distance traveled, number of rides
-        runOnUiThread(new Runnable(){
+        runOnUiThread(new Runnable() {
             @Override
-            public void run(){
+            public void run() {
                 Button btnLogout;
                 Button btnDeleteUser;
                 TextView txtclose;
@@ -815,6 +832,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     }
                 });
 
+                Button btnPlayTutorial = myDialog.findViewById(R.id.btnPlayVideo);
+                btnPlayTutorial.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showVideoPopup();
+                    }
+                });
+
 
                 //PROFILE PICTURE UPDATE
 
@@ -827,6 +852,36 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
         myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         myDialog.show();
+    }
+
+    public void showVideoPopup() {
+
+
+        TextView txtclose;
+        MediaController mc = new MediaController(this);
+
+        videoDialog.setContentView(R.layout.tutorial_popup);
+        txtclose = videoDialog.findViewById(R.id.txtclose);
+        txtclose.setText("X");
+        txtclose.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        videoDialog.dismiss();
+                    }
+                });
+
+        introVideo = findViewById(R.id.tutorialVideo);
+
+        //introVideo.setMediaController(mc);
+
+        //String path = "android.resource://" + getPackageName() + "/" + R.raw.lightwayguide;
+        String path = "http://46.166.129.165/LightWayGuide.mp4";
+        //introVideo.setVideoURI(Uri.parse(path));
+
+        videoDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        videoDialog.show();
+        //introVideo.start();
+
     }
 
     // Gathers the profile picture of either Facebook or Google.
@@ -1073,7 +1128,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             places.release();
         }
     };
-
 
 
 }
