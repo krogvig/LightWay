@@ -220,7 +220,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_main);
 
         //
-        mSearchText = (AutoCompleteTextView) findViewById(R.id.input_search);
+        mSearchText = findViewById(R.id.input_search);
 
         // Construct a GeoDataClient.
         mGeoDataClient = Places.getGeoDataClient(this, null);
@@ -389,12 +389,17 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         updateLocationUI();
 
         // Get the current location of the device and set the position of the map.
-        getDeviceLocation();
+        getDeviceLocation(true);
 
         // Listen for clicks on any marker
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker m) {
+                new Thread(new Runnable() {
+                    public void run() {
+                        getDeviceLocation(false);        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
+                    }
+                }).start();
 
                 calcTrip(m);        // When a marker is clicked, call the method to calculate the trip to it from the phones position
                 mMap.getUiSettings().setMapToolbarEnabled(true);
@@ -424,6 +429,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         String[] snippet = endDestination.getSnippet().split("Distance:");        //Get the actual distance from the snippet string
         snippet = snippet[1].split(" ");
         final double distanceToAdd = Double.parseDouble(snippet[1]);
+        AutoCompleteTextView input_search = findViewById(R.id.input_search);
+        input_search.setText("");
+
 
         DatabaseReference mDatabase;        //Connect to the Firebase database
         mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -493,7 +501,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
      * Gets the current location of the device, and positions the map's camera.
      * Call this whenever you need to update the device location
      */
-    private void getDeviceLocation() {
+    private void getDeviceLocation(final boolean moveCamera) {
         /*
          * Get the best and most recent location of the device, which may be null in rare
          * cases when a location is not available.
@@ -507,9 +515,11 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                         if (task.isSuccessful() && task.getResult() != null) {
                             // Set the map's camera position to the current location of the device.
                             mLastKnownLocation = task.getResult();
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                    new LatLng(mLastKnownLocation.getLatitude(),
-                                            mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                            if (moveCamera) {
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                        new LatLng(mLastKnownLocation.getLatitude(),
+                                                mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                            }
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
                             Log.e(TAG, "Exception: %s", task.getException());
@@ -608,12 +618,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     public void airStationsAPIActivity(View view) {
-        new Thread(new Runnable() {
-            public void run() {
-                getDeviceLocation();        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
-            }
-        }).start();
-
         mMap.clear();
 
         if (allPumps.isEmpty()) {
@@ -721,13 +725,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     public void parkingAPIActivity(View view) {
-            new Thread(new Runnable() {
-            public void run() {
-                getDeviceLocation();        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
-            }
-        }).start();
-
-        mMap.clear();
+         mMap.clear();
 
             if (allParkings.isEmpty()) {
                 Bundle args = new Bundle();
@@ -753,6 +751,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         Toast.makeText(getApplicationContext(), "Trip finished!", Toast.LENGTH_LONG).show();
         cancelButton.setVisibility(View.GONE);
         btnFinish.setVisibility(View.GONE);
+        AutoCompleteTextView input_search = findViewById(R.id.input_search);
+        input_search.setText("");
         mMap.clear();
     }
 
