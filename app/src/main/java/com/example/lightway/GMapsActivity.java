@@ -728,8 +728,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
 
         else if (allPumps.get(destination) != null) {
-            additionalInfo = "\nModel: " + allPumps.get(destination).getModell()+ "\n"+
-                    "Valves: " + allPumps.get(destination).getVentiler();
+            additionalInfo = "\nModel: " + allPumps.get(destination).getModell() + "\n" +
+                    "Valves: " + allPumps.get(destination).getVentiler() + "\n" +
+                    "Status: " + allPumps.get(destination).getStatus();
         }
 
         String snippet = "Time: " + results.routes[0].legs[0].duration.humanReadable + "\n" +
