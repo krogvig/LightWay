@@ -205,6 +205,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     private static HashMap<String, Pump>  allPumps = new HashMap<>();
     private static HashMap<String, Parking>  allParkings = new HashMap<>();
+    private double distanceToAdd;
+    private GeoApiContext geoApiContext = new GeoApiContext();
 
 
     @Override
@@ -406,7 +408,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 mMap.getUiSettings().setMapToolbarEnabled(true);
                 // return true will prevent any further map action from happening
                 return false;
-
             }
         });
 
@@ -425,19 +426,29 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         });
 
     }
+
     public void finishTrip(View v){
-        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();      //Get the user ID
-        String[] snippet = endDestination.getSnippet().split("Distance:");        //Get the actual distance from the snippet string
-        snippet = snippet[1].split(" ");
-        final double distanceToAdd = Double.parseDouble(snippet[1]);
-        AutoCompleteTextView input_search = findViewById(R.id.input_search);
+        final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();      //Get the user ID
+        AutoCompleteTextView input_search = findViewById(R.id.input_search);        //Reset searchbar
         input_search.setText("");
-
-
-        DatabaseReference mDatabase;        //Connect to the Firebase database
+        final DatabaseReference mDatabase;        //Connect to the Firebase database
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         try {
+
+            mDatabase.child("takenIDs").child(uid).addListenerForSingleValueEvent(
+                    new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {       //Get the distance for this trip which is stored in the DB
+                             distanceToAdd = Double.parseDouble(dataSnapshot.child("Distance").getValue().toString());
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
             mDatabase.child("Users").child(uid).child("distance_traveled").addListenerForSingleValueEvent(      //Connect to the "Distance traveled" child
                     new ValueEventListener() {
                         @Override
@@ -487,7 +498,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         DatabaseReference mDatabase;
         mDatabase = FirebaseDatabase.getInstance().getReference();
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        mDatabase.child("Users").child(uid).child("distance_traveled").setValue(newDistance);
+        mDatabase.child("Users").child(uid).child("distance_traveled").setValue(newDistance);       //Upload the new traveled distance to the user
 
     }
 
@@ -495,7 +506,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         DatabaseReference mDatabase;
         mDatabase = FirebaseDatabase.getInstance().getReference();
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        mDatabase.child("Users").child(uid).child("no_of_rides").setValue(newNo);
+        mDatabase.child("Users").child(uid).child("no_of_rides").setValue(newNo);       //Upload the new number of rides to the user
     }
 
     /**
@@ -516,7 +527,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                         if (task.isSuccessful() && task.getResult() != null) {
                             // Set the map's camera position to the current location of the device.
                             mLastKnownLocation = task.getResult();
-                            if (moveCamera) {
+                            if (moveCamera) {       //Only move the camera if told so, this is so we avoid moving the camera when calling the APIs
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                         new LatLng(mLastKnownLocation.getLatitude(),
                                                 mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
@@ -623,7 +634,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         //Button pumpBtn =  findViewById(R.id.air_stations);    TODO: To set the color of the button when clicked, but not sure which color or which color to change back to...
         //pumpBtn.setBackgroundColor(Color.BLUE);
 
-        if (allPumps.isEmpty()) {
+        if (allPumps.isEmpty()) {       //If pumps haven't been fetched before, create a fragment which will do this for us
             Bundle args = new Bundle();
             CallAPI callAPIFragment;
             FragmentManager fm = getSupportFragmentManager();
@@ -644,7 +655,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         //Button parkingBtn =  findViewById(R.id.parking);    TODO: To set the color of the button when clicked, but not sure which color or which color to change back to...
         //parkingBtn.setBackgroundColor(Color.BLUE);
 
-        if (allParkings.isEmpty()) {
+        if (allParkings.isEmpty()) {       //If parkings haven't been fetched before, create a fragment which will do this for us
             Bundle args = new Bundle();
             CallAPI callAPIFragment;
             FragmentManager fm = getSupportFragmentManager();
@@ -660,12 +671,11 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     private void calcTrip(Marker destination) {     // This takes the destination marker (the one previously clicked) as input
-        GeoApiContext geoApiContext = new GeoApiContext();
         Date date = Calendar.getInstance().getTime();       //Get the current time so we can display how long the ride will take
         DateTime now = new DateTime(date.getTime());
 
         try {
-            geoApiContext = geoApiContext.setQueryRateLimit(3)      //Set everything needed for the API connection, the key should be moved to the strings
+            geoApiContext = geoApiContext.setQueryRateLimit(3)      //Set everything needed for the API connection
                     .setApiKey(getString(R.string.directionsApiKey))
                     .setConnectTimeout(1, TimeUnit.SECONDS)
                     .setReadTimeout(1, TimeUnit.SECONDS)
@@ -722,18 +732,18 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     private String getEndLocationSnippet(DirectionsResult results, String destination) {
         String additionalInfo = "";
-        if (allParkings.get(destination) != null) {
+        if (allParkings.get(destination) != null) {     //For parkings, get the following info: Units, Parkingspots
             additionalInfo = "\nUnits: " + allParkings.get(destination).getAntal_enheter()+ "\n"+
             "Parkingspots: " + allParkings.get(destination).getAntal_platser();
         }
 
-        else if (allPumps.get(destination) != null) {
+        else if (allPumps.get(destination) != null) {       //For pumps, get the following info: Model, Valves, Status
             additionalInfo = "\nModel: " + allPumps.get(destination).getModell() + "\n" +
                     "Valves: " + allPumps.get(destination).getVentiler() + "\n" +
                     "Status: " + allPumps.get(destination).getStatus();
         }
 
-        String snippet = "Time: " + results.routes[0].legs[0].duration.humanReadable + "\n" +
+        String snippet = "Time: " + results.routes[0].legs[0].duration.humanReadable + "\n" +       //Then add Time and Distance
                 "Distance: " + results.routes[0].legs[0].distance.humanReadable + additionalInfo;
         return snippet;
     }
@@ -747,15 +757,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     private void activateTripOnServer(Marker destination) {
-        GeoApiContext geoApiContext = new GeoApiContext();
         Date date = Calendar.getInstance().getTime();       //Get the current time so we can display how long the ride will take
         DateTime now = new DateTime(date.getTime());
-
-        geoApiContext = geoApiContext.setQueryRateLimit(3)      //Set everything needed for the API connection, the key should be moved to the strings
-                .setApiKey(getString(R.string.directionsApiKey))
-                .setConnectTimeout(1, TimeUnit.SECONDS)
-                .setReadTimeout(1, TimeUnit.SECONDS)
-                .setWriteTimeout(1, TimeUnit.SECONDS);
 
         String origin = "" + mLastKnownLocation.getLatitude() + "," + mLastKnownLocation.getLongitude();        //Get the start-location so we now from where the polygon should draw
         String destinationString = "" + destination.getPosition().latitude + "," + destination.getPosition().longitude;
@@ -778,8 +781,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             }
 
             destination.setTitle("Your trip ID:");
-            destination.setSnippet("XX");
-            destination.showInfoWindow();
+            getTripID(destination);
 
         } catch (ApiException e) {
             e.printStackTrace();
@@ -787,6 +789,42 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void getTripID(final Marker m) {
+        final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        try {
+            mDatabase.child("freeIDs").limitToFirst(1).addListenerForSingleValueEvent(
+                    new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.getValue() != null) {
+                                String[] snippet = endDestination.getSnippet().split("Distance:");        //Get the actual distance from the DB
+                                snippet = snippet[1].split(" ");
+                                String travelDistance = snippet[1];
+
+                                String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                                String id = dataSnapshot.getValue().toString();     //Get the first free ID
+                                String fullID = id.substring(1,4);
+                                m.setSnippet(id.substring(2,4));        //Display the part of the ID the user needs to see
+                                mDatabase.child("takenIDs").child(uid).child("ID").setValue(fullID);        //Set the full ID in the takenIDs child
+                                mDatabase.child("takenIDs").child(uid).child("Distance").setValue(travelDistance);      //Set the trips distance in the takenIDs child
+                                mDatabase.child("freeIDs").child(fullID).removeValue();     //Remove the ID from freeIDs
+                                m.showInfoWindow();
+                            }
+                            else
+                                m.setSnippet("All ID's taken.\nPlease try again later.");
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+        } catch (Exception e) {
+
         }
     }
 
@@ -806,11 +844,31 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
-    //Clears the map of the polyline
     public void cancelTrip(View v) {
-        if (polyline != null) {     //Remove the previous polyline, if it exists
-            polyline.remove();
+        final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+        final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        try {
+            mDatabase.child("takenIDs").child(uid).addListenerForSingleValueEvent(
+                    new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.getValue() != null) {
+                                String currentID = dataSnapshot.child("ID").getValue().toString();      //Get the users current ID
+                                mDatabase.child("freeIDs").child(currentID).child("ID").setValue(currentID);        //Add the full ID to the freeIDs child
+                                mDatabase.child("takenIDs").child(uid).removeValue();       //Remove the ID from takenIDs
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+        } catch (Exception e) {
+
         }
+
         Toast.makeText(getApplicationContext(), "Trip finished!", Toast.LENGTH_LONG).show();
         cancelButton.setVisibility(View.GONE);
         btnFinish.setVisibility(View.GONE);
