@@ -662,7 +662,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
             callAPIFragment = new CallAPI();
             fm.beginTransaction().add(callAPIFragment, "callAPIDialog").commit();
-            args.putString("url", "https://lightway-90a9c.firebaseio.com/Parkering.json");
+            args.putString("url", "https://lightway-90a9c.firebaseio.com/Parking.json");
             callAPIFragment.putArguments(args);
         }
         else {

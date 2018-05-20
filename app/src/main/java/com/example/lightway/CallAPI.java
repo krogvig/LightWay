@@ -101,13 +101,12 @@ public class CallAPI extends Fragment {
 
             GMapsActivity gma = ((GMapsActivity) getActivity());
             JsonElement jelement = new JsonParser().parse(jsonLine);    //Sort of starting it all
-            JsonObject  jobject = jelement.getAsJsonObject();       //Gets the first object
+            JsonArray jsonArray = jelement.getAsJsonArray();
 
             try {
                 if (objType.equals("pump")) {
-                    for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
-                        String key = entry.getKey();
-                        JsonObject value = entry.getValue().getAsJsonObject();
+                    for (int x = 0; x<jsonArray.size()-1; x++) {
+                        JsonObject value = jsonArray.get(x).getAsJsonObject();
                         String adress = "N/A";
                         String ventiler = "N/A";
                         String modell = "N/A";
@@ -129,9 +128,8 @@ public class CallAPI extends Fragment {
                     }
                 }
                 else {
-                    for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
-                        String key = entry.getKey();
-                        JsonObject value = entry.getValue().getAsJsonObject();
+                    for (int x = 0; x<jsonArray.size()-1; x++) {
+                        JsonObject value = jsonArray.get(x).getAsJsonObject();
                         String typ = "N/A";
                         String antal_enheter = "N/A";
                         String antal_platser= "N/A";
