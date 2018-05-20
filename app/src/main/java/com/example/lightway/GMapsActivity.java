@@ -807,8 +807,20 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
                                 String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
                                 String id = dataSnapshot.getValue().toString();     //Get the first free ID
+                                String color = id.substring(1,2);
+                                switch (color){
+                                    case "R" :
+                                        color = "Red";
+                                        break;
+                                    case "G" :
+                                        color = "Green";
+                                        break;
+                                    case "B" :
+                                        color = "Blue";
+                                        break;
+                                }
                                 String fullID = id.substring(1,4);
-                                m.setSnippet(id.substring(2,4));        //Display the part of the ID the user needs to see
+                                m.setSnippet(color + " " + id.substring(2,4));        //Display the part of the ID the user needs to see
                                 mDatabase.child("takenIDs").child(uid).child("ID").setValue(fullID);        //Set the full ID in the takenIDs child
                                 mDatabase.child("takenIDs").child(uid).child("Distance").setValue(travelDistance);      //Set the trips distance in the takenIDs child
                                 mDatabase.child("freeIDs").child(fullID).removeValue();     //Remove the ID from freeIDs
