@@ -870,18 +870,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     }
                 });
 
-        introVideo = findViewById(R.id.tutorialVideo);
-
-        //introVideo.setMediaController(mc);
-
-        //String path = "android.resource://" + getPackageName() + "/" + R.raw.lightwayguide;
-        String path = "http://46.166.129.165/LightWayGuide.mp4";
-        //introVideo.setVideoURI(Uri.parse(path));
 
         videoDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         videoDialog.show();
-        //introVideo.start();
-
+        final VideoView introVideo = videoDialog.findViewById(R.id.tutorialVideo);
+        Uri uri = Uri.parse("android.resource://"+getPackageName()+"/"+R.raw.lightwayguide);
+        introVideo.setVideoURI(uri);
+        introVideo.setMediaController(mc);
+        introVideo.start();
     }
 
     // Gathers the profile picture of either Facebook or Google.
