@@ -68,7 +68,7 @@ public class CallAPI extends Fragment {
                 in.close();
                 con.disconnect();       //Close connection
 
-                if (url.toString().contains("Parkering")) {
+                if (url.toString().contains("Parking")) {
                     type = "parking";
                 }
 
