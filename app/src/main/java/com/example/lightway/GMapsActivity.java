@@ -205,7 +205,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     private static HashMap<String, Pump>  allPumps = new HashMap<>();
     private static HashMap<String, Parking>  allParkings = new HashMap<>();
-    private Marker currentActiveMarker;
+    private double distanceToAdd;
     private GeoApiContext geoApiContext = new GeoApiContext();
 
 
@@ -416,7 +416,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker m) {
-                currentActiveMarker = m;
                 activateTripOnServer(m);        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
                 cancelButton.setVisibility(View.VISIBLE);
                 btnFinish.setVisibility(View.VISIBLE);
@@ -429,18 +428,27 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     public void finishTrip(View v){
-        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();      //Get the user ID
-        String[] snippet = endDestination.getSnippet().split("Distance:");        //Get the actual distance from the snippet string
-        snippet = snippet[1].split(" ");
-        final double distanceToAdd = Double.parseDouble(snippet[1]);
+        final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();      //Get the user ID
         AutoCompleteTextView input_search = findViewById(R.id.input_search);
         input_search.setText("");
-
-
-        DatabaseReference mDatabase;        //Connect to the Firebase database
+        final DatabaseReference mDatabase;        //Connect to the Firebase database
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         try {
+
+            mDatabase.child("takenIDs").child(uid).addListenerForSingleValueEvent(
+                    new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                             distanceToAdd = Double.parseDouble(dataSnapshot.child("Distance").getValue().toString());
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
             mDatabase.child("Users").child(uid).child("distance_traveled").addListenerForSingleValueEvent(      //Connect to the "Distance traveled" child
                     new ValueEventListener() {
                         @Override
@@ -779,10 +787,17 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if (dataSnapshot.getValue() != null) {
+                                String[] snippet = endDestination.getSnippet().split("Distance:");        //Get the actual distance from the snippet string
+                                snippet = snippet[1].split(" ");
+                                String travelDistance = snippet[1];
+
+                                String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
                                 String id = dataSnapshot.getValue().toString();     //String ID that will be shown to the user
-                                m.setSnippet(id.substring(6,8));
-                                //mDatabase.child("takenIDs").child(dataSnapshot.getKey()).setValue(id);
-                                //mDatabase.child("freeIDs"). child(dataSnapshot.getKey());
+                                String fullID = id.substring(1,4);
+                                m.setSnippet(id.substring(2,4));
+                                mDatabase.child("takenIDs").child(uid).child("ID").setValue(fullID);
+                                mDatabase.child("takenIDs").child(uid).child("Distance").setValue(travelDistance);
+                                mDatabase.child("freeIDs").child(fullID).removeValue();
                                 m.showInfoWindow();
                             }
                             else
@@ -817,17 +832,17 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     public void cancelTrip(View v) {
         final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+        final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         try {
-            mDatabase.child("usedIDs").addListenerForSingleValueEvent(
+            mDatabase.child("takenIDs").child(uid).addListenerForSingleValueEvent(
                     new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if (dataSnapshot.getValue() != null) {
-                                String id = dataSnapshot.getValue().toString();     //String ID that will be shown to the user
-                                currentActiveMarker.setSnippet(id);
-                                mDatabase.child("takenIDs").child(dataSnapshot.getKey()).setValue(id);
-                                mDatabase.child("freeIDs"). child(dataSnapshot.getKey());
+                                String currentID = dataSnapshot.child("ID").getValue().toString();
+                                mDatabase.child("freeIDs").child(currentID).child("ID").setValue(currentID);
+                                mDatabase.child("takenIDs").child(uid).removeValue();
                             }
                         }
 
