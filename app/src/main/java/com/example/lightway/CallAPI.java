@@ -145,7 +145,7 @@ public class CallAPI extends Fragment {
                         if (jsonProperties.getAsJsonPrimitive("OBJECT_ID") != null) { object_id = jsonProperties.getAsJsonPrimitive("OBJECT_ID").getAsString(); }
                         if (jsonProperties.getAsJsonPrimitive("Typ") != null) { typ = jsonProperties.getAsJsonPrimitive("Typ").getAsString(); }
                         if (jsonProperties.getAsJsonPrimitive("Antal_enheter") != null) { antal_enheter = jsonProperties.getAsJsonPrimitive("Antal_enheter").getAsString(); }
-                        if (jsonProperties.getAsJsonPrimitive("Antal_platser") != null) { antal_enheter = jsonProperties.getAsJsonPrimitive("Antal_platser").getAsString(); }
+                        if (jsonProperties.getAsJsonPrimitive("Antal_platser") != null) { antal_platser = jsonProperties.getAsJsonPrimitive("Antal_platser").getAsString(); }
 
                         gma.setAllParkings("" + coordinates[0] + "," + coordinates[1], new Parking(type, id, coordinates, geometry_name, object_id, typ, antal_enheter, antal_platser));
 

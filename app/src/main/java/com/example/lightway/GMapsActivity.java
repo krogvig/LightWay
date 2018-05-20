@@ -561,7 +561,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         MarkerOptions options = new MarkerOptions()
                 .position(latLng)
                 .title(title);
-        mMap.addMarker(options);
+        calcTrip(mMap.addMarker(options));
 
         hideSoftKeyboard();
 
@@ -691,7 +691,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     .await();
 
             String[] endAddress = result.routes[0].legs[0].endAddress.split(",");
-            destination.setSnippet(getEndLocationSnippet(result));        //Get time and distance and add it to the InfoWindow snippet
+            destination.setSnippet(getEndLocationSnippet(result, destinationString));        //Get time and distance and add it to the InfoWindow snippet
             destination.setTitle(endAddress[0]);      //Get the adress and add it to the InfoWindow snippet
             addPolyline(result, mMap);      //Draw the navigational line
             destination.showInfoWindow();       //Display the InfoWindow snippet
@@ -730,8 +730,22 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
-    private String getEndLocationSnippet(DirectionsResult results) {       //This can be used later on
-        return "Time: " + results.routes[0].legs[0].duration.humanReadable + "\nDistance: " + results.routes[0].legs[0].distance.humanReadable;
+    private String getEndLocationSnippet(DirectionsResult results, String destination) {
+        String additionalInfo = "";
+        if (allParkings.get(destination) != null) {
+            additionalInfo = "\nUnits: " + allParkings.get(destination).getAntal_enheter()+ "\n"+
+            "Parkingspots: " + allParkings.get(destination).getAntal_platser();
+        }
+
+        else if (allPumps.get(destination) != null) {
+            additionalInfo = "\nModel: " + allPumps.get(destination).getModell() + "\n" +
+                    "Valves: " + allPumps.get(destination).getVentiler() + "\n" +
+                    "Status: " + allPumps.get(destination).getStatus();
+        }
+
+        String snippet = "Time: " + results.routes[0].legs[0].duration.humanReadable + "\n" +
+                "Distance: " + results.routes[0].legs[0].distance.humanReadable + additionalInfo;
+        return snippet;
     }
 
     private void addPolyline(DirectionsResult results, GoogleMap mMap) {

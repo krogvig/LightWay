@@ -42,15 +42,15 @@ public class Parking {
         return object_id;
     }
 
-    public String getAdress() {
+    public String getTyp() {
         return typ;
     }
 
-    public String getVentiler() {
+    public String getAntal_enheter() {
         return antal_enheter;
     }
 
-    public String getModell() {
+    public String getAntal_platser() {
         return antal_platser;
     }
 }
