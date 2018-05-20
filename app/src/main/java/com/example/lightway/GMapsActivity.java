@@ -429,7 +429,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     public void finishTrip(View v){
         final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();      //Get the user ID
-        AutoCompleteTextView input_search = findViewById(R.id.input_search);
+        AutoCompleteTextView input_search = findViewById(R.id.input_search);        //Reset searchbar
         input_search.setText("");
         final DatabaseReference mDatabase;        //Connect to the Firebase database
         mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -439,7 +439,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             mDatabase.child("takenIDs").child(uid).addListenerForSingleValueEvent(
                     new ValueEventListener() {
                         @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
+                        public void onDataChange(DataSnapshot dataSnapshot) {       //Get the distance for this trip which is stored in the DB
                              distanceToAdd = Double.parseDouble(dataSnapshot.child("Distance").getValue().toString());
                         }
 
@@ -498,7 +498,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         DatabaseReference mDatabase;
         mDatabase = FirebaseDatabase.getInstance().getReference();
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        mDatabase.child("Users").child(uid).child("distance_traveled").setValue(newDistance);
+        mDatabase.child("Users").child(uid).child("distance_traveled").setValue(newDistance);       //Upload the new traveled distance to the user
 
     }
 
@@ -506,7 +506,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         DatabaseReference mDatabase;
         mDatabase = FirebaseDatabase.getInstance().getReference();
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        mDatabase.child("Users").child(uid).child("no_of_rides").setValue(newNo);
+        mDatabase.child("Users").child(uid).child("no_of_rides").setValue(newNo);       //Upload the new number of rides to the user
     }
 
     /**
@@ -527,7 +527,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                         if (task.isSuccessful() && task.getResult() != null) {
                             // Set the map's camera position to the current location of the device.
                             mLastKnownLocation = task.getResult();
-                            if (moveCamera) {
+                            if (moveCamera) {       //Only move the camera if told so, this is so we avoid moving the camera when calling the APIs
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                         new LatLng(mLastKnownLocation.getLatitude(),
                                                 mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
@@ -634,7 +634,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         //Button pumpBtn =  findViewById(R.id.air_stations);    TODO: To set the color of the button when clicked, but not sure which color or which color to change back to...
         //pumpBtn.setBackgroundColor(Color.BLUE);
 
-        if (allPumps.isEmpty()) {
+        if (allPumps.isEmpty()) {       //If pumps haven't been fetched before, create a fragment which will do this for us
             Bundle args = new Bundle();
             CallAPI callAPIFragment;
             FragmentManager fm = getSupportFragmentManager();
@@ -655,7 +655,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         //Button parkingBtn =  findViewById(R.id.parking);    TODO: To set the color of the button when clicked, but not sure which color or which color to change back to...
         //parkingBtn.setBackgroundColor(Color.BLUE);
 
-        if (allParkings.isEmpty()) {
+        if (allParkings.isEmpty()) {       //If parkings haven't been fetched before, create a fragment which will do this for us
             Bundle args = new Bundle();
             CallAPI callAPIFragment;
             FragmentManager fm = getSupportFragmentManager();
@@ -787,17 +787,17 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if (dataSnapshot.getValue() != null) {
-                                String[] snippet = endDestination.getSnippet().split("Distance:");        //Get the actual distance from the snippet string
+                                String[] snippet = endDestination.getSnippet().split("Distance:");        //Get the actual distance from the DB
                                 snippet = snippet[1].split(" ");
                                 String travelDistance = snippet[1];
 
                                 String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                                String id = dataSnapshot.getValue().toString();     //String ID that will be shown to the user
+                                String id = dataSnapshot.getValue().toString();     //Get the first free ID
                                 String fullID = id.substring(1,4);
-                                m.setSnippet(id.substring(2,4));
-                                mDatabase.child("takenIDs").child(uid).child("ID").setValue(fullID);
-                                mDatabase.child("takenIDs").child(uid).child("Distance").setValue(travelDistance);
-                                mDatabase.child("freeIDs").child(fullID).removeValue();
+                                m.setSnippet(id.substring(2,4));        //Display the part of the ID the user needs to see
+                                mDatabase.child("takenIDs").child(uid).child("ID").setValue(fullID);        //Set the full ID in the takenIDs child
+                                mDatabase.child("takenIDs").child(uid).child("Distance").setValue(travelDistance);      //Set the trips distance in the takenIDs child
+                                mDatabase.child("freeIDs").child(fullID).removeValue();     //Remove the ID from freeIDs
                                 m.showInfoWindow();
                             }
                             else
@@ -840,9 +840,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if (dataSnapshot.getValue() != null) {
-                                String currentID = dataSnapshot.child("ID").getValue().toString();
-                                mDatabase.child("freeIDs").child(currentID).child("ID").setValue(currentID);
-                                mDatabase.child("takenIDs").child(uid).removeValue();
+                                String currentID = dataSnapshot.child("ID").getValue().toString();      //Get the users current ID
+                                mDatabase.child("freeIDs").child(currentID).child("ID").setValue(currentID);        //Add the full ID to the freeIDs child
+                                mDatabase.child("takenIDs").child(uid).removeValue();       //Remove the ID from takenIDs
                             }
                         }
 
