@@ -68,11 +68,11 @@ public class CallAPI extends Fragment {
                 in.close();
                 con.disconnect();       //Close connection
 
-                if (url.toString().contains("Test2")) {
+                if (url.toString().contains("Parkering")) {
                     type = "parking";
                 }
 
-                else if (url.toString().contains("Test")){
+                else if (url.toString().contains("Pump")){
                     type = "pump";
                 }
                 parse(content.toString(), type);
@@ -148,7 +148,6 @@ public class CallAPI extends Fragment {
                         if (jsonProperties.getAsJsonPrimitive("Antal_platser") != null) { antal_platser = jsonProperties.getAsJsonPrimitive("Antal_platser").getAsString(); }
 
                         gma.setAllParkings("" + coordinates[0] + "," + coordinates[1], new Parking(type, id, coordinates, geometry_name, object_id, typ, antal_enheter, antal_platser));
-
             }
         }
     }

@@ -630,7 +630,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
             callAPIFragment = new CallAPI();
             fm.beginTransaction().add(callAPIFragment, "callAPIDialog").commit();
-            args.putString("url", "https://lightway-90a9c.firebaseio.com/Test.json");
+            args.putString("url", "https://lightway-90a9c.firebaseio.com/Pump.json");
             callAPIFragment.putArguments(args);
             callAPIFragment.onDestroy();
         }
@@ -651,7 +651,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
             callAPIFragment = new CallAPI();
             fm.beginTransaction().add(callAPIFragment, "callAPIDialog").commit();
-            args.putString("url", "https://lightway-90a9c.firebaseio.com/Test2.json");
+            args.putString("url", "https://lightway-90a9c.firebaseio.com/Parkering.json");
             callAPIFragment.putArguments(args);
         }
         else {
