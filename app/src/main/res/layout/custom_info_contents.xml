@@ -24,9 +24,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="5sp"
+        android:layout_marginBottom="5sp"
         android:textColor="#ff000000"
         android:text=" Start Trip "
         android:layout_gravity="center_horizontal"
-        android:background="#99CCCC"
+        android:background="@drawable/rounded_corner"
         android:textSize="24sp" />
 </LinearLayout>
