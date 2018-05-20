@@ -732,18 +732,18 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     private String getEndLocationSnippet(DirectionsResult results, String destination) {
         String additionalInfo = "";
-        if (allParkings.get(destination) != null) {
+        if (allParkings.get(destination) != null) {     //For parkings, get the following info: Units, Parkingspots
             additionalInfo = "\nUnits: " + allParkings.get(destination).getAntal_enheter()+ "\n"+
             "Parkingspots: " + allParkings.get(destination).getAntal_platser();
         }
 
-        else if (allPumps.get(destination) != null) {
+        else if (allPumps.get(destination) != null) {       //For pumps, get the following info: Model, Valves, Status
             additionalInfo = "\nModel: " + allPumps.get(destination).getModell() + "\n" +
                     "Valves: " + allPumps.get(destination).getVentiler() + "\n" +
                     "Status: " + allPumps.get(destination).getStatus();
         }
 
-        String snippet = "Time: " + results.routes[0].legs[0].duration.humanReadable + "\n" +
+        String snippet = "Time: " + results.routes[0].legs[0].duration.humanReadable + "\n" +       //Then add Time and Distance
                 "Distance: " + results.routes[0].legs[0].distance.humanReadable + additionalInfo;
         return snippet;
     }
