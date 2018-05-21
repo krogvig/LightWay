@@ -191,6 +191,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private DatabaseReference mDatabase;
     private DatabaseReference userToBeRemoved;
 
+
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
@@ -204,6 +205,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         allParkings.put(key, value);
     }
 
+    private HashMap<String, String> clickableMarkers = new HashMap<>();
     private static HashMap<String, Pump>  allPumps = new HashMap<>();
     private static HashMap<String, Parking>  allParkings = new HashMap<>();
     private double distanceToAdd;
@@ -381,6 +383,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 TextView snippet = infoWindow.findViewById(R.id.snippet);
                 snippet.setText(marker.getSnippet());
 
+                TextView startTripBtn = infoWindow.findViewById(R.id.startTrip);
+                if(marker.getTitle().equals("Your trip ID:")){
+                    startTripBtn.setVisibility(View.GONE);
+                    //startTripBtn.setText("Trip has started!");
+                }else{
+                    startTripBtn.setVisibility(View.VISIBLE);
+                    //startTripBtn.setText(" Start Trip ");
+                }
 
                 return infoWindow;
             }
@@ -404,7 +414,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                         getDeviceLocation(false);        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
                     }
                 }).start();
-
+                clickableMarkers.put(m.getId(), "Clickable");
                 calcTrip(m);        // When a marker is clicked, call the method to calculate the trip to it from the phones position
                 mMap.getUiSettings().setMapToolbarEnabled(true);
                 // return true will prevent any further map action from happening
@@ -417,12 +427,20 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker m) {
-                activateTripOnServer(m);        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
-                cancelButton.setVisibility(View.VISIBLE);
-                btnFinish.setVisibility(View.VISIBLE);
-                endDestination = m;
-                Toast toast = Toast.makeText(getApplicationContext(), "Let the light guide your way!", Toast.LENGTH_SHORT);
-                toast.show();
+                String clickableOrNot = clickableMarkers.get(m.getId());
+                if(clickableOrNot.equals("Clickable")){
+                    activateTripOnServer(m);        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
+
+                    cancelButton.setVisibility(View.VISIBLE);
+                    btnFinish.setVisibility(View.VISIBLE);
+                    clickableMarkers.put(m.getId(), "NotClickable");
+
+                    endDestination = m;
+                    Toast toast = Toast.makeText(getApplicationContext(), "Let the light guide your way!", Toast.LENGTH_SHORT);
+                    toast.show();
+                }else{
+
+                }
             }
         });
 
@@ -696,6 +714,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             destination.setTitle(endAddress[0]);      //Get the adress and add it to the InfoWindow snippet
             addPolyline(result, mMap);      //Draw the navigational line
             destination.showInfoWindow();       //Display the InfoWindow snippet
+
 
         } catch (ApiException e) {
             e.printStackTrace();
