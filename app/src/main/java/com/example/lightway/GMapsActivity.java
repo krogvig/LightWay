@@ -281,6 +281,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                         || event.getAction() == KeyEvent.KEYCODE_ENTER){
                     //execute our method for searching
                     geoLocate();
+                    mSearchText.dismissDropDown();
                 }
 
                 return false;
