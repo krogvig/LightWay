@@ -174,6 +174,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private DatabaseReference mDatabase;
     private DatabaseReference userToBeRemoved;
 
+    String infoWindowSize;
+
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
@@ -370,10 +372,21 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
                 TextView startTripBtn = infoWindow.findViewById(R.id.startTrip);
                 if(marker.getTitle().equals("Your trip ID:")){
+
                     infoWindow.setBackgroundColor(Color.BLACK);
                     title.setTextColor(Color.WHITE);
-                    title.setTextSize(20);  // change for Your trip ID size.
-                    snippet.setTextSize(80); //change for ID size
+                    if(infoWindowSize.equals("Small")){
+                        title.setVisibility(View.VISIBLE);
+                        title.setTextSize(20);  // change for Your trip ID size.
+                        snippet.setTextSize(100); //change for ID size
+                        startTripBtn.setVisibility(View.VISIBLE);
+                        infoWindowSize = "Big";
+                    }else{
+                        title.setVisibility(View.GONE);
+                        snippet.setTextSize(25);
+                        startTripBtn.setVisibility(View.GONE);
+                        infoWindowSize = "Small";
+                    }
                     switch (colorID){
                         case "Blue": snippet.setTextColor(Color.BLUE);
                         break;
@@ -421,7 +434,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             @Override
             public void onMapClick(LatLng latLng) {
                 if(tripIsRunning){
-                    endDestination.showInfoWindow();
                     }
                 }
         });
@@ -437,14 +449,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     cancelButton.setVisibility(View.VISIBLE);
                     btnFinish.setVisibility(View.VISIBLE);
                     tripIsRunning = true;
+                    infoWindowSize = "Small";
                     clickableMarkers.put(m.getId(), "NotClickable");
 
                     endDestination = m;
                     Toast toast = Toast.makeText(getApplicationContext(), "Let the light guide your way!", Toast.LENGTH_SHORT);
                     toast.show();
                 }else{
-                    m.hideInfoWindow();
-
+                    m.showInfoWindow();
                 }
             }
         });
@@ -847,7 +859,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                                 }
                                 String fullID = id.substring(1,4);
                                 colorID = color;
-                                m.setSnippet(" " + id.substring(2,4) +" ");        //Display the part of the ID the user needs to see
+                                m.setSnippet("  " + id.substring(2,4) +"  ");        //Display the part of the ID the user needs to see
                                 mDatabase.child("takenIDs").child(uid).child("ID").setValue(fullID);        //Set the full ID in the takenIDs child
                                 mDatabase.child("takenIDs").child(uid).child("Distance").setValue(travelDistance);      //Set the trips distance in the takenIDs child
                                 mDatabase.child("freeIDs").child(fullID).removeValue();     //Remove the ID from freeIDs
