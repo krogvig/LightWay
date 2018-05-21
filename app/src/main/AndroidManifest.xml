@@ -58,10 +58,12 @@
 
         <activity
             android:name=".GMapsActivity"
-            android:label="@string/title_activity_gmaps">
+            android:label="@string/title_activity_gmaps"
+            android:screenOrientation="portrait">
         </activity>
         <activity android:name=".AirStationsAPIActivity" />
-        <activity android:name=".LoginActivity" >
+        <activity android:name=".LoginActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -69,8 +71,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".RegisterActivity"
-            android:parentActivityName=".LoginActivity"/>
+            android:screenOrientation="portrait"
+            android:parentActivityName=".LoginActivity" />
         <activity android:name=".ForgotPasswordActivity"
+            android:screenOrientation="portrait"
             android:parentActivityName=".LoginActivity"/>
         <activity android:name=".CallAPI" />
     </application>

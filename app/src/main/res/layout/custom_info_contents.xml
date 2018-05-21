@@ -29,6 +29,6 @@
         android:textColor="#ff000000"
         android:text=" Start Trip "
         android:layout_gravity="center_horizontal"
-        android:background="@drawable/rounded_corner"
+        android:background="@drawable/custom_button_starttrip"
         android:textSize="18sp" />
 </LinearLayout>

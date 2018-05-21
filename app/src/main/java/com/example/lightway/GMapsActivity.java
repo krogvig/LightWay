@@ -386,6 +386,18 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 TextView startTripBtn = infoWindow.findViewById(R.id.startTrip);
                 if(marker.getTitle().equals("Your trip ID:")){
                     startTripBtn.setVisibility(View.GONE);
+                    title.setVisibility(View.GONE);
+                    snippet.setTextSize(100); // How big the infowindow should be.
+                    snippet.setBackgroundColor(Color.BLACK);
+                    String snippetString = snippet.getText().toString();
+                    String colourID = snippetString.substring(0, 1);
+                    switch (colourID){
+                        case "B": snippet.setTextColor(Color.BLUE);
+                        break;
+                        case "R": snippet.setTextColor(Color.RED);
+                        break;
+                        case "G": snippet.setTextColor(Color.GREEN);
+                    }
                     //startTripBtn.setText("Trip has started!");
                 }else{
                     startTripBtn.setVisibility(View.VISIBLE);
