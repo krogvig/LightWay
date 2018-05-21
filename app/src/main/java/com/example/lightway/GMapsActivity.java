@@ -55,6 +55,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -108,6 +109,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -375,23 +377,22 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             public View getInfoContents(Marker marker) {
                 // Inflate the layouts for the info window, title and snippet.
                 View infoWindow = getLayoutInflater().inflate(R.layout.custom_info_contents,
-                        (FrameLayout) findViewById(R.id.gMap), false);
+                            (FrameLayout) findViewById(R.id.gMap), false);
 
-                TextView title = infoWindow.findViewById(R.id.title);
-                title.setText(marker.getTitle());
+                    TextView title = infoWindow.findViewById(R.id.title);
+                    title.setText(marker.getTitle());
 
-                TextView snippet = infoWindow.findViewById(R.id.snippet);
-                snippet.setText(marker.getSnippet());
+                    TextView snippet = infoWindow.findViewById(R.id.snippet);
+                    snippet.setText(marker.getSnippet());
 
-                TextView startTripBtn = infoWindow.findViewById(R.id.startTrip);
-                if(marker.getTitle().equals("Your trip ID:")){
-                    startTripBtn.setVisibility(View.GONE);
-                    //startTripBtn.setText("Trip has started!");
-                }else{
-                    startTripBtn.setVisibility(View.VISIBLE);
-                    //startTripBtn.setText(" Start Trip ");
-                }
-
+                    TextView startTripBtn = infoWindow.findViewById(R.id.startTrip);
+                    if (marker.getTitle() != null && marker.getTitle().equals("Your trip ID:")) {
+                        startTripBtn.setVisibility(View.GONE);
+                        //startTripBtn.setText("Trip has started!");
+                    } else {
+                        startTripBtn.setVisibility(View.VISIBLE);
+                        //startTripBtn.setText(" Start Trip ");
+                    }
                 return infoWindow;
             }
         });
@@ -409,16 +410,26 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker m) {
-                new Thread(new Runnable() {
-                    public void run() {
-                        getDeviceLocation(false);        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
-                    }
-                }).start();
-                clickableMarkers.put(m.getId(), "Clickable");
-                calcTrip(m);        // When a marker is clicked, call the method to calculate the trip to it from the phones position
-                mMap.getUiSettings().setMapToolbarEnabled(true);
+                if (cancelButton.getVisibility() != View.VISIBLE){
+                    new Thread(new Runnable() {
+                        public void run() {
+                            getDeviceLocation(false);        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
+                        }
+                    }).start();
+                    clickableMarkers.put(m.getId(), "Clickable");
+                    calcTrip(m);        // When a marker is clicked, call the method to calculate the trip to it from the phones position
+                    mMap.getUiSettings().setMapToolbarEnabled(true);
+                    return false;
+                }
+                else if (m.equals(endDestination)){
+                        m.showInfoWindow();
+                }
+                else {
+                    endDestination.showInfoWindow();
+                }
+
                 // return true will prevent any further map action from happening
-                return false;
+                return true;
             }
         });
 
@@ -438,14 +449,32 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     endDestination = m;
                     Toast toast = Toast.makeText(getApplicationContext(), "Let the light guide your way!", Toast.LENGTH_SHORT);
                     toast.show();
-                }else{
-
+                    toggleButtons(false);
                 }
             }
         });
 
     }
+    
+    private void toggleButtons(boolean status) {
+        ToggleButton parkingBtn = findViewById(R.id.parking);
+        ToggleButton pumpBtn = findViewById(R.id.air_stations);
 
+        if (!status) {
+            parkingBtn.setEnabled(status);
+            parkingBtn.setAlpha(0.5f);
+            pumpBtn.setEnabled(status);
+            pumpBtn.setAlpha(0.5f);
+        }
+        else {
+            parkingBtn.setEnabled(status);
+            parkingBtn.setAlpha(1f);
+            pumpBtn.setEnabled(status);
+            pumpBtn.setAlpha(1f);
+        }
+
+    }
+    
     public void finishTrip(View v){
         final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();      //Get the user ID
         AutoCompleteTextView input_search = findViewById(R.id.input_search);        //Reset searchbar
@@ -877,6 +906,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     public void cancelTrip(View v) {
+        toggleButtons(true);
         final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
         final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
@@ -901,7 +931,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
         }
 
-        Toast.makeText(getApplicationContext(), "Trip finished!", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Trip ended!", Toast.LENGTH_LONG).show();
         cancelButton.setVisibility(View.GONE);
         btnFinish.setVisibility(View.GONE);
         AutoCompleteTextView input_search = findViewById(R.id.input_search);
