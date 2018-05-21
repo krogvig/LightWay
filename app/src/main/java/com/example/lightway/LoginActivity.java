@@ -11,6 +11,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -387,6 +388,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 Swedishtext = myDialog.findViewById(R.id.textSwedish);
 
                 English = myDialog.findViewById(R.id.englishbtn);
+                EnglishText.setMovementMethod(new ScrollingMovementMethod());
                 English.setOnClickListener(new View.OnClickListener() {
                                                @Override
                                                public void onClick(View v) {
@@ -397,6 +399,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                                                }
                                            });
                 Swedish = myDialog.findViewById(R.id.swedishbtn);
+                Swedishtext.setMovementMethod(new ScrollingMovementMethod());
                 Swedish.setOnClickListener(new View.OnClickListener() {
                                                    @Override
                                                    public void onClick(View v) {

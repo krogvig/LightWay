@@ -69,9 +69,10 @@
         android:id="@+id/textEnglish"
         android:layout_width="0dp"
         android:layout_height="328dp"
-
+        android:scrollbars="vertical"
         android:layout_marginEnd="13dp"
         android:layout_marginStart="13dp"
+        android:autoLink="email"
         android:text="Privacy policy
 
 Stockholm City built the Lightway app as a free app. This Service is provided by Stockholm City at no cost and is intended for use as is.
@@ -126,10 +127,12 @@ If you have any questions or suggestions about our Privacy Policy, do not hesita
         android:layout_marginEnd="14dp"
         android:layout_marginStart="14dp"
         android:freezesText="false"
+
         android:scrollIndicators="top|bottom"
         android:scrollbarStyle="outsideOverlay"
         android:scrollbarTrackHorizontal="@color/cardview_dark_background"
-        android:scrollbars="horizontal"
+        android:scrollbars="vertical"
+        android:autoLink="email"
         android:text="Privacy policy
 
 Stockholm Stad har utvecklat Lightway applikationen som en gratis applikation. Denna tjänst tillhandahålls av Stockholm stad utan kostnad och är avsedd att användas som den är.
