@@ -194,6 +194,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private double distanceToAdd;
     private GeoApiContext geoApiContext = new GeoApiContext();
     String colorID;
+    Boolean tripIsRunning = false;
 
 
     @Override
@@ -416,6 +417,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             }
         });
 
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                if(tripIsRunning){
+                    endDestination.showInfoWindow();
+                    }
+                }
+        });
 
         // Listen for clicks on any InfoWindow
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
@@ -427,6 +436,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
                     cancelButton.setVisibility(View.VISIBLE);
                     btnFinish.setVisibility(View.VISIBLE);
+                    tripIsRunning = true;
                     clickableMarkers.put(m.getId(), "NotClickable");
 
                     endDestination = m;
@@ -493,6 +503,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                             }
                             setNoOfRides(oldNo + 1);
                             loadProfileInfo();
+                            tripIsRunning = false;
                         }
 
                         @Override
@@ -902,6 +913,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         btnFinish.setVisibility(View.GONE);
         AutoCompleteTextView input_search = findViewById(R.id.input_search);
         input_search.setText("");
+        tripIsRunning = false;
         mMap.clear();
     }
 
