@@ -370,7 +370,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 TextView startTripBtn = infoWindow.findViewById(R.id.startTrip);
                 if(marker.getTitle().equals("Your trip ID:")){
                     infoWindow.setBackgroundColor(Color.BLACK);
-                    startTripBtn.setVisibility(View.GONE);
                     title.setTextColor(Color.WHITE);
                     title.setTextSize(20);  // change for Your trip ID size.
                     snippet.setTextSize(80); //change for ID size
@@ -381,10 +380,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                         break;
                         case "Green": snippet.setTextColor(Color.GREEN);
                     }
-                    //startTripBtn.setText("Trip has started!");
+                    startTripBtn.setText(" OK ");
                 }else{
                     startTripBtn.setVisibility(View.VISIBLE);
-                    //startTripBtn.setText(" Start Trip ");
+                    startTripBtn.setText(" Start Trip ");
                 }
 
                 return infoWindow;
@@ -434,6 +433,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     Toast toast = Toast.makeText(getApplicationContext(), "Let the light guide your way!", Toast.LENGTH_SHORT);
                     toast.show();
                 }else{
+                    m.hideInfoWindow();
 
                 }
             }
