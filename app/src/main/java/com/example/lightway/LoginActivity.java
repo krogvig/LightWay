@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Html;
 import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -370,7 +371,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 Button Swedish;
                 Button OK;
                 final TextView EnglishText;
-                final TextView Swedishtext;
+
 
 
 
@@ -385,26 +386,26 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 });
 
                 EnglishText = myDialog.findViewById(R.id.textEnglish);
-                Swedishtext = myDialog.findViewById(R.id.textSwedish);
+                EnglishText.setText(Html.fromHtml(getString(R.string.EnglishText), Html.FROM_HTML_MODE_COMPACT));
+
 
                 English = myDialog.findViewById(R.id.englishbtn);
                 EnglishText.setMovementMethod(new ScrollingMovementMethod());
                 English.setOnClickListener(new View.OnClickListener() {
                                                @Override
                                                public void onClick(View v) {
-                                                   EnglishText.setVisibility(View.VISIBLE);
-                                                   Swedishtext.setVisibility(View.INVISIBLE);
 
+                                                   EnglishText.setText(Html.fromHtml(getString(R.string.EnglishText), Html.FROM_HTML_MODE_COMPACT));
 
                                                }
                                            });
                 Swedish = myDialog.findViewById(R.id.swedishbtn);
-                Swedishtext.setMovementMethod(new ScrollingMovementMethod());
+
                 Swedish.setOnClickListener(new View.OnClickListener() {
                                                    @Override
                                                    public void onClick(View v) {
-                                                       EnglishText.setVisibility(View.INVISIBLE);
-                                                       Swedishtext.setVisibility(View.VISIBLE);
+                                                       EnglishText.setText(R.string.SwedishText);
+
 
 
                                                    }

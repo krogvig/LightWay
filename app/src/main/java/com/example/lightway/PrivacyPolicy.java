@@ -20,10 +20,11 @@ public class PrivacyPolicy extends AppCompatActivity {
         setContentView(R.layout.activity_t_and_a);
 
         English = findViewById(R.id.englishbtn);
+
         Swedish = findViewById(R.id.swedishbtn);
         OK = findViewById(R.id.Okbtn);
         EnglishText = findViewById(R.id.textEnglish);
-        Swedishtext = findViewById(R.id.textSwedish);
+        EnglishText.setText(R.string.EnglishText);
 
 
         }

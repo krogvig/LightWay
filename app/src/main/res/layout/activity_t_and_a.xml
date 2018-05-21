@@ -2,23 +2,26 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".LoginActivity"
-    tools:layout_editor_absoluteY="25dp">
+    android:layout_width="350dp"
+    android:layout_height="550dp"
+    android:layout_gravity="center"
+
+    android:orientation="vertical"
+    android:padding="5dp">
+
 
 
     <Button
         android:id="@+id/englishbtn"
-        android:layout_width="115dp"
-        android:layout_height="72dp"
-
-        android:layout_marginBottom="21dp"
-        android:layout_marginEnd="88dp"
-        android:layout_marginStart="33dp"
+        android:layout_width="100dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="98dp"
+        android:layout_marginStart="43dp"
         android:onClick="ShowEnglish"
         android:text="English"
-        app:layout_constraintBottom_toTopOf="@+id/textSwedish"
+        app:layout_constraintBottom_toTopOf="@+id/textEnglish"
         app:layout_constraintEnd_toStartOf="@+id/swedishbtn"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView3" />
@@ -26,158 +29,66 @@
 
     <Button
         android:id="@+id/swedishbtn"
-        android:layout_width="115dp"
-        android:layout_height="72dp"
+        android:layout_width="100dp"
+        android:layout_height="60dp"
 
-        android:layout_marginEnd="33dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="43dp"
+        android:layout_marginTop="4dp"
         android:onClick="ShowSwedish"
         android:text="Swedish"
-        app:layout_constraintBottom_toBottomOf="@+id/englishbtn"
+        app:layout_constraintBottom_toTopOf="@+id/textEnglish"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/englishbtn"
-        app:layout_constraintTop_toTopOf="@+id/englishbtn" />
+        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+
 
     <TextView
         android:id="@+id/textView3"
-        android:layout_width="374dp"
-        android:layout_height="72dp"
-        android:layout_marginBottom="10dp"
-        android:layout_marginEnd="5dp"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+
+        android:layout_marginTop="20dp"
         android:text="Terms and Agreements"
         android:textAlignment="center"
         android:textColor="@android:color/black"
         android:textSize="25dp"
-        app:layout_constraintBottom_toTopOf="@+id/englishbtn"
+
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"/>
+
 
     <Button
         android:id="@+id/Okbtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="17dp"
+        android:layout_marginBottom="0dp"
         android:text="OK"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textSwedish" />
+        app:layout_constraintTop_toBottomOf="@+id/textEnglish"
+        />
 
     <TextView
         android:id="@+id/textEnglish"
-        android:layout_width="0dp"
-        android:layout_height="328dp"
+        android:layout_width="match_parent"
+        android:layout_height="352dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="8dp"
+
+
+        android:layout_marginStart="8dp"
+
+        android:layout_marginTop="80dp"
         android:scrollbars="vertical"
-        android:layout_marginEnd="13dp"
-        android:layout_marginStart="13dp"
-        android:autoLink="email"
-        android:text="Privacy policy
+        android:text="@string/EnglishText"
 
-Stockholm City built the Lightway app as a free app. This Service is provided by Stockholm City at no cost and is intended for use as is.
-
-This page is used to inform app users regarding our policies with the collection, use and disclosure of Personal Information if anyone decided to use our Service.
-
-If you choose to use our Service, then you agree to the collection and use of information in relation with this policy. The Personal Information that we collect are used for providing and improving the Service. We will not use or share your information with anyone except as described in this Privacy Policy.
-
-Information Collection and Use
-For a better experience while using our Service, we require you to provide us with certain personally identifiable information, including but not limited to collecting user's name, email address and location. The information that we request is collected from your device and will be retained by us and used as described in this privacy policy. The app does use third party services that may collect information used to identify you.
-
-If you choose to create a Lightway account, we will collect your name and email address. To be able to use our Service, you will need to provide your location. We collect this information in order to give you the best experience within our app.
-
-Right to Access
-At any time you have the right to request us to provide you a copy of your personal data, free of charge, in an electronic format.
-
-Right to be Forgotten
-At any time you have the right to request us to delete all type of personal data that you provided us before.
-
-Service Providers
-We may employ third-party companies and individuals due to the following reasons:
-To facilitate our Service;
-To provide the Service on our behalf;
-To perform Service-related services; or
-To assist us in analyzing how our Service is used.
-
-We want to inform users of this Service that these third parties may have access to your Personal Information. The reason is to perform the tasks assigned to them on our behalf. However, they are obligated not to disclose or use the information for any other purpose.
-
-Security
-We value your trust in providing us your Personal Information, thus we are striving to use commercially acceptable means of protecting it. But remember that no method of transmission over the internet, or method of electronic storage is 100% secure and reliable, and we cannot guarantee its absolute security.
-
-Links to Other Sites
-This Service may contain links to other sites. If you click on a third-party link, you will be directed to that site. Note that these external sites are not operated by us. Therefore, we strongly advise you to review the Privacy Policy of these websites as we have no control over, and assume no responsibility for the content, privacy policies, or practices of any third-party sites or services.
-
-Changes to This Privacy Policy
-We may update our Privacy Policy from time to time. Thus, you are advised to review this page periodically for any changes. We will notify you of any changes by posting the new Privacy Policy in this application and any and all changes are effective immediately as soon as they have been posted.
-
-Contact Us
-If you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us at lightwaypvt1@gmail.com
-"
-        android:visibility="visible"
-        app:layout_constraintBaseline_toBaselineOf="@+id/textSwedish"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/textSwedish"
-        android:layout_width="wrap_content"
-        android:layout_height="331dp"
-
-        android:layout_marginBottom="10dp"
-        android:layout_marginEnd="14dp"
-        android:layout_marginStart="14dp"
-        android:freezesText="false"
-
-        android:scrollIndicators="top|bottom"
-        android:scrollbarStyle="outsideOverlay"
-        android:scrollbarTrackHorizontal="@color/cardview_dark_background"
-        android:scrollbars="vertical"
-        android:autoLink="email"
-        android:text="Privacy policy
-
-Stockholm Stad har utvecklat Lightway applikationen som en gratis applikation. Denna tjänst tillhandahålls av Stockholm stad utan kostnad och är avsedd att användas som den är.
-
-Den här sidan används för att informera applikationsanvändare om vår policy kring insamling, användning och offentliggörande av personlig information ifall någon bestämmer sig för att använda vår tjänst.
-
-Om du väljer att använda vår tjänst, godkänner du insamlingen och användningen av personlig information i enlighet med denna policy. Den personliga information som vi samlar används för att tillhandahålla och förbättra tjänsten. Vi kommer inte använda eller dela din information med någon annan än vad som beskrivs i denna sekretesspolicy.
-
-Villkoren som används i denna sekretesspolicy har samma innebörd som i våra användarvillkor, som är tillgänglig via Lightway, om inte annat anges i denna sekretesspolicy.
-
-Informationsinsamling och användning
-För en bättre upplevelse när du använder vår tjänst kräver vi att du ger oss viss personligt identifierbar information, inklusive men inte begränsat till användarens namn, e-postadress och plats. Den information vi begär är samlad från din enhet och kommer att behållas av oss och används enligt beskrivningen i denna sekretesspolicy. Appen använder tjänster från tredje part som kan samla in information som används för att identifiera dig.
-
-Om du väljer att skapa ett Lightway-konto samlar vi in ditt namn och din e-postadress. För att kunna använda vår tjänst måste du uppge din plats. Vi samlar in denna information för att ge dig den bästa upplevelsen i vår app.
-Rätt till åtkomst
-När som helst har du rätt att begära en kopia av dina personuppgifter, kostnadsfritt, i ett elektroniskt format.
-
-Rätt att bli glömd
-När som helst har du rätt att begära att vi tar bort alla typer av personuppgifter som du gav oss förut.
-
-Tjänsteleverantörer
-Vi kan använda tredjepartsföretag och individer på grund av följande skäl:
-För att underlätta vår Tjänst;
-Att tillhandahålla Tjänsten på våra vägnar;
-Att utföra servicerelaterade tjänster eller
-För att hjälpa oss att analysera hur vår Tjänst används.
-
-Vi vill informera användare av den här tjänsten om att dessa tredje parter har tillgång till din personliga information. Anledningen är att utföra de uppdrag som tilldelats dem på vår vägnar. De är dock skyldiga att inte avslöja eller använda informationen för något annat syfte.
-
-Säkerhet
-Vi värdesätter ert förtroende för att låta oss samla din personliga information, så vi strävar efter att använda kommersiellt godtagbara sätt att skydda den. Dock är det viktigt att poängtera att ingen överföringsmetod över internet, eller elektronisk lagringsmetod är 100% säker och pålitlig, och vi kan inte garantera dess absoluta säkerhet.
-
-Länkar till andra webbplatser
-Den här tjänsten kan innehålla länkar till andra webbplatser. Om du klickar på en tredjeparts länk kommer du att styras till den webbplatsen. Observera att dessa externa sidor inte drivs av oss. Därför rekommenderar vi starkt att du granskar sekretesspolicyen för dessa webbplatser. Vi har ingen kontroll över och tar inget ansvar för innehållet, sekretesspolicy eller praxis för tredje parts webbplatser eller tjänster.
-
-Ändringar i denna sekretesspolicy
-Vi kan komma att uppdatera vår sekretesspolicy. Således rekommenderas du att regelbundet granska denna sida för eventuella ändringar. Vi meddelar dig om eventuella ändringar genom att publicera den nya sekretesspolicyn på den här sidan. Dessa ändringar gäller omedelbart efter det att de har publicerats på den här sidan.
-
-Kontakta oss
-Om du har några frågor eller förslag om vår sekretesspolicy, tveka inte att kontakta oss på lightwaypvt1@gmail.com.
-"
-        android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/Okbtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/englishbtn" />
+        app:layout_constraintTop_toBottomOf="@+id/textView3"
+        />
+
 
 </android.support.constraint.ConstraintLayout>
