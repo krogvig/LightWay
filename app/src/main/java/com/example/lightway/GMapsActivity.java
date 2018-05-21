@@ -27,7 +27,6 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -51,7 +50,6 @@ import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -66,8 +64,6 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -79,11 +75,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.UserInfo;
 import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.maps.DirectionsApi;
 import com.google.maps.GeoApiContext;
 import com.google.maps.android.PolyUtil;
@@ -93,23 +84,15 @@ import com.google.maps.model.DirectionsStep;
 import com.google.maps.model.TravelMode;
 
 import org.joda.time.DateTime;
-import org.xml.sax.SAXParseException;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -210,6 +193,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private static HashMap<String, Parking>  allParkings = new HashMap<>();
     private double distanceToAdd;
     private GeoApiContext geoApiContext = new GeoApiContext();
+    String colorID;
 
 
     @Override
@@ -385,18 +369,17 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
                 TextView startTripBtn = infoWindow.findViewById(R.id.startTrip);
                 if(marker.getTitle().equals("Your trip ID:")){
+                    infoWindow.setBackgroundColor(Color.BLACK);
                     startTripBtn.setVisibility(View.GONE);
-                    title.setVisibility(View.GONE);
-                    snippet.setTextSize(100); // How big the infowindow should be.
-                    snippet.setBackgroundColor(Color.BLACK);
-                    String snippetString = snippet.getText().toString();
-                    String colourID = snippetString.substring(0, 1);
-                    switch (colourID){
-                        case "B": snippet.setTextColor(Color.BLUE);
+                    title.setTextColor(Color.WHITE);
+                    title.setTextSize(20);  // change for Your trip ID size.
+                    snippet.setTextSize(80); //change for ID size
+                    switch (colorID){
+                        case "Blue": snippet.setTextColor(Color.BLUE);
                         break;
-                        case "R": snippet.setTextColor(Color.RED);
+                        case "Red": snippet.setTextColor(Color.RED);
                         break;
-                        case "G": snippet.setTextColor(Color.GREEN);
+                        case "Green": snippet.setTextColor(Color.GREEN);
                     }
                     //startTripBtn.setText("Trip has started!");
                 }else{
@@ -852,7 +835,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                                         break;
                                 }
                                 String fullID = id.substring(1,4);
-                                m.setSnippet(color + " " + id.substring(2,4));        //Display the part of the ID the user needs to see
+                                colorID = color;
+                                m.setSnippet(" " + id.substring(2,4) +" ");        //Display the part of the ID the user needs to see
                                 mDatabase.child("takenIDs").child(uid).child("ID").setValue(fullID);        //Set the full ID in the takenIDs child
                                 mDatabase.child("takenIDs").child(uid).child("Distance").setValue(travelDistance);      //Set the trips distance in the takenIDs child
                                 mDatabase.child("freeIDs").child(fullID).removeValue();     //Remove the ID from freeIDs
