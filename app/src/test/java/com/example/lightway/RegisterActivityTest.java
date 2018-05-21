@@ -14,6 +14,7 @@ import static org.junit.Assert.*;
 public class RegisterActivityTest {
 
     Context mMockContext;
+    RegisterActivity registerActivity = new RegisterActivity();
 
     @Before
     public void setUp() throws Exception {
@@ -21,9 +22,12 @@ public class RegisterActivityTest {
 
     @Test
     public void correctPasswordTest(){
-        RegisterActivity registerActivity = new RegisterActivity();
-
         assertTrue(registerActivity.correctPasswordFormat("Test123"));
+    }
+
+    @Test
+    public void incorrectPasswordTest(){
+        assertFalse(registerActivity.correctPasswordFormat("test1"));
     }
 
     @After
