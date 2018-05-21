@@ -21,6 +21,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBuffer;
@@ -277,7 +278,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mSearchText.setOnItemClickListener(mAutocompleteClickListener);
 
         mPlaceAutocompleteAdapter = new PlaceAutocompleteAdapter(this, mGeoDataClient,
-                LAT_LNG_BOUNDS, null);
+                LAT_LNG_BOUNDS, filter);
 
         mSearchText.setAdapter(mPlaceAutocompleteAdapter);
 
@@ -1206,4 +1207,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             places.release();
         }
     };
+
+    //Search results restricted to Sweden
+    AutocompleteFilter filter =
+            new AutocompleteFilter.Builder().setCountry("SE").build();
+
 }
