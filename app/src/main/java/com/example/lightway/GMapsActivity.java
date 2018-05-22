@@ -41,6 +41,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -456,7 +457,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     tripIsRunning = true;
                     clickableMarkers.put(m.getId(), "NotClickable");
                     endDestination = m;
-                    Toast toast = Toast.makeText(getApplicationContext(), "Let the light guide your way!", Toast.LENGTH_SHORT);
+                    Toast toast = Toast.makeText(getApplicationContext(), "Let the light guide your way!", Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP, 0, 150); // increasing the yOffest will make the toast appear lower down on the sceen
                     toast.show();
                     toggleButtons(false);
                 }else{
