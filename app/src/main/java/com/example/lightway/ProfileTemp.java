@@ -56,7 +56,6 @@ public class ProfileTemp extends AppCompatActivity {
             }
         });
 
-        setFirebasePicBtn = findViewById(R.id.setFirebasePic);
 
         setFirebasePicBtn.setOnClickListener(new View.OnClickListener() {
             @Override

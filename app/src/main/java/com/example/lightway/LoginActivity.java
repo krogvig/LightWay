@@ -1,17 +1,23 @@
 package com.example.lightway;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Html;
 import android.text.TextUtils;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
@@ -63,6 +69,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private DatabaseReference mDatabase;
 
     private String providerData;
+    Dialog myDialog;
 
     final int SIGN_IN_CODE = 500;
 
@@ -171,7 +178,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             }
         });
 
+
+        myDialog = new Dialog(this);
     }
+
 
     private void emailSignIn(){
         String email = mEmailField.getText().toString();
@@ -352,4 +362,62 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
-}
+
+    public void PrivacyPolicy(View view) {
+        runOnUiThread(new Runnable(){
+            @Override
+            public void run(){
+                Button English;
+                Button Swedish;
+                Button OK;
+                final TextView EnglishText;
+
+
+
+
+                myDialog.setContentView(R.layout.activity_t_and_a);
+
+                OK = myDialog.findViewById(R.id.Okbtn);
+                OK.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        myDialog.dismiss();
+                    }
+                });
+
+                EnglishText = myDialog.findViewById(R.id.textEnglish);
+                EnglishText.setText(Html.fromHtml(getString(R.string.EnglishText), Html.FROM_HTML_MODE_COMPACT));
+
+
+                English = myDialog.findViewById(R.id.englishbtn);
+                EnglishText.setMovementMethod(new ScrollingMovementMethod());
+                English.setOnClickListener(new View.OnClickListener() {
+                                               @Override
+                                               public void onClick(View v) {
+
+                                                   EnglishText.setText(Html.fromHtml(getString(R.string.EnglishText), Html.FROM_HTML_MODE_COMPACT));
+
+                                               }
+                                           });
+                Swedish = myDialog.findViewById(R.id.swedishbtn);
+
+                Swedish.setOnClickListener(new View.OnClickListener() {
+                                                   @Override
+                                                   public void onClick(View v) {
+                                                       EnglishText.setText(Html.fromHtml(getString(R.string.SwedishText), Html.FROM_HTML_MODE_COMPACT));
+
+
+
+                                                   }
+
+
+
+            });
+                myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.WHITE));
+                myDialog.show();
+    }
+
+
+
+});
+    }}

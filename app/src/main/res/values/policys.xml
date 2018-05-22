@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="EnglishText"> <![CDATA[<h3>Privacy policy</h3><br>
+
+        <p>Stockholm City built the Lightway app as a free app. This Service is provided by Stockholm City at no cost and is intended for use as is.</p><br>
+
+<p>This page is used to inform app users regarding our policies with the collection, use and disclosure of Personal Information if anyone decided to use our Service.</p>
+
+<p>If you choose to use our Service, then you agree to the collection and use of information in relation with this policy.</p>
+<p>The Personal Information that we collect are used for providing and improving the Service.</p>
+<p> We will not use or share your information with anyone except as described in this Privacy Policy.</p><br>
+
+<p><b>Information Collection and Use</b></p>
+For a better experience while using our Service, we require you to provide us with certain personally identifiable information, including but not limited to collecting user\'s name, email address and location.<p> The information that we request is collected from your device and will be retained by us and used as described in this privacy policy. The app does use third party services that may collect information used to identify you.</p>
+
+<p>If you choose to create a Lightway account, we will collect your name and email address.</p>
+<p> To be able to use our Service, you will need to provide your location. We collect this information in order to give you the best experience within our app.</p><br>
+
+<p><b>Right to Access</b></p>
+At any time you have the right to request us to provide you a copy of your personal data, free of charge, in an electronic format.<br>
+
+<p><b>Right to be Forgotten</b></p>
+At any time you have the right to request us to delete all type of personal data that you provided us before.
+
+<p><b>Service Providers</b></p>
+We may employ third-party companies and individuals due to the following reasons:
+<li>To facilitate our Service;</li>
+<li>To provide the Service on our behalf;</li>
+<li>To perform Service-related services; or</li>
+<li>To assist us in analyzing how our Service is used.</li>
+
+<p>We want to inform users of this Service that these third parties may have access to your Personal Information. The reason is to perform the tasks assigned to them on our behalf. However, they are obligated not to disclose or use the information for any other purpose.</p><br>
+
+<p><b>Security</b></p>
+<p>We value your trust in providing us your Personal Information, thus we are striving to use commercially acceptable means of protecting it. But remember that no method of transmission over the internet, or method of electronic storage is 100% secure and reliable, and we cannot guarantee its absolute security.</p><br>
+
+<p><b>Links to Other Sites</b></p>
+<p>This Service may contain links to other sites. If you click on a third-party link, you will be directed to that site. Note that these external sites are not operated by us. Therefore, we strongly advise you to review the Privacy Policy of these websites as we have no control over, and assume no responsibility for the content, privacy policies, or practices of any third-party sites or services.</p><br>
+
+<p><b>Changes to This Privacy Policy</b></p>
+<p>We may update our Privacy Policy from time to time. Thus, you are advised to review this page periodically for any changes. We will notify you of any changes by posting the new Privacy Policy in this application and any and all changes are effective immediately as soon as they have been posted.<p><br>
+
+<p><b>Contact Us</b></p>
+<p>If you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us at lightwaypvt1@gmail.com </p>]]></string>
+
+
+
+<string name="SwedishText"><![CDATA[<h3>Privacy policy</h3><br>
+
+        <p>Stockholm Stad har utvecklat Lightway applikationen som en gratis applikation. Denna tjänst tillhandahålls av Stockholm stad utan kostnad och är avsedd att användas som den är.</p><br>
+
+<p>Den här sidan används för att informera applikationsanvändare om vår policy kring insamling, användning och offentliggörande av personlig information ifall någon bestämmer sig för att använda vår tjänst.</p>
+
+<p>Om du väljer att använda vår tjänst, godkänner du insamlingen och användningen av personlig information i enlighet med denna policy.</p>
+<p> Den personliga information som vi samlar används för att tillhandahålla och förbättra tjänsten.</p>
+<p> Vi kommer inte använda eller dela din information med någon annan än vad som beskrivs i denna sekretesspolicy.</p><br>
+<p>Villkoren som används i denna sekretesspolicy har samma innebörd som i våra användarvillkor, som är tillgänglig via Lightway, om inte annat anges i denna sekretesspolicy.</p><br>
+
+<p><b>Informationsinsamling och användning</b></p>
+För en bättre upplevelse när du använder vår tjänst kräver vi att du ger oss viss personligt identifierbar information, inklusive men inte begränsat till användarens namn, e-postadress och plats.
+<p> Den information vi begär är samlad från din enhet och kommer att behållas av oss och används enligt beskrivningen i denna sekretesspolicy. Appen använder tjänster från tredje part som kan samla in information som används för att identifiera dig.</p>
+
+<p>Om du väljer att skapa ett Lightway-konto samlar vi in ditt namn och din e-postadress.</p>
+<p> För att kunna använda vår tjänst måste du uppge din plats. Vi samlar in denna information för att ge dig den bästa upplevelsen i vår app.</p><br>
+
+<p><b>Rätt till åtkomst</b></p>
+När som helst har du rätt att begära en kopia av dina personuppgifter, kostnadsfritt, i ett elektroniskt format.<br>
+
+<p><b>Rätt att bli glömd</b></p>
+När som helst har du rätt att begära att vi tar bort alla typer av personuppgifter som du gav oss förut.
+
+<p><b>Tjänsteleverantörer</b></p>
+Vi kan använda tredjepartsföretag och individer på grund av följande skäl:
+<li>För att underlätta vår Tjänst;</li>
+<li>Att tillhandahålla Tjänsten på våra vägnar;</li>
+<li>Att utföra servicerelaterade tjänster eller</li>
+<li>För att hjälpa oss att analysera hur vår Tjänst används.</li>
+
+
+<p>Vi vill informera användare av den här tjänsten om att dessa tredje parter har tillgång till din personliga information. Anledningen är att utföra de uppdrag som tilldelats dem på vår vägnar. De är dock skyldiga att inte avslöja eller använda informationen för något annat syfte.</p><br>
+
+<p><b>Säkerhet</b></p>
+<p>Vi värdesätter ert förtroende för att låta oss samla din personliga information, så vi strävar efter att använda kommersiellt godtagbara sätt att skydda den. Dock är det viktigt att poängtera att ingen överföringsmetod över internet, eller elektronisk lagringsmetod är 100% säker och pålitlig, och vi kan inte garantera dess absoluta säkerhet.</p><br>
+
+<p><b>Länkar till andra webbplatser</b></p>
+<p>Den här tjänsten kan innehålla länkar till andra webbplatser. Om du klickar på en tredjeparts länk kommer du att styras till den webbplatsen. Observera att dessa externa sidor inte drivs av oss. Därför rekommenderar vi starkt att du granskar sekretesspolicyen för dessa webbplatser. Vi har ingen kontroll över och tar inget ansvar för innehållet, sekretesspolicy eller praxis för tredje parts webbplatser eller tjänster.</p><br>
+
+<p><b>Ändringar i denna sekretesspolicy</b></p>
+<p>Vi kan komma att uppdatera vår sekretesspolicy. Således rekommenderas du att regelbundet granska denna sida för eventuella ändringar. Vi meddelar dig om eventuella ändringar genom att publicera den nya sekretesspolicyn på den här sidan. Dessa ändringar gäller omedelbart efter det att de har publicerats på den här sidan.<p><br>
+
+<p><b>Kontakta oss</b></p>
+<p>Om du har några frågor eller förslag om vår sekretesspolicy, tveka inte att kontakta oss på lightwaypvt1@gmail.com. </p>]]></string>
+
+
+
+
+</resources>

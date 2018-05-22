@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="350dp"
+    android:layout_height="550dp"
+    android:layout_gravity="center"
+
+    android:orientation="vertical"
+    android:padding="5dp">
+
+
+
+    <Button
+        android:id="@+id/englishbtn"
+        android:layout_width="100dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="98dp"
+        android:layout_marginStart="43dp"
+        android:onClick="ShowEnglish"
+        android:text="English"
+        app:layout_constraintBottom_toTopOf="@+id/textEnglish"
+        app:layout_constraintEnd_toStartOf="@+id/swedishbtn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+
+
+    <Button
+        android:id="@+id/swedishbtn"
+        android:layout_width="100dp"
+        android:layout_height="60dp"
+
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="43dp"
+        android:layout_marginTop="4dp"
+        android:onClick="ShowSwedish"
+        android:text="Swedish"
+        app:layout_constraintBottom_toTopOf="@+id/textEnglish"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/englishbtn"
+        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+
+        android:layout_marginTop="20dp"
+        android:text="Terms and Agreements"
+        android:textAlignment="center"
+        android:textColor="@android:color/black"
+        android:textSize="25dp"
+
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+
+    <Button
+        android:id="@+id/Okbtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="0dp"
+        android:text="OK"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textEnglish"
+        />
+
+    <TextView
+        android:id="@+id/textEnglish"
+        android:layout_width="match_parent"
+        android:layout_height="352dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="8dp"
+
+
+        android:layout_marginStart="8dp"
+
+        android:layout_marginTop="80dp"
+        android:scrollbars="vertical"
+        android:text="@string/EnglishText"
+
+        app:layout_constraintBottom_toTopOf="@+id/Okbtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView3"
+        />
+
+
+</android.support.constraint.ConstraintLayout>
