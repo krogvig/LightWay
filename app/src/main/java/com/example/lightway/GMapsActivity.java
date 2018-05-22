@@ -1234,10 +1234,11 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private void hideSoftKeyboard(){
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
+   /*   This caused a bug where you couldnt use the keyboard after using the searchbar once
         InputMethodManager imm = (InputMethodManager)
                 getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromInputMethod(mSearchText.getWindowToken(), 0);
-
+*/
         View view = this.getCurrentFocus();
         if (view != null) {
             InputMethodManager immm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
