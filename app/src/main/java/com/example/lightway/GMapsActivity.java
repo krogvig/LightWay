@@ -21,12 +21,12 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -41,6 +41,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -50,10 +51,10 @@ import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -65,8 +66,6 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -78,36 +77,24 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.UserInfo;
 import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.maps.DirectionsApi;
 import com.google.maps.GeoApiContext;
 import com.google.maps.android.PolyUtil;
 import com.google.maps.errors.ApiException;
 import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.DirectionsStep;
 import com.google.maps.model.TravelMode;
 
 import org.joda.time.DateTime;
-import org.xml.sax.SAXParseException;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -189,6 +176,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private DatabaseReference mDatabase;
     private DatabaseReference userToBeRemoved;
 
+
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
@@ -202,8 +190,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         allParkings.put(key, value);
     }
 
+    private HashMap<String, String> clickableMarkers = new HashMap<>();
     private static HashMap<String, Pump>  allPumps = new HashMap<>();
     private static HashMap<String, Parking>  allParkings = new HashMap<>();
+    private double distanceToAdd;
+    private GeoApiContext geoApiContext = new GeoApiContext();
+    private String colorID;
+    private Boolean tripIsRunning = false;
+    private Dialog tripIDPopup;
 
 
     @Override
@@ -220,7 +214,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_main);
 
         //
-        mSearchText = (AutoCompleteTextView) findViewById(R.id.input_search);
+        mSearchText = findViewById(R.id.input_search);
 
         // Construct a GeoDataClient.
         mGeoDataClient = Places.getGeoDataClient(this, null);
@@ -237,6 +231,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
 
         myDialog = new Dialog(this);
+        tripIDPopup = new Dialog(this);
 
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -274,7 +269,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mSearchText.setOnItemClickListener(mAutocompleteClickListener);
 
         mPlaceAutocompleteAdapter = new PlaceAutocompleteAdapter(this, mGeoDataClient,
-                LAT_LNG_BOUNDS, null);
+                LAT_LNG_BOUNDS, filter);
 
         mSearchText.setAdapter(mPlaceAutocompleteAdapter);
 
@@ -287,6 +282,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                         || event.getAction() == KeyEvent.KEYCODE_ENTER){
                     //execute our method for searching
                     geoLocate();
+                    mSearchText.dismissDropDown();
                 }
 
                 return false;
@@ -369,13 +365,35 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             public View getInfoContents(Marker marker) {
                 // Inflate the layouts for the info window, title and snippet.
                 View infoWindow = getLayoutInflater().inflate(R.layout.custom_info_contents,
-                        (FrameLayout) findViewById(R.id.gMap), false);
+                            (FrameLayout) findViewById(R.id.gMap), false);
 
                 TextView title = infoWindow.findViewById(R.id.title);
                 title.setText(marker.getTitle());
 
                 TextView snippet = infoWindow.findViewById(R.id.snippet);
                 snippet.setText(marker.getSnippet());
+
+                TextView startTripBtn = infoWindow.findViewById(R.id.startTrip);
+                if(marker.getTitle().equals("Your trip ID:")){
+
+                    infoWindow.setBackgroundColor(Color.BLACK);
+                    title.setTextColor(Color.WHITE);
+                    title.setVisibility(View.VISIBLE);
+                    title.setTextSize(13);  // change for Your trip ID size.
+                    snippet.setTextSize(25); //change for ID size
+                    startTripBtn.setVisibility(View.GONE);
+
+                    switch (colorID){
+                        case "Blue": snippet.setTextColor(Color.BLUE);
+                        break;
+                        case "Red": snippet.setTextColor(Color.RED);
+                        break;
+                        case "Green": snippet.setTextColor(Color.GREEN);
+                    }
+                }else{
+                    startTripBtn.setVisibility(View.VISIBLE);
+                    startTripBtn.setText(" Start Trip ");
+                }
 
                 return infoWindow;
             }
@@ -388,46 +406,112 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         updateLocationUI();
 
         // Get the current location of the device and set the position of the map.
-        getDeviceLocation();
+        getDeviceLocation(true);
 
         // Listen for clicks on any marker
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker m) {
+                if (cancelButton.getVisibility() != View.VISIBLE){
+                    new Thread(new Runnable() {
+                        public void run() {
+                            getDeviceLocation(false);        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
+                        }
+                    }).start();
+                    clickableMarkers.put(m.getId(), "Clickable");
+                    calcTrip(m);        // When a marker is clicked, call the method to calculate the trip to it from the phones position
+                    mMap.getUiSettings().setMapToolbarEnabled(true);
+                    return false;
+                }
+                else if (m.equals(endDestination)){
+                        m.showInfoWindow();
+                }
+                else {
+                    endDestination.showInfoWindow();
+                }
 
-                calcTrip(m);        // When a marker is clicked, call the method to calculate the trip to it from the phones position
-                mMap.getUiSettings().setMapToolbarEnabled(true);
                 // return true will prevent any further map action from happening
-                return false;
-
+                return true;
             }
         });
 
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                if(tripIsRunning){
+                    // can put endDestination.showInfoWindow(); here if we dont want the user to be able to "lose" the small infowindow
+                    }
+                }
+        });
 
         // Listen for clicks on any InfoWindow
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker m) {
+                String clickableOrNot = clickableMarkers.get(m.getId());
+                if(clickableOrNot.equals("Clickable")){
+                    activateTripOnServer(m);        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
 
-                cancelButton.setVisibility(View.VISIBLE);
-                btnFinish.setVisibility(View.VISIBLE);
-                endDestination = m;
-                Toast toast = Toast.makeText(getApplicationContext(), "Let the light guide your way!", Toast.LENGTH_SHORT);
-                toast.show();
+                    cancelButton.setVisibility(View.VISIBLE);
+                    btnFinish.setVisibility(View.VISIBLE);
+                    tripIsRunning = true;
+                    clickableMarkers.put(m.getId(), "NotClickable");
+                    endDestination = m;
+                    Toast toast = Toast.makeText(getApplicationContext(), "Let the light guide your way!", Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP, 0, 150); // increasing the yOffest will make the toast appear lower down on the sceen
+                    toast.show();
+                    toggleButtons(false);
+                }else{
+                    if(tripIsRunning){
+                        showTripIDPopup(m, colorID);
+                    }
+                }
             }
         });
 
     }
-    public void finishTrip(View v){
-        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();      //Get the user ID
-        String[] snippet = endDestination.getSnippet().split("Distance:");        //Get the actual distance from the snippet string
-        snippet = snippet[1].split(" ");
-        final double distanceToAdd = Double.parseDouble(snippet[1]);
 
-        DatabaseReference mDatabase;        //Connect to the Firebase database
+    private void toggleButtons(boolean status) {
+        ToggleButton parkingBtn = findViewById(R.id.parking);
+        ToggleButton pumpBtn = findViewById(R.id.air_stations);
+
+        if (!status) {
+            parkingBtn.setEnabled(status);
+            parkingBtn.setAlpha(0.5f);
+            pumpBtn.setEnabled(status);
+            pumpBtn.setAlpha(0.5f);
+        }
+        else {
+            parkingBtn.setEnabled(status);
+            parkingBtn.setAlpha(1f);
+            pumpBtn.setEnabled(status);
+            pumpBtn.setAlpha(1f);
+        }
+
+    }
+
+    public void finishTrip(View v){
+        final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();      //Get the user ID
+        AutoCompleteTextView input_search = findViewById(R.id.input_search);        //Reset searchbar
+        input_search.setText("");
+        final DatabaseReference mDatabase;        //Connect to the Firebase database
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         try {
+
+            mDatabase.child("takenIDs").child(uid).addListenerForSingleValueEvent(
+                    new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {       //Get the distance for this trip which is stored in the DB
+                             distanceToAdd = Double.parseDouble(dataSnapshot.child("Distance").getValue().toString());
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
             mDatabase.child("Users").child(uid).child("distance_traveled").addListenerForSingleValueEvent(      //Connect to the "Distance traveled" child
                     new ValueEventListener() {
                         @Override
@@ -458,6 +542,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                             }
                             setNoOfRides(oldNo + 1);
                             loadProfileInfo();
+                            tripIsRunning = false;
                         }
 
                         @Override
@@ -477,7 +562,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         DatabaseReference mDatabase;
         mDatabase = FirebaseDatabase.getInstance().getReference();
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        mDatabase.child("Users").child(uid).child("distance_traveled").setValue(newDistance);
+        mDatabase.child("Users").child(uid).child("distance_traveled").setValue(newDistance);       //Upload the new traveled distance to the user
 
     }
 
@@ -485,14 +570,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         DatabaseReference mDatabase;
         mDatabase = FirebaseDatabase.getInstance().getReference();
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        mDatabase.child("Users").child(uid).child("no_of_rides").setValue(newNo);
+        mDatabase.child("Users").child(uid).child("no_of_rides").setValue(newNo);       //Upload the new number of rides to the user
     }
 
     /**
      * Gets the current location of the device, and positions the map's camera.
      * Call this whenever you need to update the device location
      */
-    private void getDeviceLocation() {
+    private void getDeviceLocation(final boolean moveCamera) {
         /*
          * Get the best and most recent location of the device, which may be null in rare
          * cases when a location is not available.
@@ -506,9 +591,11 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                         if (task.isSuccessful() && task.getResult() != null) {
                             // Set the map's camera position to the current location of the device.
                             mLastKnownLocation = task.getResult();
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                    new LatLng(mLastKnownLocation.getLatitude(),
-                                            mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                            if (moveCamera) {       //Only move the camera if told so, this is so we avoid moving the camera when calling the APIs
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                        new LatLng(mLastKnownLocation.getLatitude(),
+                                                mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                            }
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
                             Log.e(TAG, "Exception: %s", task.getException());
@@ -538,7 +625,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         MarkerOptions options = new MarkerOptions()
                 .position(latLng)
                 .title(title);
-        mMap.addMarker(options);
+        Marker newMarker = mMap.addMarker(options);
+        clickableMarkers.put(newMarker.getId(), "Clickable");
+        calcTrip(newMarker);
+
 
         hideSoftKeyboard();
 
@@ -607,22 +697,18 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     public void airStationsAPIActivity(View view) {
-        new Thread(new Runnable() {
-            public void run() {
-                getDeviceLocation();        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
-            }
-        }).start();
-
         mMap.clear();
+        //Button pumpBtn =  findViewById(R.id.air_stations);    TODO: To set the color of the button when clicked, but not sure which color or which color to change back to...
+        //pumpBtn.setBackgroundColor(Color.BLUE);
 
-        if (allPumps.isEmpty()) {
+        if (allPumps.isEmpty()) {       //If pumps haven't been fetched before, create a fragment which will do this for us
             Bundle args = new Bundle();
             CallAPI callAPIFragment;
             FragmentManager fm = getSupportFragmentManager();
 
             callAPIFragment = new CallAPI();
             fm.beginTransaction().add(callAPIFragment, "callAPIDialog").commit();
-            args.putString("url", "https://lightway-90a9c.firebaseio.com/Test.json");
+            args.putString("url", "https://lightway-90a9c.firebaseio.com/Pump.json");
             callAPIFragment.putArguments(args);
             callAPIFragment.onDestroy();
         }
@@ -631,13 +717,32 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
+    public void parkingAPIActivity(View view) {
+        mMap.clear();
+        //Button parkingBtn =  findViewById(R.id.parking);    TODO: To set the color of the button when clicked, but not sure which color or which color to change back to...
+        //parkingBtn.setBackgroundColor(Color.BLUE);
+
+        if (allParkings.isEmpty()) {       //If parkings haven't been fetched before, create a fragment which will do this for us
+            Bundle args = new Bundle();
+            CallAPI callAPIFragment;
+            FragmentManager fm = getSupportFragmentManager();
+
+            callAPIFragment = new CallAPI();
+            fm.beginTransaction().add(callAPIFragment, "callAPIDialog").commit();
+            args.putString("url", "https://lightway-90a9c.firebaseio.com/Parking.json");
+            callAPIFragment.putArguments(args);
+        }
+        else {
+            addAllMarkersToMap("parking");
+        }
+    }
+
     private void calcTrip(Marker destination) {     // This takes the destination marker (the one previously clicked) as input
-        GeoApiContext geoApiContext = new GeoApiContext();
         Date date = Calendar.getInstance().getTime();       //Get the current time so we can display how long the ride will take
         DateTime now = new DateTime(date.getTime());
 
         try {
-            geoApiContext = geoApiContext.setQueryRateLimit(3)      //Set everything needed for the API connection, the key should be moved to the strings
+            geoApiContext = geoApiContext.setQueryRateLimit(3)      //Set everything needed for the API connection
                     .setApiKey(getString(R.string.directionsApiKey))
                     .setConnectTimeout(1, TimeUnit.SECONDS)
                     .setReadTimeout(1, TimeUnit.SECONDS)
@@ -652,10 +757,12 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     .departureTime(now)
                     .await();
 
-            destination.setSnippet(getEndLocationSnippet(result));        //Get time and distance and add it to the InfoWindow snippet
-            destination.setTitle(result.routes[0].legs[0].endAddress);      //Get the adress and add it to the InfoWindow snippet
+            String[] endAddress = result.routes[0].legs[0].endAddress.split(",");
+            destination.setSnippet(getEndLocationSnippet(result, destinationString));        //Get time and distance and add it to the InfoWindow snippet
+            destination.setTitle(endAddress[0]);      //Get the adress and add it to the InfoWindow snippet
             addPolyline(result, mMap);      //Draw the navigational line
             destination.showInfoWindow();       //Display the InfoWindow snippet
+
 
         } catch (ApiException e) {
             e.printStackTrace();
@@ -691,8 +798,22 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
-    private String getEndLocationSnippet(DirectionsResult results) {       //This can be used later on
-        return "Tid: " + results.routes[0].legs[0].duration.humanReadable + " Distance: " + results.routes[0].legs[0].distance.humanReadable;
+    private String getEndLocationSnippet(DirectionsResult results, String destination) {
+        String additionalInfo = "";
+        if (allParkings.get(destination) != null) {     //For parkings, get the following info: Units, Parkingspots
+            additionalInfo = "\nUnits: " + allParkings.get(destination).getAntal_enheter()+ "\n"+
+            "Parkingspots: " + allParkings.get(destination).getAntal_platser();
+        }
+
+        else if (allPumps.get(destination) != null) {       //For pumps, get the following info: Model, Valves, Status
+            additionalInfo = "\nModel: " + allPumps.get(destination).getModell() + "\n" +
+                    "Valves: " + allPumps.get(destination).getVentiler() + "\n" +
+                    "Status: " + allPumps.get(destination).getStatus();
+        }
+
+        String snippet = "Time: " + results.routes[0].legs[0].duration.humanReadable + "\n" +       //Then add Time and Distance
+                "Distance: " + results.routes[0].legs[0].distance.humanReadable + additionalInfo;
+        return snippet;
     }
 
     private void addPolyline(DirectionsResult results, GoogleMap mMap) {
@@ -703,8 +824,94 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         polyline = mMap.addPolyline(new PolylineOptions().addAll(decodedPath));     //Add the polyline
     }
 
+    private void activateTripOnServer(Marker destination) {
+        Date date = Calendar.getInstance().getTime();       //Get the current time so we can display how long the ride will take
+        DateTime now = new DateTime(date.getTime());
+
+        String origin = "" + mLastKnownLocation.getLatitude() + "," + mLastKnownLocation.getLongitude();        //Get the start-location so we now from where the polygon should draw
+        String destinationString = "" + destination.getPosition().latitude + "," + destination.getPosition().longitude;
+
+        try {
+            DirectionsResult result = DirectionsApi.newRequest(geoApiContext)       //Get information from the API about the trip
+                    .mode(TravelMode.BICYCLING).origin(origin)
+                    .destination(destinationString)
+                    .departureTime(now)
+                    .await();
+
+            DirectionsStep[] steps = result.routes[0].legs[0].steps;
+            String[] lightWay = new String[steps.length+1];
+            lightWay[0] = steps[0].startLocation.toString();
+            lightWay[1] = steps[0].endLocation.toString();
+
+            for (int x = 1; x < steps.length; x++) {
+                lightWay[x] = steps[x-1].endLocation.toString();
+                System.out.print(lightWay[x].toString());       //TODO: Send this string to the server
+            }
+
+            destination.setTitle("Your trip ID:");
+            getTripID(destination);
+
+        } catch (ApiException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void getTripID(final Marker m) {
+        final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        try {
+            mDatabase.child("freeIDs").limitToFirst(1).addListenerForSingleValueEvent(
+                    new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.getValue() != null) {
+                                String[] snippet = endDestination.getSnippet().split("Distance:");        //Get the actual distance from the DB
+                                snippet = snippet[1].split(" ");
+                                String travelDistance = snippet[1];
+
+                                String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                                String id = dataSnapshot.getValue().toString();     //Get the first free ID
+                                String color = id.substring(1,2);
+                                switch (color){
+                                    case "R" :
+                                        color = "Red";
+                                        break;
+                                    case "G" :
+                                        color = "Green";
+                                        break;
+                                    case "B" :
+                                        color = "Blue";
+                                        break;
+                                }
+                                String fullID = id.substring(1,4);
+                                colorID = color;
+                                m.setSnippet("  " + id.substring(2,4) +"  ");        //Display the part of the ID the user needs to see
+                                mDatabase.child("takenIDs").child(uid).child("ID").setValue(fullID);        //Set the full ID in the takenIDs child
+                                mDatabase.child("takenIDs").child(uid).child("Distance").setValue(travelDistance);      //Set the trips distance in the takenIDs child
+                                mDatabase.child("freeIDs").child(fullID).removeValue();     //Remove the ID from freeIDs
+                                m.showInfoWindow();
+                                showTripIDPopup(m, color);
+                            }
+                            else
+                                m.setSnippet("All ID's taken.\nPlease try again later.");
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+        } catch (Exception e) {
+
+        }
+    }
+
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {        //Used to get the ArrayList back from AirStationsAPIActivity
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
                 case (GALLERY_REQUEST):
@@ -719,40 +926,68 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
-    public void parkingAPIActivity(View view) {
-            new Thread(new Runnable() {
-            public void run() {
-                getDeviceLocation();        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
-            }
-        }).start();
-
-        mMap.clear();
-
-            if (allParkings.isEmpty()) {
-                Bundle args = new Bundle();
-                CallAPI callAPIFragment;
-                FragmentManager fm = getSupportFragmentManager();
-
-                callAPIFragment = new CallAPI();
-                fm.beginTransaction().add(callAPIFragment, "callAPIDialog").commit();
-                args.putString("url", "https://lightway-90a9c.firebaseio.com/Test2.json");
-                callAPIFragment.putArguments(args);
-            }
-            else {
-                addAllMarkersToMap("parking");
-            }
-    }
-
-
-    //Clears the map of the polyline
     public void cancelTrip(View v) {
-        if (polyline != null) {     //Remove the previous polyline, if it exists
-            polyline.remove();
+        toggleButtons(true);
+        final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+        final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        try {
+            mDatabase.child("takenIDs").child(uid).addListenerForSingleValueEvent(
+                    new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.getValue() != null) {
+                                String currentID = dataSnapshot.child("ID").getValue().toString();      //Get the users current ID
+                                mDatabase.child("freeIDs").child(currentID).child("ID").setValue(currentID);        //Add the full ID to the freeIDs child
+                                mDatabase.child("takenIDs").child(uid).removeValue();       //Remove the ID from takenIDs
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+        } catch (Exception e) {
+
         }
-        Toast.makeText(getApplicationContext(), "Trip finished!", Toast.LENGTH_LONG).show();
+
+        Toast.makeText(getApplicationContext(), "Trip ended!", Toast.LENGTH_LONG).show();
         cancelButton.setVisibility(View.GONE);
         btnFinish.setVisibility(View.GONE);
+        AutoCompleteTextView input_search = findViewById(R.id.input_search);
+        input_search.setText("");
         mMap.clear();
+    }
+
+    public void showTripIDPopup(Marker marker, String color){
+        TextView tripIDText;
+        TextView closePopup;
+
+        tripIDPopup.setContentView(R.layout.trip_id_popup);
+
+        closePopup = tripIDPopup.findViewById(R.id.closePopup);
+        closePopup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tripIDPopup.dismiss();
+            }
+        });
+
+        tripIDText = tripIDPopup.findViewById(R.id.tripIDText);
+        String tripIDString = marker.getSnippet().toString();
+        tripIDText.setText(tripIDString);
+        switch (color){
+            case "Blue": tripIDText.setTextColor(Color.BLUE);
+                break;
+            case "Red": tripIDText.setTextColor(Color.RED);
+                break;
+            case "Green": tripIDText.setTextColor(Color.GREEN);
+        }
+
+        tripIDPopup.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        tripIDPopup.show();
+
     }
 
     public void showUserPopup(View v) {
@@ -945,7 +1180,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     public void showDeleteUserPopup() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.MyAlertDialogStyle);
         builder.setMessage("Are you sure you want to delete your account?");
 
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -970,11 +1205,11 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
         //set Backgroundcolour for NO-button
-        Button nbutton = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
-        nbutton.setBackgroundColor(Color.GREEN);
+        //Button nbutton = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+        //nbutton.setBackgroundColor(Color.GREEN);
         //set Backgroundcolour for YES-button
-        Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-        pbutton.setBackgroundColor(Color.RED);
+        //Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        //pbutton.setBackgroundColor(Color.RED);
     }
 
     public void deleteUser(){
@@ -999,10 +1234,11 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private void hideSoftKeyboard(){
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
+   /*   This caused a bug where you couldnt use the keyboard after using the searchbar once
         InputMethodManager imm = (InputMethodManager)
                 getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromInputMethod(mSearchText.getWindowToken(), 0);
-
+*/
         View view = this.getCurrentFocus();
         if (view != null) {
             InputMethodManager immm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -1073,9 +1309,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
     };
 
-
+    //Search results restricted to Sweden
+    AutocompleteFilter filter =
+            new AutocompleteFilter.Builder().setCountry("SE").build();
 
 }
-
-
-

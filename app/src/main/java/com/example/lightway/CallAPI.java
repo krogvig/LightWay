@@ -68,11 +68,11 @@ public class CallAPI extends Fragment {
                 in.close();
                 con.disconnect();       //Close connection
 
-                if (url.toString().contains("Test2")) {
+                if (url.toString().contains("Parking")) {
                     type = "parking";
                 }
 
-                else if (url.toString().contains("Test")){
+                else if (url.toString().contains("Pump")){
                     type = "pump";
                 }
                 parse(content.toString(), type);
@@ -101,13 +101,12 @@ public class CallAPI extends Fragment {
 
             GMapsActivity gma = ((GMapsActivity) getActivity());
             JsonElement jelement = new JsonParser().parse(jsonLine);    //Sort of starting it all
-            JsonObject  jobject = jelement.getAsJsonObject();       //Gets the first object
+            JsonArray jsonArray = jelement.getAsJsonArray();
 
             try {
                 if (objType.equals("pump")) {
-                    for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
-                        String key = entry.getKey();
-                        JsonObject value = entry.getValue().getAsJsonObject();
+                    for (int x = 0; x<jsonArray.size()-1; x++) {
+                        JsonObject value = jsonArray.get(x).getAsJsonObject();
                         String adress = "N/A";
                         String ventiler = "N/A";
                         String modell = "N/A";
@@ -129,9 +128,8 @@ public class CallAPI extends Fragment {
                     }
                 }
                 else {
-                    for (Map.Entry<String, JsonElement> entry : jobject.entrySet()) {
-                        String key = entry.getKey();
-                        JsonObject value = entry.getValue().getAsJsonObject();
+                    for (int x = 0; x<jsonArray.size()-1; x++) {
+                        JsonObject value = jsonArray.get(x).getAsJsonObject();
                         String typ = "N/A";
                         String antal_enheter = "N/A";
                         String antal_platser= "N/A";
@@ -145,10 +143,9 @@ public class CallAPI extends Fragment {
                         if (jsonProperties.getAsJsonPrimitive("OBJECT_ID") != null) { object_id = jsonProperties.getAsJsonPrimitive("OBJECT_ID").getAsString(); }
                         if (jsonProperties.getAsJsonPrimitive("Typ") != null) { typ = jsonProperties.getAsJsonPrimitive("Typ").getAsString(); }
                         if (jsonProperties.getAsJsonPrimitive("Antal_enheter") != null) { antal_enheter = jsonProperties.getAsJsonPrimitive("Antal_enheter").getAsString(); }
-                        if (jsonProperties.getAsJsonPrimitive("Antal_platser") != null) { antal_enheter = jsonProperties.getAsJsonPrimitive("Antal_platser").getAsString(); }
+                        if (jsonProperties.getAsJsonPrimitive("Antal_platser") != null) { antal_platser = jsonProperties.getAsJsonPrimitive("Antal_platser").getAsString(); }
 
                         gma.setAllParkings("" + coordinates[0] + "," + coordinates[1], new Parking(type, id, coordinates, geometry_name, object_id, typ, antal_enheter, antal_platser));
-
             }
         }
     }

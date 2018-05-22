@@ -35,7 +35,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private final String pattern = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{6,32}";
+    private final String pattern = "(?=.*[0-9])(?=\\S+$).{6,32}";
     private EditText emailField;
     private EditText nameField;
     private EditText passwordField;
@@ -137,8 +137,6 @@ public class RegisterActivity extends AppCompatActivity {
             if(!(password.matches(pattern))){
                 errorMessage("Invalid password!" + '\n' + "Password should contain:" + '\n'
                 + "a digit" + '\n'
-                + "a lowercase letter" + '\n'
-                + "an uppercase letter" + '\n'
                 + "no spaces" + '\n'
                 + "and be 6 to 32 characters long" + '\n');
                 return false;
