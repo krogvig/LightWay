@@ -162,4 +162,6 @@
             app:layout_constraintLeft_toLeftOf="@id/btnFinishTrip"
             app:layout_constraintRight_toRightOf="parent" />
 
+
+
 </android.support.constraint.ConstraintLayout>

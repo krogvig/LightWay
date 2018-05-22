@@ -267,7 +267,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
 
         //Check if first run and then show tutorial
-        Boolean isFirstRun = getSharedPreferences("PREFERENCE", MODE_PRIVATE)
+ /*       Boolean isFirstRun = getSharedPreferences("PREFERENCE", MODE_PRIVATE)
                 .getBoolean("isfirstrun", true);
         if (isFirstRun) {
             // do some thing
@@ -275,9 +275,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             getSharedPreferences("PREFERENCE", MODE_PRIVATE).edit()
                     .putBoolean("isfirstrun", false).apply();
         }
-
+*/
         // imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();  //moved to userpoup for now.
     }
+
 
     //
     private void init() {
@@ -343,6 +344,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     protected void onStart() {
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
+        tryForTutorialPopup();
+
+
+
     }
 
     private void logout() {
@@ -442,6 +447,59 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             }
         });
 
+    }
+
+    public void tryForTutorialPopup(){
+        //Check if first run and then show tutorial
+        Boolean isFirstRun = getSharedPreferences("PREFERENCE", MODE_PRIVATE)
+                .getBoolean("isfirstrun", false);
+        if (isFirstRun) {
+            firstRunPopup();
+            // do some thing
+            //showVideoPopup();
+            getSharedPreferences("PREFERENCE", MODE_PRIVATE).edit()
+                    .putBoolean("isfirstrun", false).apply();
+        } else {
+        //    firstRunPopup();
+
+        }
+    }
+
+    public void firstRunPopup () {
+
+        AlertDialog.Builder firstRunAlert = new AlertDialog.Builder(this, R.style.MyAlertDialogStyle);
+
+
+        firstRunAlert.setTitle("Welcome to LightWay!");
+        firstRunAlert.setMessage("This appears to be the first time you're using this application. Do you want to watch a tutorial to learn how to use LightWay?");
+
+     //   firstRunAlert.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+        firstRunAlert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+
+                // Do nothing but close the dialog
+                showVideoPopup();
+                dialog.dismiss();
+            }
+        });
+
+        firstRunAlert.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                // Do nothing
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog firstRunAlertDialog = firstRunAlert.create();
+        firstRunAlertDialog.show();
+        //Button nbutton = firstRunAlertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+        //nbutton.setBackgroundResource();
+        //set Backgroundcolour for YES-button
+        //Button pbutton = firstRunAlertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        //pbutton.setBackgroundColor(Color.RED);
     }
 
     public void finishTrip(View v) {
@@ -858,7 +916,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
 
         TextView txtclose;
-        MediaController mc = new MediaController(this);
 
         videoDialog.setContentView(R.layout.tutorial_popup);
         txtclose = videoDialog.findViewById(R.id.txtclose);
@@ -873,10 +930,13 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
         videoDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         videoDialog.show();
+        MediaController mc = new MediaController(this);
+
         final VideoView introVideo = videoDialog.findViewById(R.id.tutorialVideo);
+        introVideo.setMediaController(mc);
+        mc.setMediaPlayer(introVideo);
         Uri uri = Uri.parse("android.resource://"+getPackageName()+"/"+R.raw.lightwayguide);
         introVideo.setVideoURI(uri);
-        introVideo.setMediaController(mc);
         introVideo.start();
     }
 

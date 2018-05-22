@@ -191,6 +191,10 @@ public class RegisterActivity extends AppCompatActivity {
                         mProgress.dismiss();
 
                         Intent loginIntent = new Intent(RegisterActivity.this, LoginActivity.class);
+
+                            getSharedPreferences("PREFERENCE", MODE_PRIVATE).edit()
+                                    .putBoolean("isfirstrun", true).apply();
+
                         startActivity(loginIntent);
                     } else {
                         try
@@ -232,6 +236,7 @@ public class RegisterActivity extends AppCompatActivity {
         } catch (NullPointerException e) {
             System.out.print(e);
         }
+
     }
 
 }
