@@ -7,12 +7,14 @@
     tools:context="com.example.lightway.GMapsActivity">
 
     <FrameLayout
-        class = "com.example.lightway.CallAPI"
         android:id="@+id/callAPIDialog"
-        android:tag="callAPIDialog"
-        android:layout_weight="1"
+        class="com.example.lightway.CallAPI"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@android:color/black"
+        android:backgroundTint="@android:color/black"
+        android:tag="callAPIDialog" />
 
     <fragment
         android:id="@+id/gMap"

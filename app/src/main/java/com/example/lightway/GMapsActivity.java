@@ -155,8 +155,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private Button logOutButton;
 
     private Button btnFinish;
-
     private Button cancelButton;
+    private Button pumpBtn;
+    private Button parkingBtn;
     private Marker endDestination;
 
     //Used to draw out the navigational line
@@ -198,6 +199,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private String colorID;
     private Boolean tripIsRunning = false;
     private Dialog tripIDPopup;
+
+
 
 
     @Override
@@ -246,7 +249,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
         cancelButton = findViewById(R.id.btnCancel);
         btnFinish = findViewById(R.id.btnFinishTrip);
-
+        pumpBtn =  findViewById(R.id.air_stations);
+        parkingBtn =  findViewById(R.id.parking);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
@@ -283,6 +287,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     //execute our method for searching
                     geoLocate();
                     mSearchText.dismissDropDown();
+                    parkingBtn.setBackgroundResource(R.drawable.custom_button);
+                    pumpBtn.setBackgroundResource(R.drawable.custom_button);
                 }
 
                 return false;
@@ -621,6 +627,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
 
         mMap.clear();
+        parkingBtn.setBackgroundResource(R.drawable.custom_button);
+        pumpBtn.setBackgroundResource(R.drawable.custom_button);
 
         MarkerOptions options = new MarkerOptions()
                 .position(latLng)
@@ -704,8 +712,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }).start();
 
         mMap.clear();
-        //Button pumpBtn =  findViewById(R.id.air_stations);    TODO: To set the color of the button when clicked, but not sure which color or which color to change back to...
-        //pumpBtn.setBackgroundColor(Color.BLUE);
+
+        parkingBtn.setBackgroundResource(R.drawable.custom_button);
+        pumpBtn.setBackgroundResource(R.drawable.custom_button_chosen);
 
         if (allPumps.isEmpty()) {       //If pumps haven't been fetched before, create a fragment which will do this for us
             Bundle args = new Bundle();
@@ -732,7 +741,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
         mMap.clear();
         //Button parkingBtn =  findViewById(R.id.parking);    TODO: To set the color of the button when clicked, but not sure which color or which color to change back to...
-        //parkingBtn.setBackgroundColor(Color.BLUE);
+        pumpBtn.setBackgroundResource(R.drawable.custom_button);
+        parkingBtn.setBackgroundResource(R.drawable.custom_button_chosen);
+
 
         if (allParkings.isEmpty()) {       //If parkings haven't been fetched before, create a fragment which will do this for us
             Bundle args = new Bundle();
@@ -969,6 +980,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         btnFinish.setVisibility(View.GONE);
         AutoCompleteTextView input_search = findViewById(R.id.input_search);
         input_search.setText("");
+        parkingBtn.setBackgroundResource(R.drawable.custom_button);
+        pumpBtn.setBackgroundResource(R.drawable.custom_button);
         mMap.clear();
     }
 
