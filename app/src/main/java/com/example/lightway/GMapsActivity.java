@@ -929,14 +929,17 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
 
         videoDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        videoDialog.show();
-        MediaController mc = new MediaController(this);
+   //     MediaController mc = new MediaController(this);
 
         final VideoView introVideo = videoDialog.findViewById(R.id.tutorialVideo);
-        introVideo.setMediaController(mc);
-        mc.setMediaPlayer(introVideo);
+      //  introVideo.setMediaController(mc);
+    //    mc.setMediaPlayer(introVideo);
         Uri uri = Uri.parse("android.resource://"+getPackageName()+"/"+R.raw.lightwayguide);
         introVideo.setVideoURI(uri);
+        introVideo.bringToFront();
+        videoDialog.getWindow().setBackgroundDrawable(new ColorDrawable(0));
+        videoDialog.show();
+        introVideo.setZOrderOnTop(true);
         introVideo.start();
     }
 
