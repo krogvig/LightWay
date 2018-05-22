@@ -697,6 +697,12 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     public void airStationsAPIActivity(View view) {
+        new Thread(new Runnable() {
+            public void run() {
+                getDeviceLocation(false);        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
+            }
+        }).start();
+
         mMap.clear();
         //Button pumpBtn =  findViewById(R.id.air_stations);    TODO: To set the color of the button when clicked, but not sure which color or which color to change back to...
         //pumpBtn.setBackgroundColor(Color.BLUE);
@@ -718,6 +724,12 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     public void parkingAPIActivity(View view) {
+        new Thread(new Runnable() {
+            public void run() {
+                getDeviceLocation(false);        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
+            }
+        }).start();
+
         mMap.clear();
         //Button parkingBtn =  findViewById(R.id.parking);    TODO: To set the color of the button when clicked, but not sure which color or which color to change back to...
         //parkingBtn.setBackgroundColor(Color.BLUE);
@@ -1269,6 +1281,12 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback = new ResultCallback<PlaceBuffer>() {
         @Override
         public void onResult(@NonNull PlaceBuffer places) {
+            new Thread(new Runnable() {
+                public void run() {
+                    getDeviceLocation(false);        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
+                }
+            }).start();
+
             if(!places.getStatus().isSuccess()){
                 Log.d(TAG, "onResult: Place query did not complete successfully: " + places.getStatus().toString());
                 places.release();
