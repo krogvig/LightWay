@@ -319,6 +319,15 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         hideSoftKeyboard();
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.stopAutoManage(this);
+            mGoogleApiClient.disconnect();
+        }
+    }
+
     //searching for a custom location
     private void geoLocate() {
         Log.d(TAG, "goeLocate: geolocating");
@@ -346,6 +355,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     @Override
     protected void onStart() {
         super.onStart();
+        if (mGoogleApiClient != null)
+            mGoogleApiClient.connect();
         mAuth.addAuthStateListener(mAuthListener);
         tryForTutorialPopup();
 
@@ -455,10 +466,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     return false;
                 }
                 else if (m.equals(endDestination)){
-                        m.showInfoWindow();
+                    endDestination.showInfoWindow();
                 }
                 else {
-                    endDestination.showInfoWindow();
+                    m.showInfoWindow();
                 }
 
                 // return true will prevent any further map action from happening
@@ -470,7 +481,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             @Override
             public void onMapClick(LatLng latLng) {
                 if(tripIsRunning){
-                    // can put endDestination.showInfoWindow(); here if we dont want the user to be able to "lose" the small infowindow
+                   // endDestination.showInfoWindow(); //here if we dont want the user to be able to "lose" the small infowindow
                     }
                 }
         });
@@ -481,13 +492,15 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             public void onInfoWindowClick(Marker m) {
                 String clickableOrNot = clickableMarkers.get(m.getId());
                 if(clickableOrNot.equals("Clickable")){
-                    activateTripOnServer(m);        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
+                    mMap.clear();
+                    endDestination = mMap.addMarker(new MarkerOptions().position(new LatLng(m.getPosition().latitude, m.getPosition().longitude)));       //Add the marker and its title
+                    calcTrip(endDestination);
+                    activateTripOnServer(endDestination);        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
 
                     cancelButton.setVisibility(View.VISIBLE);
                     btnFinish.setVisibility(View.VISIBLE);
                     tripIsRunning = true;
-                    clickableMarkers.put(m.getId(), "NotClickable");
-                    endDestination = m;
+                    clickableMarkers.put(endDestination.getId(), "NotClickable");
                     //Toast toast = Toast.makeText(getApplicationContext(), "Let the light guide your way!", Toast.LENGTH_LONG);
                     //toast.setGravity(Gravity.TOP, 0, 150); // increasing the yOffest will make the toast appear lower down on the sceen
                     //toast.show();
@@ -803,7 +816,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             args.putString("url", "https://lightway-90a9c.firebaseio.com/Pump.json");
             callAPIFragment.putArguments(args);
             callAPIFragment.onDestroy();
-        } else {
+        }
+        else {
             addAllMarkersToMap("pump");
         }
     }
@@ -816,7 +830,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }).start();
 
         mMap.clear();
-        //Button parkingBtn =  findViewById(R.id.parking);    TODO: To set the color of the button when clicked, but not sure which color or which color to change back to...
+
         pumpBtn.setBackgroundResource(R.drawable.custom_button);
         parkingBtn.setBackgroundResource(R.drawable.custom_button_chosen);
 

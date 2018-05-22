@@ -76,9 +76,18 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     @Override
     protected void onStart() {
         super.onStart();
-
+        if (mGoogleApiClient != null)
+            mGoogleApiClient.connect();
         mAuth.addAuthStateListener(mAuthListener);
+    }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.stopAutoManage(this);
+            mGoogleApiClient.disconnect();
+        }
     }
 
     @Override
@@ -106,8 +115,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 }
             }
         };
-
-
 
 
         mLoginbutton.setOnClickListener(new View.OnClickListener() {
@@ -263,6 +270,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         // ...
                     }
                 });
+
     }
 
     private void handleFacebookAccessToken(AccessToken token) {
