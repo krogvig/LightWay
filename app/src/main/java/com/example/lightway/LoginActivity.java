@@ -404,7 +404,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 Swedish.setOnClickListener(new View.OnClickListener() {
                                                    @Override
                                                    public void onClick(View v) {
-                                                       EnglishText.setText(R.string.SwedishText);
+                                                       EnglishText.setText(Html.fromHtml(getString(R.string.SwedishText), Html.FROM_HTML_MODE_COMPACT));
 
 
 
