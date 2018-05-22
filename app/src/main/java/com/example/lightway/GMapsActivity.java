@@ -27,7 +27,6 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -42,6 +41,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -51,7 +51,6 @@ import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -67,8 +66,6 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -80,11 +77,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.UserInfo;
 import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.maps.DirectionsApi;
 import com.google.maps.GeoApiContext;
 import com.google.maps.android.PolyUtil;
@@ -94,24 +86,15 @@ import com.google.maps.model.DirectionsStep;
 import com.google.maps.model.TravelMode;
 
 import org.joda.time.DateTime;
-import org.xml.sax.SAXParseException;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -212,6 +195,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private static HashMap<String, Parking>  allParkings = new HashMap<>();
     private double distanceToAdd;
     private GeoApiContext geoApiContext = new GeoApiContext();
+    private String colorID;
+    private Boolean tripIsRunning = false;
+    private Dialog tripIDPopup;
 
 
     @Override
@@ -245,6 +231,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
 
         myDialog = new Dialog(this);
+        tripIDPopup = new Dialog(this);
 
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -295,6 +282,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                         || event.getAction() == KeyEvent.KEYCODE_ENTER){
                     //execute our method for searching
                     geoLocate();
+                    mSearchText.dismissDropDown();
                 }
 
                 return false;
@@ -379,20 +367,34 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 View infoWindow = getLayoutInflater().inflate(R.layout.custom_info_contents,
                             (FrameLayout) findViewById(R.id.gMap), false);
 
-                    TextView title = infoWindow.findViewById(R.id.title);
-                    title.setText(marker.getTitle());
+                TextView title = infoWindow.findViewById(R.id.title);
+                title.setText(marker.getTitle());
 
-                    TextView snippet = infoWindow.findViewById(R.id.snippet);
-                    snippet.setText(marker.getSnippet());
+                TextView snippet = infoWindow.findViewById(R.id.snippet);
+                snippet.setText(marker.getSnippet());
 
-                    TextView startTripBtn = infoWindow.findViewById(R.id.startTrip);
-                    if (marker.getTitle() != null && marker.getTitle().equals("Your trip ID:")) {
-                        startTripBtn.setVisibility(View.GONE);
-                        //startTripBtn.setText("Trip has started!");
-                    } else {
-                        startTripBtn.setVisibility(View.VISIBLE);
-                        //startTripBtn.setText(" Start Trip ");
+                TextView startTripBtn = infoWindow.findViewById(R.id.startTrip);
+                if(marker.getTitle().equals("Your trip ID:")){
+
+                    infoWindow.setBackgroundColor(Color.BLACK);
+                    title.setTextColor(Color.WHITE);
+                    title.setVisibility(View.VISIBLE);
+                    title.setTextSize(13);  // change for Your trip ID size.
+                    snippet.setTextSize(25); //change for ID size
+                    startTripBtn.setVisibility(View.GONE);
+
+                    switch (colorID){
+                        case "Blue": snippet.setTextColor(Color.BLUE);
+                        break;
+                        case "Red": snippet.setTextColor(Color.RED);
+                        break;
+                        case "Green": snippet.setTextColor(Color.GREEN);
                     }
+                }else{
+                    startTripBtn.setVisibility(View.VISIBLE);
+                    startTripBtn.setText(" Start Trip ");
+                }
+
                 return infoWindow;
             }
         });
@@ -433,6 +435,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             }
         });
 
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                if(tripIsRunning){
+                    // can put endDestination.showInfoWindow(); here if we dont want the user to be able to "lose" the small infowindow
+                    }
+                }
+        });
 
         // Listen for clicks on any InfoWindow
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
@@ -444,18 +454,23 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
                     cancelButton.setVisibility(View.VISIBLE);
                     btnFinish.setVisibility(View.VISIBLE);
+                    tripIsRunning = true;
                     clickableMarkers.put(m.getId(), "NotClickable");
-
                     endDestination = m;
-                    Toast toast = Toast.makeText(getApplicationContext(), "Let the light guide your way!", Toast.LENGTH_SHORT);
+                    Toast toast = Toast.makeText(getApplicationContext(), "Let the light guide your way!", Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP, 0, 150); // increasing the yOffest will make the toast appear lower down on the sceen
                     toast.show();
                     toggleButtons(false);
+                }else{
+                    if(tripIsRunning){
+                        showTripIDPopup(m, colorID);
+                    }
                 }
             }
         });
 
     }
-    
+
     private void toggleButtons(boolean status) {
         ToggleButton parkingBtn = findViewById(R.id.parking);
         ToggleButton pumpBtn = findViewById(R.id.air_stations);
@@ -474,7 +489,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
 
     }
-    
+
     public void finishTrip(View v){
         final String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();      //Get the user ID
         AutoCompleteTextView input_search = findViewById(R.id.input_search);        //Reset searchbar
@@ -527,6 +542,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                             }
                             setNoOfRides(oldNo + 1);
                             loadProfileInfo();
+                            tripIsRunning = false;
                         }
 
                         @Override
@@ -609,7 +625,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         MarkerOptions options = new MarkerOptions()
                 .position(latLng)
                 .title(title);
-        calcTrip(mMap.addMarker(options));
+        Marker newMarker = mMap.addMarker(options);
+        clickableMarkers.put(newMarker.getId(), "Clickable");
+        calcTrip(newMarker);
+
 
         hideSoftKeyboard();
 
@@ -869,11 +888,13 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                                         break;
                                 }
                                 String fullID = id.substring(1,4);
-                                m.setSnippet(color + " " + id.substring(2,4));        //Display the part of the ID the user needs to see
+                                colorID = color;
+                                m.setSnippet("  " + id.substring(2,4) +"  ");        //Display the part of the ID the user needs to see
                                 mDatabase.child("takenIDs").child(uid).child("ID").setValue(fullID);        //Set the full ID in the takenIDs child
                                 mDatabase.child("takenIDs").child(uid).child("Distance").setValue(travelDistance);      //Set the trips distance in the takenIDs child
                                 mDatabase.child("freeIDs").child(fullID).removeValue();     //Remove the ID from freeIDs
                                 m.showInfoWindow();
+                                showTripIDPopup(m, color);
                             }
                             else
                                 m.setSnippet("All ID's taken.\nPlease try again later.");
@@ -937,6 +958,36 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         AutoCompleteTextView input_search = findViewById(R.id.input_search);
         input_search.setText("");
         mMap.clear();
+    }
+
+    public void showTripIDPopup(Marker marker, String color){
+        TextView tripIDText;
+        TextView closePopup;
+
+        tripIDPopup.setContentView(R.layout.trip_id_popup);
+
+        closePopup = tripIDPopup.findViewById(R.id.closePopup);
+        closePopup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tripIDPopup.dismiss();
+            }
+        });
+
+        tripIDText = tripIDPopup.findViewById(R.id.tripIDText);
+        String tripIDString = marker.getSnippet().toString();
+        tripIDText.setText(tripIDString);
+        switch (color){
+            case "Blue": tripIDText.setTextColor(Color.BLUE);
+                break;
+            case "Red": tripIDText.setTextColor(Color.RED);
+                break;
+            case "Green": tripIDText.setTextColor(Color.GREEN);
+        }
+
+        tripIDPopup.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        tripIDPopup.show();
+
     }
 
     public void showUserPopup(View v) {
@@ -1183,10 +1234,11 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private void hideSoftKeyboard(){
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
+   /*   This caused a bug where you couldnt use the keyboard after using the searchbar once
         InputMethodManager imm = (InputMethodManager)
                 getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromInputMethod(mSearchText.getWindowToken(), 0);
-
+*/
         View view = this.getCurrentFocus();
         if (view != null) {
             InputMethodManager immm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
