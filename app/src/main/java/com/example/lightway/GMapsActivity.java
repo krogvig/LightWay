@@ -1080,7 +1080,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     public void showDeleteUserPopup() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.MyAlertDialogStyle);
         builder.setMessage("Are you sure you want to delete your account?");
 
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -1105,11 +1105,11 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
         //set Backgroundcolour for NO-button
-        Button nbutton = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
-        nbutton.setBackgroundColor(Color.GREEN);
+        //Button nbutton = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+        //nbutton.setBackgroundColor(Color.GREEN);
         //set Backgroundcolour for YES-button
-        Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-        pbutton.setBackgroundColor(Color.RED);
+        //Button pbutton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        //pbutton.setBackgroundColor(Color.RED);
     }
 
     public void deleteUser(){
