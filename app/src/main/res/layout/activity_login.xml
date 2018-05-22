@@ -175,10 +175,11 @@
         android:layout_marginEnd="5dp"
         android:layout_marginStart="5dp"
 
-        android:background="@drawable/border_circle"
         android:layout_marginTop="9dp"
+        android:background="@drawable/border_circle"
         android:onClick="PrivacyPolicy"
         android:text=" By logging in and using the application you accept these Terms and Agreements."
+        android:textAlignment="center"
         android:textColor="@android:color/white"
         android:textSize="15sp"
         app:layout_constraintEnd_toEndOf="parent"
