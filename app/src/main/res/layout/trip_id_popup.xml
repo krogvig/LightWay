@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="390dp"
+    android:layout_height="200dp"
+    android:layout_gravity="top"
+    android:background="#000000"
+    android:orientation="vertical"
+    android:padding="5dp">
+
+    <TextView
+        android:id="@+id/closePopup"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="end"
+        android:background="@drawable/circle_background"
+        android:gravity="center"
+        android:text="X"
+        android:textColor="@android:color/white"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="170dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/yourIDText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Your ID is:"
+            android:textSize="20dp"
+            android:textColor="@android:color/white" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="145dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tripIDText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="B3"
+                android:textSize="100dp"
+                android:layout_gravity="center_horizontal" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
