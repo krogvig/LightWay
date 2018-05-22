@@ -178,7 +178,7 @@
         android:layout_marginTop="9dp"
         android:background="@drawable/border_circle"
         android:onClick="PrivacyPolicy"
-        android:text=" By logging in and using the application you accept these Terms and Agreements."
+        android:text=" By logging in and using the application you accept these Terms and Conditions."
         android:textAlignment="center"
         android:textColor="@android:color/white"
         android:textSize="15sp"
