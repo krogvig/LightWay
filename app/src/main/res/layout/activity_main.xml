@@ -44,11 +44,12 @@
 
         <AutoCompleteTextView
             android:id="@+id/input_search"
-            android:layout_width="253dp"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_toEndOf="@+id/profileBtn"
             android:background="@null"
-            android:hint="  Enter Adress, City or Zip Code"
+            android:hint="Enter Adress, City or Zip Code"
+            android:paddingStart="15dp"
+            android:paddingEnd="31dp"
             android:singleLine="true"
             android:textColor="#000"
             android:textSize="15sp" />
