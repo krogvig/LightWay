@@ -721,6 +721,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         parkingBtn.setBackgroundResource(R.drawable.custom_button);
         pumpBtn.setBackgroundResource(R.drawable.custom_button);
 
+        if(mLastKnownLocation==null){
+            getDeviceLocation(false);
+        }
+
         MarkerOptions options = new MarkerOptions()
                 .position(latLng)
                 .title(title);
@@ -821,6 +825,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         else {
             addAllMarkersToMap("pump");
         }
+        if(mLastKnownLocation==null){
+            getDeviceLocation(true);
+        }
     }
 
     public void parkingAPIActivity(View view) {
@@ -849,6 +856,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         else {
             addAllMarkersToMap("parking");
         }
+        if(mLastKnownLocation==null){
+            getDeviceLocation(true);
+        }
     }
 
     private void calcTrip(Marker destination) {     // This takes the destination marker (the one previously clicked) as input
@@ -861,6 +871,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     .setConnectTimeout(1, TimeUnit.SECONDS)
                     .setReadTimeout(1, TimeUnit.SECONDS)
                     .setWriteTimeout(1, TimeUnit.SECONDS);
+
 
             String origin = "" + mLastKnownLocation.getLatitude() + "," + mLastKnownLocation.getLongitude();        //Get the start-location so we now from where the polygon should draw
             String destinationString = "" + destination.getPosition().latitude + "," + destination.getPosition().longitude;
