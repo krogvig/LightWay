@@ -14,16 +14,9 @@
         android:layout_weight="1"
         android:background="@android:color/black"
         android:backgroundTint="@android:color/black"
-        android:tag="callAPIDialog" />
-
-    <fragment
-        android:id="@+id/gMap"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/air_stations"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:context=".GMapsActivity" />
+        android:tag="callAPIDialog"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="37dp" />
 
 
     <RelativeLayout
@@ -32,7 +25,7 @@
         android:layout_height="50dp"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="2dp"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="8dp"
         android:background="@drawable/white_border"
         android:elevation="10dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -62,11 +55,14 @@
 
     </RelativeLayout>
 
+
     <Button
         android:id="@+id/btnFinishTrip"
         android:layout_width="wrap_content"
         android:layout_height="35dp"
         android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:layout_weight="1"
         android:background="@drawable/custom_button_finishtrip"
         android:onClick="finishTrip"
@@ -77,15 +73,17 @@
         android:text="Finish trip"
         android:textColor="@color/common_google_signin_btn_text_dark_default"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/gMap"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="@id/btnCancel" />
+        app:layout_constraintBottom_toTopOf="@+id/air_stations"
+        app:layout_constraintEnd_toStartOf="@+id/profileBtnImg"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/btnCancel"
         android:layout_width="wrap_content"
         android:layout_height="35dp"
         android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:layout_weight="1"
         android:background="@drawable/custom_button_canceltrip"
         android:onClick="cancelTrip"
@@ -97,18 +95,25 @@
         android:text="Cancel trip"
         android:textColor="@color/common_google_signin_btn_text_dark_default"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/gMap"
-        app:layout_constraintLeft_toLeftOf="@id/btnFinishTrip"
-        app:layout_constraintRight_toRightOf="parent" />
+        app:layout_constraintBottom_toTopOf="@+id/parking"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/profileBtnImg" />
 
+    <fragment
+        android:id="@+id/gMap"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/parking"
+        app:layout_constraintTop_toTopOf="@+id/callAPIDialog"
+        tools:context=".GMapsActivity" />
 
     <ToggleButton
         android:id="@+id/air_stations"
         android:layout_width="wrap_content"
-        android:layout_height="27dp"
-        android:layout_marginBottom="7dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginTop="7dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="8dp"
+        android:layout_weight="1"
         android:background="@drawable/custom_button"
         android:onClick="airStationsAPIActivity"
         android:paddingTop="4dp"
@@ -120,32 +125,31 @@
         android:textColor="@color/common_google_signin_btn_text_dark_default"
         android:textOff="@string/air_stations"
         android:textOn="@string/air_stations"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/profileBtnImg"
-        app:layout_constraintTop_toBottomOf="@+id/gMap"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintBaseline_toBaselineOf="@+id/parking"
+        app:layout_constraintEnd_toStartOf="@+id/profileBtnImg" />
 
     <ImageButton
         android:id="@+id/profileBtnImg"
-        android:layout_width="60dp"
+        android:layout_width="wrap_content"
         android:layout_height="60dp"
+        android:layout_weight="1"
         android:adjustViewBounds="true"
         android:background="@drawable/circle_background"
         android:onClick="showUserPopup"
         android:scaleType="fitCenter"
         android:src="@drawable/profile_button_circle"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/parking"
-        />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <ToggleButton
         android:id="@+id/parking"
         android:layout_width="wrap_content"
-        android:layout_height="27dp"
-        android:layout_marginBottom="7dp"
-        android:layout_marginTop="7dp"
-        android:layout_marginStart="20dp"
+        android:layout_height="36dp"
 
+        android:layout_marginStart="8dp"
+        android:layout_weight="1"
         android:background="@drawable/custom_button"
         android:checked="false"
         android:onClick="parkingAPIActivity"
@@ -154,15 +158,14 @@
         android:shadowDx="5"
         android:shadowDy="5"
         android:shadowRadius="10"
+
         android:text="@string/parking"
         android:textColor="@color/common_google_signin_btn_text_dark_default"
-
         android:textOff="@string/parking"
         android:textOn="@string/parking"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="@id/profileBtnImg"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/gMap"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintStart_toEndOf="@+id/profileBtnImg" />
 
 </android.support.constraint.ConstraintLayout>
