@@ -41,7 +41,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -52,7 +51,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -68,9 +66,6 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.EmailAuthCredential;
-import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -278,7 +273,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     .putBoolean("isfirstrun", false).apply();
         }
 */
-        // imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();  moved to userpoup for now.
 
 
     }
@@ -1340,10 +1334,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GALLERY_REQUEST);
     }*/
 
-    private void chooseUserDestination (View v){
-        //do something
-    }
-
 
     // Using firebase .getdDisplayName instead of the "name" in the database. So that the name shows up properly for google/facebook users.
     private void loadUsername(){
@@ -1398,8 +1388,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
                         }else{
 
-                            Toast.makeText(getApplicationContext(), "Too long since user last authenticated" +
-                                    ", please log out and back in to proceed", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Reauthentication is needed" +
+                                    ", please log out and back in order to proceed", Toast.LENGTH_LONG).show();
 
                         }
                     }});
