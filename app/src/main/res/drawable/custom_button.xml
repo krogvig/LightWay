@@ -30,7 +30,7 @@
                 android:angle="270" />
             <stroke
                 android:width="2dp"
-                android:color="@android:color/darker_gray" />
+                android:color="#8804fb"/>
             <corners
                 android:radius="1000dp" />
             <padding

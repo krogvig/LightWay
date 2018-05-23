@@ -72,6 +72,46 @@
 
     </RelativeLayout>
 
+    <Button
+        android:id="@+id/btnFinishTrip"
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"
+        android:layout_marginBottom="8dp"
+        android:layout_weight="1"
+        android:background="@drawable/custom_button_finishtrip"
+        android:onClick="finishTrip"
+        android:shadowColor="#000000"
+        android:shadowDx="5"
+        android:shadowDy="5"
+        android:shadowRadius="10"
+        android:text="Finish trip"
+        android:textColor="@color/common_google_signin_btn_text_dark_default"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/gMap"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="@id/btnCancel" />
+
+    <Button
+        android:id="@+id/btnCancel"
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"
+        android:layout_marginBottom="8dp"
+        android:layout_weight="1"
+        android:background="@drawable/custom_button_canceltrip"
+        android:onClick="cancelTrip"
+        android:paddingTop="4dp"
+        android:shadowColor="#000000"
+        android:shadowDx="5"
+        android:shadowDy="5"
+        android:shadowRadius="10"
+        android:text="Cancel trip"
+        android:textColor="@color/common_google_signin_btn_text_dark_default"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/gMap"
+        app:layout_constraintLeft_toLeftOf="@id/btnFinishTrip"
+        app:layout_constraintRight_toRightOf="parent" />
+
+
     <ToggleButton
         android:id="@+id/air_stations"
         android:layout_width="wrap_content"
@@ -91,10 +131,22 @@
         android:textOff="@string/air_stations"
         android:textOn="@string/air_stations"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/parking"
-        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/profileBtnImg"
         app:layout_constraintTop_toBottomOf="@+id/gMap"
         app:layout_constraintVertical_bias="0.0" />
+
+    <ImageButton
+        android:id="@+id/profileBtnImg"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:adjustViewBounds="true"
+        android:background="@drawable/circle_background"
+        android:onClick="showUserPopup"
+        android:scaleType="fitCenter"
+        android:src="@drawable/profile_button_circle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/parking"
+        />
 
     <ToggleButton
         android:id="@+id/parking"
@@ -102,6 +154,8 @@
         android:layout_height="27dp"
         android:layout_marginBottom="7dp"
         android:layout_marginTop="7dp"
+        android:layout_marginStart="20dp"
+
         android:background="@drawable/custom_button"
         android:checked="false"
         android:onClick="parkingAPIActivity"
@@ -110,60 +164,15 @@
         android:shadowDx="5"
         android:shadowDy="5"
         android:shadowRadius="10"
-
         android:text="@string/parking"
         android:textColor="@color/common_google_signin_btn_text_dark_default"
 
         android:textOff="@string/parking"
         android:textOn="@string/parking"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="@id/air_stations"
+        app:layout_constraintLeft_toLeftOf="@id/profileBtnImg"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/gMap"
         app:layout_constraintVertical_bias="0.0" />
-
-    <Button
-        android:id="@+id/btnFinishTrip"
-        android:layout_width="wrap_content"
-        android:layout_height="35dp"
-        android:layout_weight="1"
-        android:background="@drawable/custom_button_finishtrip"
-        android:onClick="finishTrip"
-        android:shadowColor="#000000"
-        android:shadowDx="5"
-        android:shadowDy="5"
-        android:shadowRadius="10"
-        android:layout_marginBottom="8dp"
-        android:layout_marginStart="8dp"
-        android:text="Finish trip"
-        android:visibility="gone"
-        android:textColor="@color/common_google_signin_btn_text_dark_default"
-        app:layout_constraintBottom_toBottomOf="@id/gMap"
-        tools:layout_editor_absoluteX="141dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="@id/btnCancel"/>
-
-        <Button
-            android:id="@+id/btnCancel"
-            android:layout_width="wrap_content"
-            android:layout_height="35dp"
-            android:layout_marginBottom="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_weight="1"
-            android:background="@drawable/custom_button_canceltrip"
-            android:onClick="cancelTrip"
-            android:paddingTop="4dp"
-            android:shadowColor="#000000"
-            android:shadowDx="5"
-            android:shadowDy="5"
-            android:shadowRadius="10"
-            android:text="Cancel trip"
-            android:textColor="@color/common_google_signin_btn_text_dark_default"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@id/gMap"
-            app:layout_constraintLeft_toLeftOf="@id/btnFinishTrip"
-            app:layout_constraintRight_toRightOf="parent" />
-
-
 
 </android.support.constraint.ConstraintLayout>
