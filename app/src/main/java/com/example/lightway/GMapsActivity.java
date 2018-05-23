@@ -237,7 +237,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.gMap);
         mapFragment.getMapAsync(this);
 
-        myDialog = new Dialog(this);
         tripIDPopup = new Dialog(this);
 
         mAuth = FirebaseAuth.getInstance();
@@ -276,7 +275,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     .putBoolean("isfirstrun", false).apply();
         }
 */
-        // imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();  //moved to userpoup for now.
+        // imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();  moved to userpoup for now.
+
+
     }
 
 
@@ -1375,8 +1376,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             userToBeRemoved.removeValue(); //removes the user from the database
-                            LoginManager.getInstance().logOut();
-                            startActivity(new Intent(GMapsActivity.this, LoginActivity.class));
+                            logout();
 
 
                         }
