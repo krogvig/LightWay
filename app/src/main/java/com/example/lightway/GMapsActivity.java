@@ -694,11 +694,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                                                 mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
                             }
                         } else {
-                            Log.d(TAG, "Current location is null. Using defaults.");
-                            Log.e(TAG, "Exception: %s", task.getException());
-                            mMap.moveCamera(CameraUpdateFactory
-                                    .newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
-                            mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                            if(mLastKnownLocation==null){
+                                Log.e("ERROR", "IF YOU SEE THIS MORE THAN ONCE WE ARE LOOPING FOREVER AAAAH!!");
+                                getDeviceLocation(true);
+                            }
                         }
                     }
                 });
@@ -720,10 +719,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mMap.clear();
         parkingBtn.setBackgroundResource(R.drawable.custom_button);
         pumpBtn.setBackgroundResource(R.drawable.custom_button);
-
-        if(mLastKnownLocation==null){
-            getDeviceLocation(false);
-        }
 
         MarkerOptions options = new MarkerOptions()
                 .position(latLng)
@@ -825,9 +820,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         else {
             addAllMarkersToMap("pump");
         }
-        if(mLastKnownLocation==null){
-            getDeviceLocation(true);
-        }
     }
 
     public void parkingAPIActivity(View view) {
@@ -855,9 +847,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
         else {
             addAllMarkersToMap("parking");
-        }
-        if(mLastKnownLocation==null){
-            getDeviceLocation(true);
         }
     }
 
