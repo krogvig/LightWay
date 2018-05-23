@@ -51,6 +51,7 @@ import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.TextView;
@@ -203,6 +204,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private String colorID;
     private Boolean tripIsRunning = false;
     private Dialog tripIDPopup;
+    private ImageButton profileImageBtn;
 
 
 
@@ -275,9 +277,10 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     .putBoolean("isfirstrun", false).apply();
         }
 */
-        // imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();  moved to userpoup for now.
+        imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();
 
-
+        profileImageBtn = findViewById(R.id.profileBtn);
+        setProfileImageBtn();
     }
 
 
@@ -1275,14 +1278,24 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
+    private void setProfileImageBtn(){
+        RequestOptions options = new RequestOptions();
+        if(imageFromFirebase!=null){
+            Glide.with(GMapsActivity.this)
+                    .load(imageFromFirebase)
+                    .apply(options.centerInside())
+                    .into(profileImageBtn);
+        }
+    }
     private void setDisplayProfilePic() {
 
         RequestOptions options = new RequestOptions();
-
-        Glide.with(GMapsActivity.this)
-                .load(imageFromFirebase)
-                .apply(options.centerInside())
-                .into(testImage);
+        if(imageFromFirebase!=null){
+            Glide.with(GMapsActivity.this)
+                    .load(imageFromFirebase)
+                    .apply(options.centerInside())
+                    .into(testImage);
+        }
 
     }
 
