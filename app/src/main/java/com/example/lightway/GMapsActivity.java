@@ -896,6 +896,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
         }
     }
 
@@ -980,6 +982,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (IndexOutOfBoundsException e) {
             e.printStackTrace();
         }
     }
