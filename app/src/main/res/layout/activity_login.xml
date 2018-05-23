@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="84dp"
         android:layout_marginStart="85dp"
-        android:layout_marginTop="120dp"
+        android:layout_marginTop="80dp"
         android:backgroundTint="@android:color/white"
         android:ems="10"
         android:hint="Email..."
@@ -82,6 +82,8 @@
         android:shadowDx="5"
         android:shadowDy="5"
         android:shadowRadius="10"
+        android:background="@drawable/border_circle"
+
         android:text="Create an account"
         android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
@@ -92,12 +94,13 @@
         style="@android:style/Widget.DeviceDefault.Button.Borderless"
         android:layout_width="117dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="84dp"
+        android:layout_marginStart="74dp"
         android:layout_marginTop="8dp"
         android:shadowColor="#000000"
         android:shadowDx="5"
         android:shadowDy="5"
         android:shadowRadius="10"
+        android:background="@drawable/border_circle"
         android:text="Forgot your password?"
         android:textColor="@android:color/white"
         app:layout_constraintStart_toStartOf="parent"
@@ -133,7 +136,6 @@
         android:layout_marginEnd="168dp"
         android:layout_marginStart="168dp"
         android:layout_marginTop="80dp"
-        android:background="@drawable/border_circle"
         android:paddingBottom="8dp"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
@@ -160,7 +162,7 @@
         android:shadowDx="5"
         android:shadowDy="5"
         android:shadowRadius="10"
-        android:text="Continue With"
+        android:text="Continue with"
         android:textColor="@android:color/white"
         android:textSize="15sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -168,23 +170,22 @@
         app:layout_constraintTop_toBottomOf="@+id/textView" />
 
 
-    <TextView
+    <Button
         android:id="@+id/PrivacyPolicy"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="5dp"
-        android:layout_marginStart="5dp"
-
-        android:layout_marginTop="9dp"
-        android:background="@drawable/border_circle"
+        android:layout_marginBottom="5dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginStart="30dp"
+        android:background="@drawable/button_rounded"
         android:onClick="PrivacyPolicy"
-        android:text=" By logging in and using the application you accept these Terms and Conditions."
+        android:text="Click here to read our Terms and Conditions"
         android:textAlignment="center"
         android:textColor="@android:color/white"
-        android:textSize="15sp"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent" />
 
 
 </android.support.constraint.ConstraintLayout>
