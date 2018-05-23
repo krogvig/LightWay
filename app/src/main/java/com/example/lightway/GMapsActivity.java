@@ -68,6 +68,9 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -1356,7 +1359,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //perform any action
-                Toast.makeText(getApplicationContext(), "Account deleted", Toast.LENGTH_LONG).show();
                 deleteUser();
 
             }
@@ -1382,7 +1384,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     public void deleteUser(){
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String uid = user.getUid();
         userToBeRemoved = FirebaseDatabase.getInstance().getReference().child("Users").child(uid);
         user.delete()
@@ -1392,7 +1394,12 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                         if (task.isSuccessful()) {
                             userToBeRemoved.removeValue(); //removes the user from the database
                             logout();
+                            Toast.makeText(getApplicationContext(), "Account deleted", Toast.LENGTH_LONG).show();
 
+                        }else{
+
+                            Toast.makeText(getApplicationContext(), "Too long since user last authenticated" +
+                                    ", please log out and back in to proceed", Toast.LENGTH_LONG).show();
 
                         }
                     }});
