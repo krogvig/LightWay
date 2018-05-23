@@ -40,16 +40,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/gMap">
 
-        <ImageButton
-            android:id="@+id/profileBtn"
-
-            android:layout_width="44dp"
-            android:layout_height="match_parent"
-
-            android:onClick="showUserPopup"
-            android:scaleType="centerCrop"
-            android:src="@drawable/com_facebook_profile_picture_blank_square" />
-
         <ImageView
             android:id="@+id/ic_magnify"
             android:layout_width="15dp"
