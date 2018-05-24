@@ -490,10 +490,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             public void onInfoWindowClick(Marker m) {
                 String clickableOrNot = clickableMarkers.get(m.getId());
                 if(clickableOrNot.equals("Clickable")){
-                    mMap.clear();
                     endDestination = mMap.addMarker(new MarkerOptions().position(new LatLng(m.getPosition().latitude, m.getPosition().longitude)));       //Add the marker and its title
                     calcTrip(endDestination);
-                    activateTripOnServer(endDestination);        //Update the location in it's own thread (for better performance) to make sure we're starting from the correct spot
 
                     cancelButton.setVisibility(View.VISIBLE);
                     btnFinish.setVisibility(View.VISIBLE);
@@ -503,6 +501,9 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     //toast.setGravity(Gravity.TOP, 0, 150); // increasing the yOffest will make the toast appear lower down on the sceen
                     //toast.show();
                     toggleButtons(false);
+                    mMap.clear();
+                    activateTripOnServer(endDestination);
+
                 }else{
                     if(tripIsRunning){
                         showTripIDPopup(m, colorID);
@@ -869,15 +870,14 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         DateTime now = new DateTime(date.getTime());
 
         try {
-            geoApiContext = geoApiContext.setQueryRateLimit(3)      //Set everything needed for the API connection
-                    .setApiKey(getString(R.string.directionsApiKey))
-                    .setConnectTimeout(1, TimeUnit.SECONDS)
-                    .setReadTimeout(1, TimeUnit.SECONDS)
-                    .setWriteTimeout(1, TimeUnit.SECONDS);
-
-
             String origin = "" + mLastKnownLocation.getLatitude() + "," + mLastKnownLocation.getLongitude();        //Get the start-location so we now from where the polygon should draw
             String destinationString = "" + destination.getPosition().latitude + "," + destination.getPosition().longitude;
+
+            geoApiContext = geoApiContext.setQueryRateLimit(3)      //Set everything needed for the API connection
+                    .setApiKey(getString(R.string.directionsApiKey))
+                    .setConnectTimeout(500, TimeUnit.MILLISECONDS)
+                    .setReadTimeout(500, TimeUnit.MILLISECONDS)
+                    .setWriteTimeout(500, TimeUnit.MILLISECONDS);
 
             DirectionsResult result = DirectionsApi.newRequest(geoApiContext)       //Get information from the API about the trip
                     .mode(TravelMode.BICYCLING).origin(origin)
