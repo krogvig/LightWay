@@ -568,18 +568,24 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private void toggleButtons(boolean status) {
         ToggleButton parkingBtn = findViewById(R.id.parking);
         ToggleButton pumpBtn = findViewById(R.id.air_stations);
+        AutoCompleteTextView input_search = findViewById(R.id.input_search);
 
         if (!status) {
             parkingBtn.setEnabled(status);
             parkingBtn.setAlpha(0.5f);
             pumpBtn.setEnabled(status);
             pumpBtn.setAlpha(0.5f);
+            input_search.setHint("Finish your trip before searching again");
+            input_search.setEnabled(status);
+
         }
         else {
             parkingBtn.setEnabled(status);
             parkingBtn.setAlpha(1f);
             pumpBtn.setEnabled(status);
             pumpBtn.setAlpha(1f);
+            input_search.setHint("Enter Adress, City or Zip Code");
+            input_search.setEnabled(status);
         }
 
     }
