@@ -490,6 +490,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             public void onInfoWindowClick(Marker m) {
                 String clickableOrNot = clickableMarkers.get(m.getId());
                 if(clickableOrNot.equals("Clickable")){
+                    mMap.clear();
                     endDestination = mMap.addMarker(new MarkerOptions().position(new LatLng(m.getPosition().latitude, m.getPosition().longitude)));       //Add the marker and its title
                     calcTrip(endDestination);
 
@@ -501,7 +502,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     //toast.setGravity(Gravity.TOP, 0, 150); // increasing the yOffest will make the toast appear lower down on the sceen
                     //toast.show();
                     toggleButtons(false);
-                    mMap.clear();
                     activateTripOnServer(endDestination);
 
                 }else{
