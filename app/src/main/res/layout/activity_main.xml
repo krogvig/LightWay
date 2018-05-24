@@ -51,6 +51,7 @@
             android:paddingStart="15dp"
             android:paddingEnd="31dp"
             android:singleLine="true"
+            android:imeOptions="actionDone"
             android:textColor="#000"
             android:textSize="15sp"
             android:selectAllOnFocus="true" />

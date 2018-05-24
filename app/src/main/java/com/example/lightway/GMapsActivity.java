@@ -1447,7 +1447,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private AdapterView.OnItemClickListener mAutocompleteClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            hideSoftKeyboard();
 
             final AutocompletePrediction item = mPlaceAutocompleteAdapter.getItem(i);
             final String placeId = item.getPlaceId();
@@ -1455,6 +1454,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
                     .getPlaceById(mGoogleApiClient, placeId);
             placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
+
+            hideSoftKeyboard();
 
         }
     };
