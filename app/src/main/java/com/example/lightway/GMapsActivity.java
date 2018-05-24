@@ -41,7 +41,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -52,7 +51,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -275,7 +273,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                     .putBoolean("isfirstrun", false).apply();
         }
 */
-        // imageFromFirebase = mAuth.getCurrentUser().getPhotoUrl();  moved to userpoup for now.
 
 
     }
@@ -896,6 +893,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
         }
     }
 
@@ -980,6 +979,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (IndexOutOfBoundsException e) {
             e.printStackTrace();
         }
     }
@@ -1333,10 +1334,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GALLERY_REQUEST);
     }*/
 
-    private void chooseUserDestination (View v){
-        //do something
-    }
-
 
     // Using firebase .getdDisplayName instead of the "name" in the database. So that the name shows up properly for google/facebook users.
     private void loadUsername(){
@@ -1352,7 +1349,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //perform any action
-                Toast.makeText(getApplicationContext(), "Account deleted", Toast.LENGTH_LONG).show();
                 deleteUser();
 
             }
@@ -1378,7 +1374,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     public void deleteUser(){
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String uid = user.getUid();
         userToBeRemoved = FirebaseDatabase.getInstance().getReference().child("Users").child(uid);
         user.delete()
@@ -1388,7 +1384,12 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                         if (task.isSuccessful()) {
                             userToBeRemoved.removeValue(); //removes the user from the database
                             logout();
+                            Toast.makeText(getApplicationContext(), "Account deleted", Toast.LENGTH_LONG).show();
 
+                        }else{
+
+                            Toast.makeText(getApplicationContext(), "Reauthentication is needed" +
+                                    ", please log out and back in order to proceed", Toast.LENGTH_LONG).show();
 
                         }
                     }});
