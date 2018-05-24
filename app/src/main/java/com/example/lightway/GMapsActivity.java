@@ -479,6 +479,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             @Override
             public void onMapClick(LatLng latLng) {
                 hideSoftKeyboard();
+                mSearchText.clearFocus();
                 }
         });
 
@@ -511,6 +512,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         });
 
     }
+
+
     public void tryForTutorialPopup(){
         //Check if first run and then show tutorial
         Boolean isFirstRun = getSharedPreferences("PREFERENCE", MODE_PRIVATE)
