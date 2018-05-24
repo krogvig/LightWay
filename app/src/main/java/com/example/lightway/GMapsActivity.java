@@ -414,7 +414,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 snippet.setText(marker.getSnippet());
 
                 TextView startTripBtn = infoWindow.findViewById(R.id.startTrip);
-                if(marker.getTitle().equals("Your trip ID:")){
+                if(marker.getTitle() != null && marker.getTitle().equals("Your trip ID:")){
 
                     infoWindow.setBackgroundColor(Color.BLACK);
                     title.setTextColor(Color.WHITE);
