@@ -478,9 +478,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                if(tripIsRunning){
-                   // endDestination.showInfoWindow(); //here if we dont want the user to be able to "lose" the small infowindow
-                    }
+                hideSoftKeyboard();
                 }
         });
 
@@ -1449,7 +1447,6 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
     private AdapterView.OnItemClickListener mAutocompleteClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            hideSoftKeyboard();
 
             final AutocompletePrediction item = mPlaceAutocompleteAdapter.getItem(i);
             final String placeId = item.getPlaceId();
@@ -1457,6 +1454,8 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
             PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
                     .getPlaceById(mGoogleApiClient, placeId);
             placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
+
+            hideSoftKeyboard();
 
         }
     };
