@@ -24,12 +24,11 @@
         android:layout_width="297dp"
         android:layout_height="50dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginStart="2dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:background="@drawable/white_border"
         android:elevation="10dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.55"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/gMap">
 
@@ -40,16 +39,19 @@
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:layout_marginEnd="10dp"
+            android:adjustViewBounds="false"
             android:src="@drawable/ic_magnify" />
 
         <AutoCompleteTextView
             android:id="@+id/input_search"
-            android:layout_width="253dp"
+            android:layout_width="254dp"
             android:layout_height="match_parent"
-            android:layout_toEndOf="@+id/profileBtn"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="12dp"
             android:background="@null"
             android:hint="  Enter Adress, City or Zip Code"
             android:singleLine="true"
+            android:textAlignment="textStart"
             android:textColor="#000"
             android:textSize="15sp" />
 
