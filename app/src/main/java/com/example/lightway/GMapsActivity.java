@@ -1170,7 +1170,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
                 btnLogout.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        logout();
+                        showLogOutPopup();
                     }
                 });
 
@@ -1347,6 +1347,30 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
 
     }
 
+    public void showLogOutPopup(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.MyAlertDialogStyle);
+        builder.setMessage("Are you sure you want to log out?");
+
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //perform any action
+                logout();
+
+            }
+        });
+
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //perform any action
+            }
+        });
+
+        //creating alert dialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
     public void showDeleteUserPopup() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.MyAlertDialogStyle);
         builder.setMessage("Are you sure you want to delete your account?");
