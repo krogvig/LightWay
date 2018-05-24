@@ -52,7 +52,8 @@
             android:paddingEnd="31dp"
             android:singleLine="true"
             android:textColor="#000"
-            android:textSize="15sp" />
+            android:textSize="15sp"
+            android:selectAllOnFocus="true" />
 
     </RelativeLayout>
 

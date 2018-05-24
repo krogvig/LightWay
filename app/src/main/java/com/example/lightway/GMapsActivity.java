@@ -478,9 +478,7 @@ public class GMapsActivity extends FragmentActivity implements OnMapReadyCallbac
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                if(tripIsRunning){
-                   // endDestination.showInfoWindow(); //here if we dont want the user to be able to "lose" the small infowindow
-                    }
+                hideSoftKeyboard();
                 }
         });
 
