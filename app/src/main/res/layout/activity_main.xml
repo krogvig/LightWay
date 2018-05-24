@@ -54,10 +54,7 @@
             android:imeOptions="actionDone"
             android:textColor="#000"
             android:textSize="15sp"
-            android:textCursorDrawable="@drawable/color_cursor"/>
-            android:textSize="15sp"
-            android:selectAllOnFocus="true"
- />
+            android:selectAllOnFocus="true" />
 
     </RelativeLayout>
 
